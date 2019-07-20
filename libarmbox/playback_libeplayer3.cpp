@@ -767,16 +767,10 @@ void cPlayback::RequestAbort()
 	{
 		hal_info("%s\n", __func__);
 		Stop();
-		//player->playback->abortRequested = 1;//why ?
+		//player->playback->abortRequested = 1;
 		while (player->playback->isPlaying)
 			usleep(100000);
 	}
-	else if(player->playback->isHttp && !player->playback->isPlaying &&!player->playback->abortRequested)
-	{
-		hal_info("%s\n", __func__);
-		player->playback->abortRequested = 1;
-	}
-
 }
 
 bool cPlayback::IsPlaying()
