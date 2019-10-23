@@ -90,7 +90,7 @@ AC_ARG_WITH(boxmodel,
 	AS_HELP_STRING([--with-boxmodel], [valid for generic: generic, raspi])
 AS_HELP_STRING([], [valid for spark: spark, spark7162])
 AS_HELP_STRING([], [valid for duckbox: ufs910, ufs912, ufs913, ufs922, atevio7500, fortis_hdbox, octagon1008, hs7110, hs7810a, hs7119, hs7819, dp7000, cuberevo, cuberevo_mini, cuberevo_mini2, cuberevo_250hd, cuberevo_2000hd, cuberevo_3000hd, ipbox9900, ipbox99, ipbox55, arivalink200, tf7700, hl101])
-AS_HELP_STRING([], [valid for armbox: hd51, hd60, bre2ze4k, osmio4k, osmio4kplus, vusolo4k, vuduo4k, vuultimo4k, vuuno4k, vuuno4kse, vuzero4k])
+AS_HELP_STRING([], [valid for armbox: hd51, hd60, bre2ze4k, osmio4k, osmio4kplus, vusolo4k, vuduo4k, vuultimo4k, vuuno4k, vuuno4kse, vuzero4k, zgemmah7])
 AS_HELP_STRING([], [valid for mipsbox: vuduo]),
 	[case "${withval}" in
 		generic|raspi)
@@ -114,7 +114,7 @@ AS_HELP_STRING([], [valid for mipsbox: vuduo]),
 				AC_MSG_ERROR([unknown model $withval for boxtype $BOXTYPE])
 			fi
 		;;
-		hd51|hd60|bre2ze4k|osmio4k|osmio4kplus|vusolo4k|vuduo4k|vuultimo4k|vuuno4k|vuuno4kse|vuzero4k)
+		hd51|hd60|bre2ze4k|osmio4k|osmio4kplus|vusolo4k|vuduo4k|vuultimo4k|vuuno4k|vuuno4kse|vuzero4k|zgemmah7)
 			if test "$BOXTYPE" = "armbox"; then
 				BOXMODEL="$withval"
 			else
@@ -148,7 +148,6 @@ AM_CONDITIONAL(BOXTYPE_MIPSBOX, test "$BOXTYPE" = "mipsbox")
 # generic
 AM_CONDITIONAL(BOXMODEL_GENERIC, test "$BOXMODEL" = "generic")
 AM_CONDITIONAL(BOXMODEL_RASPI, test "$BOXMODEL" = "raspi")
-
 
 # spark
 AM_CONDITIONAL(BOXMODEL_SPARK, test "$BOXMODEL" = "spark")
@@ -192,6 +191,7 @@ AM_CONDITIONAL(BOXMODEL_VUULTIMO4K, test "$BOXMODEL" = "vuultimo4k")
 AM_CONDITIONAL(BOXMODEL_VUUNO4K, test "$BOXMODEL" = "vuuno4k")
 AM_CONDITIONAL(BOXMODEL_VUUNO4KSE, test "$BOXMODEL" = "vuuno4kse")
 AM_CONDITIONAL(BOXMODEL_VUZERO4K, test "$BOXMODEL" = "vuzero4k")
+AM_CONDITIONAL(BOXMODEL_ZGEMMAH7, test "$BOXMODEL" = "zgemmah7")
 
 # mipsbox
 AM_CONDITIONAL(BOXMODEL_VUDUO, test "$BOXMODEL" = "vuduo")
@@ -293,6 +293,8 @@ elif test "$BOXMODEL" = "vuuno4kse"; then
 	AC_DEFINE(BOXMODEL_VUUNO4KSE, 1, [vuuno4kse])
 elif test "$BOXMODEL" = "vuzero4k"; then
 	AC_DEFINE(BOXMODEL_VUZERO4K, 1, [vuzero4k])
+elif test "$BOXMODEL" = "vuzero4k"; then
+	AC_DEFINE(BOXMODEL_ZGEMMAH7, 1, [zgemmah7])
 elif test "$BOXMODEL" = "vuduo"; then
 	AC_DEFINE(BOXMODEL_VUDUO, 1, [vuduo])
 fi
