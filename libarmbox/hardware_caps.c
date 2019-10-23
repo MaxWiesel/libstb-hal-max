@@ -218,7 +218,7 @@ hw_caps_t *get_hwcaps(void)
 	strcpy(caps.boxname, "OS mio+ 4K");
 	strcpy(caps.boxarch, "BCM72604");
 #endif
-#if BOXMODEL_ZGEMMAH7
+#if BOXMODEL_H7
 	initialized = 1;
 	caps.has_CI = 1;
 	caps.can_cec = 1;
