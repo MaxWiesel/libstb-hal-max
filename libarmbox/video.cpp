@@ -477,6 +477,7 @@ int cVideo::setAspectRatio(int aspect, int mode)
 
 	if (mode == -1)
 		return 0;
+
 #if BOXMODEL_OSMIO4K || BOXMODEL_OSMIO4KPLUS
 	hal_debug("%s: /proc/stb/video/policy2 -> %s\n", __func__, m[mo]);
 	n = proc_put("/proc/stb/video/policy2", m[mo], strlen(m[mo]));
@@ -541,6 +542,9 @@ int cVideo::Start(void * /*PcrChannel*/, unsigned short /*PcrPid*/, unsigned sho
 	playstate = VIDEO_PLAYING;
 	fop(ioctl, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX);
 	int res = fop(ioctl, VIDEO_PLAY);
+#ifdef BOXMODEL_HISILICON
+	fop(ioctl, VIDEO_CONTINUE);
+#endif
 	if (brightness > -1) {
 		SetControl(VIDEO_CONTROL_BRIGHTNESS, brightness);
 		brightness = -1;

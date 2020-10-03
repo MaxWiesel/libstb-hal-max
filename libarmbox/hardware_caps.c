@@ -183,6 +183,25 @@ hw_caps_t *get_hwcaps(void)
 	strcpy(caps.boxname, "HD60");
 	strcpy(caps.boxarch, "HI3798M");
 #endif
+#if BOXMODEL_HD61
+	initialized = 1;
+	caps.has_CI = 2;
+	caps.can_cec = 1;
+	caps.can_cpufreq = 0;
+	caps.can_shutdown = 1;
+	caps.display_xres = 4;
+	caps.display_type = HW_DISPLAY_LED_NUM;
+	caps.display_can_deepstandby = 0;
+	caps.display_can_set_brightness = 1;
+	caps.display_has_statusline = 0;
+	caps.display_has_colon = 1;
+	caps.has_button_timer = 1;
+	caps.has_button_vformat = 0;
+	caps.has_HDMI = 1;
+	strcpy(caps.boxvendor, "AX-Technologies");
+	strcpy(caps.boxname, "HD61");
+	strcpy(caps.boxarch, "HI3798M");
+#endif
 #if BOXMODEL_BRE2ZE4K
 	initialized = 1;
 	caps.has_CI = 1;
