@@ -113,6 +113,8 @@ public:
 
 	AVFormatContext *GetAVFormatContext();
 	void ReleaseAVFormatContext();
+	void GetTitles(std::vector<int> &playlists, std::vector<std::string> &titles, int &current);
+	void SetTitle(int title);
 };
 
 class netlink_event : public OpenThreads::Thread

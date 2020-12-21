@@ -30,7 +30,6 @@
 #include <pthread.h>
 #include <syscall.h>
 
-#include "dmx_lib.h"
 #include "audio_lib.h"
 #include "video_lib.h"
 #include "glfb.h"
@@ -1025,6 +1024,17 @@ void cPlayback::GetChapters(std::vector<int> &positions, std::vector<std::string
 {
 	positions.clear();
 	titles.clear();
+}
+
+void cPlayback::GetTitles(std::vector<int> &playlists, std::vector<std::string> &titles, int &current)
+{
+	playlists.clear();
+	titles.clear();
+	current = 0;
+}
+
+void cPlayback::SetTitle(int /*title*/)
+{
 }
 
 bool cPlayback::SelectSubtitles(int pid)

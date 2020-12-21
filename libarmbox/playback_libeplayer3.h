@@ -69,6 +69,10 @@ class cPlayback
 
 		AVFormatContext *GetAVFormatContext();
 		void ReleaseAVFormatContext();
+
+		void GetTitles(std::vector<int> &playlists, std::vector<std::string> &titles, int &current);
+		void SetTitle(int title);
+
 #if 0
 		void FindAllSubs(uint16_t *pids, unsigned short *supported, uint16_t *numpida, std::string *language);
 		bool SelectSubtitles(int pid);

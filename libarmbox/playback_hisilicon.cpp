@@ -45,6 +45,17 @@
 extern cAudio *audioDecoder;
 extern cVideo *videoDecoder;
 
+void cPlayback::SetTitle(int /*title*/)
+{
+}
+
+void cPlayback::GetTitles(std::vector<int> &playlists, std::vector<std::string> &titles, int &current)
+{
+	playlists.clear();
+	titles.clear();
+	current = 0;
+}
+
 //Used by Fileplay
 bool cPlayback::Open(playmode_t PlayMode)
 {

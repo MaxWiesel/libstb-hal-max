@@ -94,6 +94,9 @@ public:
 	std::string extra_headers;
 	std::string user_agent;
 
+	void GetTitles(std::vector<int> &playlists, std::vector<std::string> &titles, int &current);
+	void SetTitle(int title);
+
 	//
 	~cPlayback();
 	void getMeta();

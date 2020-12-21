@@ -542,7 +542,7 @@ int cVideo::Start(void * /*PcrChannel*/, unsigned short /*PcrPid*/, unsigned sho
 	playstate = VIDEO_PLAYING;
 	fop(ioctl, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX);
 	int res = fop(ioctl, VIDEO_PLAY);
-#ifdef BOXMODEL_HISILICON
+#if BOXMODEL_HISILICON
 	fop(ioctl, VIDEO_CONTINUE);
 #endif
 	if (brightness > -1) {
