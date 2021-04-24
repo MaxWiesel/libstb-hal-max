@@ -619,7 +619,7 @@ static inline int encode_user_header(BW *p)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void m4v_encode_m4v_header(BW *bw, M4V_VOL *vol, uint32 time)
+void m4v_encode_m4v_header(BW *bw, M4V_VOL *vol, uint32 time __attribute__((unused)))
 {
 	encode_vo_header(bw);
 	encode_vol_header(bw, vol);

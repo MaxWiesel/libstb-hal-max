@@ -122,7 +122,7 @@ static void copy_microblock(MICROBLOCK *flv_mb, M4V_MICROBLOCK *m4v_mb)
 	}
 }
 
-static int write_pad_not_coded_frames(flv2mpeg4_CTX *pub_ctx, CONVCTX *c, BW *bw, uint32 time)
+static int write_pad_not_coded_frames(flv2mpeg4_CTX *pub_ctx, CONVCTX *c, BW *bw, int time)
 {
 	// if any timecode padding is needed, then pad.
 	while (c->frame * 1000 / 30 < time)
@@ -156,7 +156,7 @@ static int write_pad_not_coded_frames(flv2mpeg4_CTX *pub_ctx, CONVCTX *c, BW *bw
 	return 0;
 }
 
-static int write_m4v_picture_frame(flv2mpeg4_CTX *pub_ctx, CONVCTX *c, BR *br, BW *bw, PICTURE *flvpic, uint32 time)
+static int write_m4v_picture_frame(flv2mpeg4_CTX *pub_ctx, CONVCTX *c, BR *br, BW *bw, PICTURE *flvpic, uint32 time __attribute__((unused)))
 {
 	MICROBLOCK mb;
 	M4V_VOP vop;
@@ -246,7 +246,7 @@ static int write_m4v_frame(flv2mpeg4_CTX *pub_ctx, CONVCTX *c, BR *br, BW *bw, u
 	return 0;
 }
 
-int flv2mpeg4_process_flv_packet(flv2mpeg4_CTX *ctx, uint8 picture_type, const uint8 *buf, uint32 size, uint32 time)
+int flv2mpeg4_process_flv_packet(flv2mpeg4_CTX *ctx, uint8 picture_type __attribute__((unused)), const uint8 *buf, uint32 size, uint32 time)
 {
 	CTX *p = ctx->priv;
 	BR br;
