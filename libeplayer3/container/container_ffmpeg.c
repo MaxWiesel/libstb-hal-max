@@ -1134,8 +1134,6 @@ static void FFMPEGThread(Context_t *context)
 								out_sample_rate = *rate ? *rate : 44100;
 							}
 
-							printf(">>>>>>>>>>>>>>>>>> out_sample_rate[%d]\n", out_sample_rate);
-
 							swr = swr_alloc();
 							out_channels = c->channels;
 
