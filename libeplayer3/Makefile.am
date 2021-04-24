@@ -28,6 +28,7 @@ SOURCE_FILES += playback/playback.c
 SOURCE_FILES += external/ffmpeg/src/bitstream.c
 SOURCE_FILES += external/ffmpeg/src/latmenc.c
 SOURCE_FILES += external/ffmpeg/src/mpeg4audio.c
+SOURCE_FILES += external/ffmpeg/src/xiph.c
 
 if ENABLE_FLV2MPEG4
 AM_CFLAGS    += -DHAVE_FLV2MPEG4_CONVERTER
@@ -43,12 +44,12 @@ SOURCE_FILES += \
 	output/writer/mipsel/writer.c \
 	output/writer/mipsel/aac.c \
 	output/writer/mipsel/ac3.c \
+	output/writer/mipsel/bcma.c \
 	output/writer/mipsel/mp3.c \
 	output/writer/mipsel/pcm.c \
 	output/writer/mipsel/lpcm.c \
 	output/writer/mipsel/dts.c \
 	output/writer/mipsel/amr.c \
-	output/writer/mipsel/wma.c \
 	output/writer/mipsel/h265.c \
 	output/writer/mipsel/h264.c \
 	output/writer/mipsel/mjpeg.c \
