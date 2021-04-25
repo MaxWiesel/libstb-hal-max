@@ -108,7 +108,8 @@ typedef enum
 	SUBTITLE_CODEC_ID_ASS,
 	SUBTITLE_CODEC_ID_WEBVTT,
 	SUBTITLE_CODEC_ID_PGS,
-	SUBTITLE_CODEC_ID_DVB
+	SUBTITLE_CODEC_ID_DVB,
+	SUBTITLE_CODEC_ID_XSUB
 } SubtitleCodecId_t;
 
 typedef struct
@@ -121,7 +122,11 @@ typedef struct
 	int64_t           dts;
 	uint8_t          *private_data;
 	uint32_t          private_size;
+
 	int64_t           durationMS; // duration in miliseconds
+
+	int         width;
+	int         height;
 } WriterSubCallData_t;
 
 typedef struct SubWriter_s

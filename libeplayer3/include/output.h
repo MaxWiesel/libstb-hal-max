@@ -67,11 +67,11 @@ typedef struct
 	int64_t          dts;
 	int64_t          durationMS; // duration in miliseconds
 
+	uint32_t         width;
+	uint32_t         height;
+
 	char            *type;
 } SubtitleOut_t;
-
-struct Context_s;
-typedef struct Context_s Context_t;
 
 typedef struct Output_s
 {
@@ -93,5 +93,8 @@ typedef struct OutputHandler_s
 	Output_t *subtitle;
 	int32_t (* Command)(Context_t *, OutputCmd_t, void *);
 } OutputHandler_t;
+
+struct Context_s;
+typedef struct Context_s Context_t;
 
 #endif

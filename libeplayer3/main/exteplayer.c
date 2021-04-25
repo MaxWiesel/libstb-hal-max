@@ -305,6 +305,7 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 				int Id = -1;
 				char *pch;
 				char Name[] = "          ";
+				E2iStartMsg();
 				E2iSendMsg("{\"%c_%c\": [", argvBuff[0], argvBuff[1]);
 				for (i = 0; TrackList[i] != NULL; i += 2)
 				{
@@ -643,7 +644,7 @@ int main(int argc, char *argv[])
 	int commandRetVal = -1;
 
 	/* inform client that we can handle additional commands */
-	E2iSendMsg("{\"EPLAYER3_EXTENDED\":{\"version\":%d}}\n", 65);
+	E2iSendMsg("{\"EPLAYER3_EXTENDED\":{\"version\":%d}}\n", 66);
 
 	PlayFiles_t playbackFiles;
 	memset(&playbackFiles, 0x00, sizeof(playbackFiles));
