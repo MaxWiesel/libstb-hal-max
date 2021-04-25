@@ -496,14 +496,12 @@ int decode_picture_header(BR *p, PICTURE *picture)
 
 	if (get_bits(p, 17) != 1)
 	{
-		fprintf(stderr, "start code error\n");
 		return -1;
 	}
 
 	tmp = get_bits(p, 5);
 	if (tmp != 0 && tmp != 1)
 	{
-		fprintf(stderr, "picture format error\n");
 		return -1;
 	}
 
@@ -537,7 +535,6 @@ int decode_picture_header(BR *p, PICTURE *picture)
 			width = 160, height = 120;
 			break;
 		default:
-			fprintf(stderr, "size error\n");
 			return -1;
 	}
 

@@ -862,6 +862,7 @@ static int Write(Context_t *context, void *_out)
 				}
 				else
 				{
+					bool changed = false;
 					if (evt.type == VIDEO_EVENT_SIZE_CHANGED)
 					{
 						linuxdvb_printf(10, "VIDEO_EVENT_SIZE_CHANGED type: 0x%x\n", evt.type);
@@ -871,12 +872,14 @@ static int Write(Context_t *context, void *_out)
 						videoInfo.width = evt.u.size.w;
 						videoInfo.height = evt.u.size.h;
 						videoInfo.aspect_ratio = evt.u.size.aspect_ratio;
+						changed = true;
 					}
 					else if (evt.type == VIDEO_EVENT_FRAME_RATE_CHANGED)
 					{
 						linuxdvb_printf(10, "VIDEO_EVENT_FRAME_RATE_CHANGED type: 0x%x\n", evt.type);
 						linuxdvb_printf(10, "framerate : %d\n", evt.u.frame_rate);
 						videoInfo.frame_rate = evt.u.frame_rate;
+						changed = true;
 					}
 					else if (evt.type == 16 /*VIDEO_EVENT_PROGRESSIVE_CHANGED*/)
 					{
@@ -884,10 +887,22 @@ static int Write(Context_t *context, void *_out)
 						linuxdvb_printf(10, "progressive : %d\n", evt.u.frame_rate);
 						videoInfo.progressive = evt.u.frame_rate;
 						context->manager->video->Command(context, MANAGER_UPDATED_TRACK_INFO, NULL);
+						changed = true;
 					}
 					else
 					{
 						linuxdvb_err("unhandled DVBAPI Video Event %d\n", evt.type);
+					}
+
+					if (changed &&
+					    videoInfo.width != -1 &&
+					    videoInfo.height != -1 &&
+					    videoInfo.aspect_ratio != -1 &&
+					    videoInfo.frame_rate != -1 &&
+					    videoInfo.progressive != -1)
+					{
+						E2iSendMsg("{\"v_e\":{\"w\":%d,\"h\":%d,\"a\":%d,\"f\":%d,\"p\":%d}}\n",
+						    videoInfo.width, videoInfo.height, videoInfo.aspect_ratio, videoInfo.frame_rate, videoInfo.progressive);
 					}
 				}
 			}
@@ -986,9 +1001,7 @@ static int reset(Context_t *context)
 {
 	int ret = cERR_LINUXDVB_NO_ERROR;
 	Writer_t *writer;
-
 	getLinuxDVBMutex();
-
 	char *Encoding = NULL;
 
 	context->manager->video->Command(context, MANAGER_GETENCODING, &Encoding);

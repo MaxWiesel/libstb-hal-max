@@ -18,6 +18,7 @@ SOURCE_FILES += manager/audio.c
 SOURCE_FILES += manager/video.c
 SOURCE_FILES += manager/chapter.c
 SOURCE_FILES += manager/subtitle.c
+SOURCE_FILES += output/graphic_subtitle.c
 SOURCE_FILES += output/output_subtitle.c
 SOURCE_FILES += output/output.c
 SOURCE_FILES += output/writer/common/pes.c
@@ -29,6 +30,7 @@ SOURCE_FILES += external/ffmpeg/src/bitstream.c
 SOURCE_FILES += external/ffmpeg/src/latmenc.c
 SOURCE_FILES += external/ffmpeg/src/mpeg4audio.c
 SOURCE_FILES += external/ffmpeg/src/xiph.c
+SOURCE_FILES += external/plugins/src/png.c
 
 if ENABLE_FLV2MPEG4
 AM_CFLAGS    += -DHAVE_FLV2MPEG4_CONVERTER
@@ -62,7 +64,7 @@ SOURCE_FILES += \
 
 libeplayer3_la_SOURCES = $(SOURCE_FILES)
 
-LIBEPLAYER3_LIBS = libeplayer3.la -lpthread -lavformat -lavcodec -lavutil -lswresample
+LIBEPLAYER3_LIBS = libeplayer3.la -lswscale -ldl -lpthread -lavformat -lavcodec -lavutil -lswresample
 
 bin_PROGRAMS = eplayer3
 eplayer3_SOURCES = main/exteplayer.c
