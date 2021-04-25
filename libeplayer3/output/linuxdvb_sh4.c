@@ -1228,6 +1228,7 @@ static int Command(void *_context, OutputCmd_t command, void *argument)
 		}
 		case OUTPUT_CLEAR:
 		{
+			reset(context);
 			ret = LinuxDvbClear(context, (char *)argument);
 			reset(context);
 			sCURRENT_PTS = 0;

@@ -140,7 +140,7 @@ static int writeData(WriterAVCallData_t *call)
 		uint32_t byte_rate      = pcmPrivateData->bit_rate / 8;
 		uint32_t block_align    = pcmPrivateData->block_align;
 
-		int32_t format_tag;
+		int32_t format_tag = 0;
 		switch (pcmPrivateData->codec_id)
 		{
 			case AV_CODEC_ID_WMAV1:
