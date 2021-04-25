@@ -113,7 +113,7 @@ static int writeDataBCMV(WriterAVCallData_t *call)
 	int bytes = payload_len - 10 - 8;
 	UpdatePesHeaderPayloadSize(PesHeader, payload_len);
 	// pes header
-	if (pes_header_len != WriteExt(call->WriteV, call->fd, PesHeader, pes_header_len)) return -1;
+	if (pes_header_len != (unsigned)WriteExt(call->WriteV, call->fd, PesHeader, pes_header_len)) return -1;
 	if (bytes != WriteExt(call->WriteV, call->fd, call->data, bytes)) return -1;
 
 	offs += bytes;
@@ -136,7 +136,7 @@ static int writeDataBCMV(WriterAVCallData_t *call)
 
 		UpdatePesHeaderPayloadSize(PesHeader, wr + 3);
 
-		if (pes_header_len != WriteExt(call->WriteV, call->fd, PesHeader, pes_header_len)) return -1;
+		if (pes_header_len != (unsigned)WriteExt(call->WriteV, call->fd, PesHeader, pes_header_len)) return -1;
 		if (wr != WriteExt(call->WriteV, call->fd, call->data + offs, wr)) return -1;
 
 		bytes += wr;
