@@ -26,7 +26,7 @@ static int flv2mpeg4_context_write_packet_cb(void *usr_data, int keyframe __attr
 	}
 
 	AudioVideoOut_t avOut;
-	avOut.data       = (char *)buf;
+	avOut.data       = (unsigned char *)buf;
 	avOut.len        = size;
 	avOut.pts        = ctx->track->pts;
 	avOut.dts        = ctx->track->dts;

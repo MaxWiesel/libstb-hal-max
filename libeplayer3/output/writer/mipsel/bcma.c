@@ -159,6 +159,7 @@ static int writeData(WriterAVCallData_t *call)
 				bits_per_sample = 8;
 				byte_rate = 32000;
 				block_align = 1;
+				break;
 			default:
 				format_tag = 0xFFFF;
 				break;
