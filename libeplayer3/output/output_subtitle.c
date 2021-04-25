@@ -235,6 +235,7 @@ static int Write(Context_t *context, void *data)
 
 		WriterSubCallData_t subPacket;
 		memset(&subPacket, 0x00, sizeof(subPacket));
+		subPacket.codecId = SUBTITLE_CODEC_ID_PGS;
 		subPacket.trackId = out->trackId;
 		subPacket.data = out->data;
 		subPacket.len = out->len;
