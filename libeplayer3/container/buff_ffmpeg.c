@@ -107,7 +107,7 @@ static void update_finish_timeout()
 		 * this is the reason for additional validation when we what to close immediately
 		 */
 		if (!progressive_playback && 0 == ret && currPts >= maxInjectedPts &&
-		        ((currPts - maxInjectedPts) / 90000) < 2)
+		    ((currPts - maxInjectedPts) / 90000) < 2)
 		{
 			/* close immediately
 			 */

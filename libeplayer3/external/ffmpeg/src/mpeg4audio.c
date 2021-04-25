@@ -95,7 +95,7 @@ uint8_t get_chan_config(int channels)
 }
 
 int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf,
-                                 int bit_size, int sync_extension)
+    int bit_size, int sync_extension)
 {
 	GetBitContext gb;
 	int specific_config_bitindex, ret;
@@ -180,8 +180,8 @@ int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf,
 }
 
 static av_always_inline unsigned int copy_bits(PutBitContext *pb,
-        GetBitContext *gb,
-        int bits)
+    GetBitContext *gb,
+    int bits)
 {
 	unsigned int el = get_bits(gb, bits);
 	put_bits(pb, bits, el);

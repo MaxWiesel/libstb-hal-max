@@ -265,16 +265,18 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 			{
 				int i = 0;
 				int Id = -1;
-				char * pch;
+				char *pch;
 				char Name[] = "          ";
 				fprintf(stderr, "{\"%c_%c\": [", argvBuff[0], argvBuff[1]);
 				for (i = 0; TrackList[i] != NULL; i += 2)
 				{
 					pch = strtok(TrackList[i], " ");
-					if (pch != NULL) {
+					if (pch != NULL)
+					{
 						Id = atoi(pch);
 						pch = strtok(NULL, " ");
-						if (pch != NULL) {
+						if (pch != NULL)
+						{
 							snprintf(Name, sizeof(Name), "%s", pch);
 						}
 					}
@@ -282,7 +284,7 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 					{
 						fprintf(stderr, ", ");
 					}
-					fprintf(stderr, "{\"id\":%d,\"e\":\"%s\",\"n\":\"%s\"}", Id, TrackList[i+1], Name);
+					fprintf(stderr, "{\"id\":%d,\"e\":\"%s\",\"n\":\"%s\"}", Id, TrackList[i + 1], Name);
 					free(TrackList[i]);
 					free(TrackList[i + 1]);
 				}
@@ -309,7 +311,7 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 				else // video
 				{
 					fprintf(stderr, "{\"%c_%c\":{\"id\":%d,\"e\":\"%s\",\"n\":\"%s\",\"w\":%d,\"h\":%d,\"f\":%u,\"p\":%d,\"an\":%d,\"ad\":%d}}\n", \
-					        argvBuff[0], argvBuff[1], track->Id, track->Encoding, track->Name, track->width, track->height, track->frame_rate, track->progressive, track->aspect_ratio_num, track->aspect_ratio_den);
+					    argvBuff[0], argvBuff[1], track->Id, track->Encoding, track->Name, track->width, track->height, track->frame_rate, track->progressive, track->aspect_ratio_num, track->aspect_ratio_den);
 				}
 				free(track->Encoding);
 				free(track->Name);
@@ -347,7 +349,7 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 						if (NULL != TrackList)
 						{
 							int i = 0;
-							char * pch;
+							char *pch;
 							for (i = 0; TrackList[i] != NULL; i += 2)
 							{
 								if (idx == i)
@@ -437,7 +439,7 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 				else // video
 				{
 					fprintf(stderr, "{\"%c_%c\":{\"id\":%d,\"e\":\"%s\",\"n\":\"%s\",\"w\":%d,\"h\":%d,\"f\":%u,\"p\":%d,\"an\":%d,\"ad\":%d}}\n", \
-					        argvBuff[0], argvBuff[1], track->Id, track->Encoding, track->Name, track->width, track->height, track->frame_rate, track->progressive, track->aspect_ratio_num, track->aspect_ratio_den);
+					    argvBuff[0], argvBuff[1], track->Id, track->Encoding, track->Name, track->width, track->height, track->frame_rate, track->progressive, track->aspect_ratio_num, track->aspect_ratio_den);
 				}
 				free(track->Encoding);
 				free(track->Name);
@@ -687,7 +689,7 @@ static int ParseParams(int argc, char *argv[], PlayFiles_t *playbackFiles, int *
 			strcpy(playbackFiles->szFirstFile, "file://");
 		}
 		strcat(playbackFiles->szFirstFile, argv[optind]);
-		playbackFiles->szFirstFile[IPTV_MAX_FILE_PATH-1] = '\0';
+		playbackFiles->szFirstFile[IPTV_MAX_FILE_PATH - 1] = '\0';
 		map_inter_file_path(playbackFiles->szFirstFile);
 		printf("file: [%s]\n", playbackFiles->szFirstFile);
 		++optind;
@@ -1051,7 +1053,7 @@ int main(int argc, char *argv[])
 
 						if (g_player->container && g_player->container->selectedContainer)
 						{
-							commandRetVal = g_player->container->selectedContainer->Command((Context_t*)g_player->container, CONTAINER_LAST_PTS, &lastPts);
+							commandRetVal = g_player->container->selectedContainer->Command((Context_t *)g_player->container, CONTAINER_LAST_PTS, &lastPts);
 						}
 
 						if (0 == commandRetVal && lastPts != INVALID_PTS_VALUE)
@@ -1071,10 +1073,10 @@ int main(int argc, char *argv[])
 					if (ptrP)
 					{
 						fprintf(stderr, "{\"PLAYBACK_INFO\":{ \"isPlaying\":%s, \"isPaused\":%s, \"isForwarding\":%s, \"isSeeking\":%s, \"isCreationPhase\":%s,", \
-						        DUMP_BOOL(ptrP->isPlaying), DUMP_BOOL(ptrP->isPaused), DUMP_BOOL(ptrP->isForwarding), DUMP_BOOL(ptrP->isSeeking), DUMP_BOOL(ptrP->isCreationPhase));
+						    DUMP_BOOL(ptrP->isPlaying), DUMP_BOOL(ptrP->isPaused), DUMP_BOOL(ptrP->isForwarding), DUMP_BOOL(ptrP->isSeeking), DUMP_BOOL(ptrP->isCreationPhase));
 						fprintf(stderr, "\"BackWard\":%d, \"SlowMotion\":%d, \"Speed\":%d, \"AVSync\":%d,", ptrP->BackWard, ptrP->SlowMotion, ptrP->Speed, ptrP->AVSync);
 						fprintf(stderr, " \"isVideo\":%s, \"isAudio\":%s, \"isSubtitle\":%s, \"isDvbSubtitle\":%s, \"isTeletext\":%s, \"mayWriteToFramebuffer\":%s, \"abortRequested\":%s }}\n", \
-						        DUMP_BOOL(ptrP->isVideo), DUMP_BOOL(ptrP->isAudio), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(ptrP->abortRequested));
+						    DUMP_BOOL(ptrP->isVideo), DUMP_BOOL(ptrP->isAudio), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(ptrP->abortRequested));
 					}
 
 					break;
