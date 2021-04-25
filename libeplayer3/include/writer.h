@@ -103,10 +103,12 @@ ssize_t WriteExt(WriteV_t _call, int fd, void *data, size_t size);
 
 typedef enum
 {
+	SUBTITLE_CODEC_ID_UNKNOWN,
 	SUBTITLE_CODEC_ID_SUBRIP,
 	SUBTITLE_CODEC_ID_ASS,
 	SUBTITLE_CODEC_ID_WEBVTT,
-	SUBTITLE_CODEC_ID_PGS
+	SUBTITLE_CODEC_ID_PGS,
+	SUBTITLE_CODEC_ID_DVB
 } SubtitleCodecId_t;
 
 typedef struct
@@ -124,7 +126,7 @@ typedef struct
 
 typedef struct SubWriter_s
 {
-	int32_t (* open)();
+	int32_t (* open)(SubtitleCodecId_t codecId, uint8_t *extradata, int extradata_size);
 	int32_t (* close)();
 	int32_t (* reset)();
 	int32_t (* write)(WriterSubCallData_t *);

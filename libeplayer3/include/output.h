@@ -64,6 +64,7 @@ typedef struct
 	uint32_t         extralen;
 
 	int64_t          pts;
+	int64_t          dts;
 	int64_t          durationMS; // duration in miliseconds
 
 	char            *type;
