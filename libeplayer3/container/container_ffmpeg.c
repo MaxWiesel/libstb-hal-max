@@ -122,6 +122,31 @@ static int64_t doCalcPts(int64_t start_time, const AVRational time_base, int64_t
 void LinuxDvbBuffSetStamp(void *stamp);
 static int32_t container_ffmpeg_stop(Context_t *context);
 
+static char *g_graphic_sub_path;
+
+const char *GetGraphicSubPath()
+{
+	return g_graphic_sub_path;
+}
+
+void E2iSendMsg(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	vfprintf(stderr, format, args);
+	va_end(args);
+}
+
+void E2iStartMsg(void)
+{
+	flockfile(stderr);
+}
+
+void E2iEndMsg(void)
+{
+	funlockfile(stderr);
+}
+
 /* Progressive playback means that we play local file
  * but this local file can grows up, for example
  * we start playback before download was finished
