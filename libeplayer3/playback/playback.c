@@ -242,10 +242,13 @@ static int PlaybackClose(Context_t *context)
 	{
 		playback_err("container delete failed\n");
 	}
+
 	if (context->manager->audio)
 		context->manager->audio->Command(context, MANAGER_DEL, NULL);
+
 	if (context->manager->video)
 		context->manager->video->Command(context, MANAGER_DEL, NULL);
+
 	if (context->manager->chapter)
 		context->manager->chapter->Command(context, MANAGER_DEL, NULL);
 
@@ -479,6 +482,7 @@ static int32_t PlaybackTerminate(Context_t *context)
 		}
 
 		ret = context->container->selectedContainer->Command(context, CONTAINER_STOP, NULL);
+
 		if (context && context->playback)
 		{
 			context->playback->isPaused     = 0;

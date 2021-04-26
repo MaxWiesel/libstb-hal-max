@@ -48,7 +48,7 @@
 
 static Track_t *Tracks = NULL;
 static int TrackCount = 0;
-static int CurrentTrack = 0;    //TRACK[0] as default.
+static int CurrentTrack = 0; //TRACK[0] as default.
 
 static void (* updatedTrackInfoFnc)(void) = NULL;
 

@@ -49,7 +49,7 @@
 
 static Track_t *Tracks = NULL;
 static int TrackCount = 0;
-static int CurrentTrack = 0;    //TRACK[0] as default.
+static int CurrentTrack = 0; //TRACK[0] as default.
 
 /* ***************************** */
 /* Prototypes                    */
@@ -152,45 +152,6 @@ static char **ManagerList(Context_t *context __attribute__((unused)))
 
 	return tracklist;
 }
-
-#if 0
-static TrackDescription_t *ManagerList(Context_t *context __attribute__((unused)))
-{
-	int i = 0;
-	TrackDescription_t *tracklist = NULL;
-
-	audio_mgr_printf(10, "%s::%s\n", __FILE__, __FUNCTION__);
-	if (Tracks != NULL)
-	{
-		tracklist = malloc(sizeof(TrackDescription_t) * ((TrackCount) + 1));
-
-		if (tracklist == NULL)
-		{
-			audio_mgr_err("%s::%s malloc failed\n", __FILE__, __FUNCTION__);
-			return NULL;
-		}
-
-		int j = 0;
-		for (i = 0; i < TrackCount; ++i)
-		{
-			if (Tracks[i].pending || Tracks[i].Id < 0)
-			{
-				continue;
-			}
-
-			tracklist[j].Id = Tracks[i].Id;
-			tracklist[j].Name = strdup(Tracks[i].Name);
-			tracklist[j].Encoding = strdup(Tracks[i].Encoding);
-			++j;
-		}
-
-		tracklist[j].Id = -1;
-	}
-	//audio_mgr_printf(10, "%s::%s return %p (%d - %d)\n", __FILE__, __FUNCTION__, tracklist, j, TrackCount);
-
-	return tracklist;
-}
-#endif
 
 static int ManagerDel(Context_t *context)
 {

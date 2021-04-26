@@ -48,7 +48,7 @@
 
 static Track_t *Tracks = NULL;
 static int TrackCount = 0;
-static int CurrentTrack = -1;   //no as default.
+static int CurrentTrack = -1; //no as default.
 
 /* ***************************** */
 /* Prototypes                    */

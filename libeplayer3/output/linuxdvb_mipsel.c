@@ -1001,7 +1001,9 @@ static int reset(Context_t *context)
 {
 	int ret = cERR_LINUXDVB_NO_ERROR;
 	Writer_t *writer;
+
 	getLinuxDVBMutex();
+
 	char *Encoding = NULL;
 
 	context->manager->video->Command(context, MANAGER_GETENCODING, &Encoding);
@@ -1040,7 +1042,6 @@ static int reset(Context_t *context)
 
 	if (isBufferedOutput)
 		LinuxDvbBuffFlush(context);
-
 
 	return ret;
 }

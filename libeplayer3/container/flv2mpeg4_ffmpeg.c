@@ -16,7 +16,6 @@ typedef struct
 	Track_t   *track;
 } Flv2Mpeg4Context;
 
-
 static int flv2mpeg4_context_write_packet_cb(void *usr_data, int keyframe __attribute__((unused)), int pts __attribute__((unused)), const uint8_t *buf, int size)
 {
 	Flv2Mpeg4Context *ctx = usr_data;

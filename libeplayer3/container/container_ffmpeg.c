@@ -624,7 +624,7 @@ static void FFMPEGThread(Context_t *context)
 	uint64_t out_channel_layout = AV_CH_LAYOUT_STEREO;
 	uint32_t cAVIdx = 0;
 
-	void *stamp =0;
+	void *stamp = 0;
 
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56, 34, 100)
 #ifdef __sh__
@@ -1930,6 +1930,7 @@ int32_t container_ffmpeg_init_av_context(Context_t *context, char *filename, uin
 		avContextTab[AVIdx]->iformat->flags |= AVFMT_SEEK_TO_PTS;
 		avContextTab[AVIdx]->flags = AVFMT_FLAG_GENPTS;
 	}
+
 	printf("minimal Probe: %d\n", context->playback->noprobe);
 
 	if (context->playback->noprobe)
@@ -1981,6 +1982,7 @@ int32_t container_ffmpeg_init_av_context(Context_t *context, char *filename, uin
 				avContextTab[AVIdx]->pb->read_packet = ffmpeg_read_wrapper;
 		}
 	}
+
 	if (avio_opts != NULL)
 	{
 		av_dict_free(&avio_opts);
@@ -2101,9 +2103,9 @@ int32_t container_ffmpeg_update_tracks(Context_t *context, char *filename, int32
 #endif
 
 	ffmpeg_printf(20, "dump format\n");
+
 	if ((avContextTab[0] != NULL) && (FFMPEG_DEBUG_LEVEL > 0))
 		av_dump_format(avContextTab[0], 0, filename, 0);
-
 
 	uint32_t cAVIdx = 0;
 
@@ -2156,6 +2158,7 @@ int32_t container_ffmpeg_update_tracks(Context_t *context, char *filename, int32
 				}
 			}
 		}
+
 		uint32_t i = 0;
 		for (i = 0; i < avContext->nb_chapters; i++)
 		{
