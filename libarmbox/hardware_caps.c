@@ -88,6 +88,7 @@ hw_caps_t *get_hwcaps(void)
 	caps.display_has_statusline = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_has_colon = 0;
 	caps.has_button_timer = 1;
+	caps.has_button_vformat = 0;
 	caps.has_HDMI = 2;
 	caps.has_HDMI_input = 1;
 	strcpy(caps.startup_file, "STARTUP");
