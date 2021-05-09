@@ -128,7 +128,6 @@ typedef enum
 	VIDEO_CONTROL_MAX = VIDEO_CONTROL_SHARPNESS
 } VIDEO_CONTROL;
 
-
 class cVideo
 {
 	friend class cPlayback;
@@ -157,12 +156,18 @@ class cVideo
 
 		int brightness, contrast, saturation, hue;
 
+		/* used internally by playback */
 		void openDevice(void);
 		void closeDevice(void);
 	public:
 		/* constructor & destructor */
 		cVideo(int mode, void *, void *, unsigned int unit = 0);
 		~cVideo(void);
+
+		void open_AVInput_Device(void) { return; };	// Dummy
+		void close_AVInput_Device(void) { return; };	// Dummy
+
+		void setAVInput(int val);
 
 		void * GetTVEnc() { return NULL; };
 		void * GetTVEncSD() { return NULL; };
@@ -202,7 +207,7 @@ class cVideo
 		bool ShowPicture(const char * fname, const char *_destname = NULL);
 		void StopPicture();
 		void Standby(unsigned int bOn);
-		void ShowPig(int _x)
+		void ShowPig(int _x);
 		void Pig(int x, int y, int w, int h, int osd_w = 1064, int osd_h = 600, int startx = 0, int starty = 0, int endx = 1279, int endy = 719);
 		void SetControl(int, int);
 		void VideoParamWatchdog(void);
