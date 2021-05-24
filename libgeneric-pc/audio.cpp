@@ -125,24 +125,24 @@ int cAudio::Stop(void)
 bool cAudio::Pause(bool /*Pcm*/)
 {
 	return true;
-};
+}
 
 void cAudio::SetSyncMode(AVSYNC_TYPE Mode)
 {
 	hal_debug("%s %d\n", __func__, Mode);
-};
+}
 
 void cAudio::SetStreamType(int bypass)
 {
 	StreamType = bypass;
 
 	hal_debug("%s %d (0x%x)\n", __FUNCTION__, bypass, bypass);
-};
+}
 
 int cAudio::setChannel(int /*channel*/)
 {
 	return 0;
-};
+}
 
 int cAudio::PrepareClipPlay(int ch, int srate, int bits, int le)
 {
@@ -168,7 +168,7 @@ int cAudio::PrepareClipPlay(int ch, int srate, int bits, int le)
 				driver, ai->name, ai->short_name, ai->author);
 	}
 	return 0;
-};
+}
 
 int cAudio::WriteClip(unsigned char *buffer, int size)
 {
@@ -179,7 +179,7 @@ int cAudio::WriteClip(unsigned char *buffer, int size)
 	}
 	ao_play(adevice, (char *)buffer, size);
 	return size;
-};
+}
 
 int cAudio::StopClip()
 {
@@ -195,7 +195,7 @@ int cAudio::StopClip()
 	adevice = NULL;
 #endif
 	return 0;
-};
+}
 
 void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &mode)
 {
@@ -270,7 +270,7 @@ void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &m
 	}
 	hal_debug("%s t: %d l: %d f: %d b: %d m: %d codec_id: %x\n",
 		  __func__, type, layer, freq, bitrate, mode, c?c->codec_id:-1);
-};
+}
 
 void cAudio::SetSRS(int /*iq_enable*/, int /*nmgr_enable*/, int /*iq_mode*/, int /*iq_level*/)
 {
@@ -280,22 +280,22 @@ void cAudio::SetSRS(int /*iq_enable*/, int /*nmgr_enable*/, int /*iq_mode*/, int
 void cAudio::SetHdmiDD(bool enable)
 {
 	hal_debug("%s %d\n", __func__, enable);
-};
+}
 
 void cAudio::SetSpdifDD(bool enable)
 {
 	hal_debug("%s %d\n", __func__, enable);
-};
+}
 
 void cAudio::ScheduleMute(bool On)
 {
 	hal_debug("%s %d\n", __func__, On);
-};
+}
 
 void cAudio::EnableAnalogOut(bool enable)
 {
 	hal_debug("%s %d\n", __func__, enable);
-};
+}
 
 void cAudio::setBypassMode(bool disable)
 {

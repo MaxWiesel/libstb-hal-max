@@ -22,7 +22,6 @@ typedef enum {
 	ANALOG_SCART_MASK = 0x10
 } analog_mode_t;
 
-
 typedef enum {
 	VIDEO_FORMAT_MPEG2 = 0,
 	VIDEO_FORMAT_MPEG4,
@@ -127,21 +126,21 @@ class cVideo
 		/* called from GL thread */
 		class SWFramebuffer : public std::vector<unsigned char>
 		{
-		public:
-			SWFramebuffer() : mWidth(0), mHeight(0) {}
-			void width(int w) { mWidth = w; }
-			void height(int h) { mHeight = h; }
-			void pts(uint64_t p) { mPts = p; }
-			void AR(AVRational a) { mAR = a; }
-			int width() const { return mWidth; }
-			int height() const { return mHeight; }
-			int64_t pts() const { return mPts; }
-			AVRational AR() const { return mAR; }
-		private:
-			int mWidth;
-			int mHeight;
-			int64_t mPts;
-			AVRational mAR;
+			public:
+				SWFramebuffer() : mWidth(0), mHeight(0) {}
+				void width(int w) { mWidth = w; }
+				void height(int h) { mHeight = h; }
+				void pts(uint64_t p) { mPts = p; }
+				void AR(AVRational a) { mAR = a; }
+				int width() const { return mWidth; }
+				int height() const { return mHeight; }
+				int64_t pts() const { return mPts; }
+				AVRational AR() const { return mAR; }
+			private:
+				int mWidth;
+				int mHeight;
+				int64_t mPts;
+				AVRational mAR;
 		};
 		int buf_in, buf_out, buf_num;
 		int64_t GetPTS(void);

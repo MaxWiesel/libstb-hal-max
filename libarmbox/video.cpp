@@ -1113,6 +1113,7 @@ bool getvideo2(unsigned char *video, int xres, int yres)
 	close(fd_video);
 	return ret;
 }
+
 static bool swscale(unsigned char *src, unsigned char *dst, int sw, int sh, int dw, int dh, AVPixelFormat sfmt)
 {
 	bool ret = false;

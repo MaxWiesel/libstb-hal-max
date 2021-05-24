@@ -25,15 +25,26 @@
 
 #include "config.h"
 #include <unistd.h>
+
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
 
-extern "C" {
+#include "glfb_priv.h"
+#include "video_lib.h"
+#include "hal_debug.h"
+
+extern "C"
+{
 #include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
+#include <libavutil/imgutils.h>
 }
+
+#define hal_debug(args...) _hal_debug(HAL_DEBUG_VIDEO, this, args)
+#define hal_info(args...) _hal_info(HAL_DEBUG_VIDEO, this, args)
+#define hal_debug_c(args...) _hal_debug(HAL_DEBUG_VIDEO, NULL, args)
+#define hal_info_c(args...) _hal_info(HAL_DEBUG_VIDEO, NULL, args)
 
 /* ffmpeg buf 32k */
 #define INBUF_SIZE 0x8000
@@ -46,14 +57,6 @@ extern "C" {
 #if USE_CLUTTER
 #define VDEC_PIXFMT AV_PIX_FMT_BGR24
 #endif
-
-#include "video_lib.h"
-#include "dmx_hal.h"
-#include "glfb_priv.h"
-#include "hal_debug.h"
-#define hal_debug(args...) _hal_debug(HAL_DEBUG_VIDEO, this, args)
-#define hal_info(args...) _hal_info(HAL_DEBUG_VIDEO, this, args)
-#define hal_info_c(args...) _hal_info(HAL_DEBUG_VIDEO, NULL, args)
 
 cVideo *videoDecoder = NULL;
 extern cDemux *videoDemux;
@@ -396,7 +399,8 @@ void cVideo::getPictureInfo(int &width, int &height, int &rate)
 {
 	width = dec_w;
 	height = dec_h;
-	switch (dec_r) {
+	switch (dec_r)
+	{
 		case 23://23.976fps
 			rate = VIDEO_FRAME_RATE_23_976;
 			break;
@@ -426,7 +430,7 @@ void cVideo::getPictureInfo(int &width, int &height, int &rate)
 
 void cVideo::SetSyncMode(AVSYNC_TYPE)
 {
-};
+}
 
 int cVideo::SetStreamType(VIDEO_FORMAT v)
 {
@@ -789,7 +793,7 @@ bool cVideo::GetScreenImage(unsigned char * &data, int &xres, int &yres, bool ge
 	if (get_video && get_osd) {
 		/* alpha blend osd onto data (video). TODO: maybe libavcodec can do this? */
 		uint32_t *d = (uint32_t *)data;
-		uint32_t *pixpos = (uint32_t *)&(*osd)[0];
+		uint32_t *pixpos = (uint32_t *) &(*osd)[0];
 		for (int count = 0; count < yres; count++) {
 			for (int count2 = 0; count2 < xres; count2++ ) {
 				uint32_t pix = *pixpos;

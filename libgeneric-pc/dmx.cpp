@@ -19,18 +19,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include <config.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include <cstring>
 #include <cstdio>
 #include <string>
-#include <unistd.h>
 #include <sys/ioctl.h>
 #include "dmx_hal.h"
 #include "hal_debug.h"
@@ -147,6 +147,7 @@ void cDemux::Close(void)
 		hal_info("%s #%d: not open!\n", __FUNCTION__, num);
 		return;
 	}
+
 	pesfds.clear();
 	ioctl(fd, DMX_STOP);
 	close(fd);
@@ -255,9 +256,9 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char * const filt
 		hal_info("%s #%d: len too long: %d, DMX_FILTER_SIZE %d\n", __func__, num, len, DMX_FILTER_SIZE);
 		len = DMX_FILTER_SIZE;
 	}
+	flt = filter[0];
 	s_flt.pid = pid;
 	s_flt.timeout = timeout;
-	flt = filter[0];
 	memcpy(s_flt.filter.filter, filter, len);
 	memcpy(s_flt.filter.mask,   mask,   len);
 	if (negmask != NULL)
@@ -266,77 +267,78 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char * const filt
 	s_flt.flags = DMX_IMMEDIATE_START|DMX_CHECK_CRC;
 
 	int to = 0;
-	switch (filter[0]) {
-	case 0x00: /* program_association_section */
-		to = 2000;
-		break;
-	case 0x01: /* conditional_access_section */
-		to = 6000;
-		break;
-	case 0x02: /* program_map_section */
-		to = 1500;
-		break;
-	case 0x03: /* transport_stream_description_section */
-		to = 10000;
-		break;
-	/* 0x04 - 0x3F: reserved */
-	case 0x40: /* network_information_section - actual_network */
-		to = 10000;
-		break;
-	case 0x41: /* network_information_section - other_network */
-		to = 15000;
-		break;
-	case 0x42: /* service_description_section - actual_transport_stream */
-		to = 10000;
-		break;
-	/* 0x43 - 0x45: reserved for future use */
-	case 0x46: /* service_description_section - other_transport_stream */
-		to = 10000;
-		break;
-	/* 0x47 - 0x49: reserved for future use */
-	case 0x4A: /* bouquet_association_section */
-		to = 11000;
-		break;
-	/* 0x4B - 0x4D: reserved for future use */
-	case 0x4E: /* event_information_section - actual_transport_stream, present/following */
-		to = 2000;
-		break;
-	case 0x4F: /* event_information_section - other_transport_stream, present/following */
-		to = 10000;
-		break;
-	/* 0x50 - 0x5F: event_information_section - actual_transport_stream, schedule */
-	/* 0x60 - 0x6F: event_information_section - other_transport_stream, schedule */
-	case 0x70: /* time_date_section */
-		s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
-		//s_flt.pid     = 0x0014;
-		to = 30000;
-		break;
-	case 0x71: /* running_status_section */
-		s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
-		to = 0;
-		break;
-	case 0x72: /* stuffing_section */
-		s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
-		to = 0;
-		break;
-	case 0x73: /* time_offset_section */
-		//s_flt.pid     = 0x0014;
-		to = 30000;
-		break;
-	/* 0x74 - 0x7D: reserved for future use */
-	case 0x7E: /* discontinuity_information_section */
-		s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
-		to = 0;
-		break;
-	case 0x7F: /* selection_information_section */
-		to = 0;
-		break;
-	/* 0x80 - 0x8F: ca_message_section */
-	/* 0x90 - 0xFE: user defined */
-	/*        0xFF: reserved */
-	default:
-		break;
-//		return -1;
+	switch (filter[0])
+	{
+		case 0x00: /* program_association_section */
+			to = 2000;
+			break;
+		case 0x01: /* conditional_access_section */
+			to = 6000;
+			break;
+		case 0x02: /* program_map_section */
+			to = 1500;
+			break;
+		case 0x03: /* transport_stream_description_section */
+			to = 10000;
+			break;
+		/* 0x04 - 0x3F: reserved */
+		case 0x40: /* network_information_section - actual_network */
+			to = 10000;
+			break;
+		case 0x41: /* network_information_section - other_network */
+			to = 15000;
+			break;
+		case 0x42: /* service_description_section - actual_transport_stream */
+			to = 10000;
+			break;
+		/* 0x43 - 0x45: reserved for future use */
+		case 0x46: /* service_description_section - other_transport_stream */
+			to = 10000;
+			break;
+		/* 0x47 - 0x49: reserved for future use */
+		case 0x4A: /* bouquet_association_section */
+			to = 11000;
+			break;
+		/* 0x4B - 0x4D: reserved for future use */
+		case 0x4E: /* event_information_section - actual_transport_stream, present/following */
+			to = 2000;
+			break;
+		case 0x4F: /* event_information_section - other_transport_stream, present/following */
+			to = 10000;
+			break;
+		/* 0x50 - 0x5F: event_information_section - actual_transport_stream, schedule */
+		/* 0x60 - 0x6F: event_information_section - other_transport_stream, schedule */
+		case 0x70: /* time_date_section */
+			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
+			//s_flt.pid     = 0x0014;
+			to = 30000;
+			break;
+		case 0x71: /* running_status_section */
+			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
+			to = 0;
+			break;
+		case 0x72: /* stuffing_section */
+			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
+			to = 0;
+			break;
+		case 0x73: /* time_offset_section */
+			//s_flt.pid     = 0x0014;
+			to = 30000;
+			break;
+		/* 0x74 - 0x7D: reserved for future use */
+		case 0x7E: /* discontinuity_information_section */
+			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
+			to = 0;
+			break;
+		case 0x7F: /* selection_information_section */
+			to = 0;
+			break;
+		/* 0x80 - 0x8F: ca_message_section */
+		/* 0x90 - 0xFE: user defined */
+		/*        0xFF: reserved */
+		default:
+			//return -1;
+			break;
 	}
 	/* the negmask == NULL is a hack: the users of negmask are PMT-update
 	 * and sectionsd EIT-Version change. And they really want no timeout
@@ -345,7 +347,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char * const filt
 		s_flt.timeout = to;
 
 	hal_debug("%s #%d pid:0x%04hx fd:%d type:%s len:%d to:%d flags:%x flt[0]:%02x\n", __func__, num,
-		pid, fd, DMX_T[dmx_type], len, s_flt.timeout,s_flt.flags, s_flt.filter.filter[0]);
+		pid, fd, DMX_T[dmx_type], len, s_flt.timeout, s_flt.flags, s_flt.filter.filter[0]);
 
 	if (debuglevel == 2) {
 		fprintf(stderr,"filt: ");for(int i=0;i<DMX_FILTER_SIZE;i++)fprintf(stderr,"%02hhx ",s_flt.filter.filter[i]);fprintf(stderr,"\n");
@@ -377,39 +379,40 @@ bool cDemux::pesFilter(const unsigned short _pid)
 	hal_debug("%s #%d pid: 0x%04hx fd: %d type: %s\n", __FUNCTION__, num, pid, fd, DMX_T[dmx_type]);
 
 	memset(&p_flt, 0, sizeof(p_flt));
-	p_flt.pid = pid;
+	p_flt.pid    = pid;
 	p_flt.output = DMX_OUT_DECODER;
 	p_flt.input  = DMX_IN_FRONTEND;
 
-	switch (dmx_type) {
-	case DMX_PCR_ONLY_CHANNEL:
-		p_flt.pes_type = DMX_PES_PCR;
-		if (HAL_nodec)
-			return true;
-		break;
-	case DMX_AUDIO_CHANNEL:
-		p_flt.pes_type = DMX_PES_OTHER;
-		p_flt.output  = DMX_OUT_TSDEMUX_TAP;
-		if (HAL_nodec)	/* no need to demux if we don't decode... */
-			return true;
-		break;
-	case DMX_VIDEO_CHANNEL:
-		p_flt.pes_type = DMX_PES_OTHER;
-		p_flt.output  = DMX_OUT_TSDEMUX_TAP;
-		if (HAL_nodec)
-			return true;
-		break;
-	case DMX_PES_CHANNEL:
-		p_flt.pes_type = DMX_PES_OTHER;
-		p_flt.output  = DMX_OUT_TAP;
-		break;
-	case DMX_TP_CHANNEL:
-		p_flt.pes_type = DMX_PES_OTHER;
-		p_flt.output  = DMX_OUT_TSDEMUX_TAP;
-		break;
-	default:
-		hal_info("%s #%d invalid dmx_type %d!\n", __func__, num, dmx_type);
-		return false;
+	switch (dmx_type)
+	{
+		case DMX_PCR_ONLY_CHANNEL:
+			p_flt.pes_type = DMX_PES_PCR;
+			if (HAL_nodec)
+				return true;
+			break;
+		case DMX_AUDIO_CHANNEL:
+			p_flt.pes_type = DMX_PES_OTHER;
+			p_flt.output  = DMX_OUT_TSDEMUX_TAP;
+			if (HAL_nodec)	/* no need to demux if we don't decode... */
+				return true;
+			break;
+		case DMX_VIDEO_CHANNEL:
+			p_flt.pes_type = DMX_PES_OTHER;
+			p_flt.output  = DMX_OUT_TSDEMUX_TAP;
+			if (HAL_nodec)
+				return true;
+			break;
+		case DMX_PES_CHANNEL:
+			p_flt.pes_type = DMX_PES_OTHER;
+			p_flt.output  = DMX_OUT_TAP;
+			break;
+		case DMX_TP_CHANNEL:
+			p_flt.pes_type = DMX_PES_OTHER;
+			p_flt.output  = DMX_OUT_TSDEMUX_TAP;
+			break;
+		default:
+			hal_info("%s #%d invalid dmx_type %d!\n", __func__, num, dmx_type);
+			return false;
 	}
 	return (ioctl(fd, DMX_SET_PES_FILTER, &p_flt) >= 0);
 }
@@ -448,7 +451,7 @@ bool cDemux::addPid(unsigned short Pid)
 	pesfds.push_back(pfd);
 	ret = (ioctl(fd, DMX_ADD_PID, &Pid));
 	if (ret < 0)
-		hal_info("%s: DMX_ADD_PID (%m)\n", __func__);
+		hal_info("%s: DMX_ADD_PID (%m) pid=%hx\n", __func__, Pid);
 	return (ret != -1);
 }
 

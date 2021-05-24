@@ -369,7 +369,7 @@ again:
 	}
 #endif
 	return ret;
-};
+}
 
 int cAudio::StopClip()
 {
@@ -390,7 +390,7 @@ int cAudio::StopClip()
 	}
 	setVolume(volume, volume);
 	return 0;
-};
+}
 
 void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &mode)
 {
@@ -439,7 +439,7 @@ void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &m
 	}
 	//fprintf(stderr, "type: %d layer: %d freq: %d bitrate: %d mode: %d\n", type, layer, freq, bitrate, mode);
 #endif
-};
+}
 
 void cAudio::SetSRS(int /*iq_enable*/, int /*nmgr_enable*/, int /*iq_mode*/, int /*iq_level*/)
 {
