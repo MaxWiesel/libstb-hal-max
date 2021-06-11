@@ -18,7 +18,6 @@
 
 #include <hardware_caps.h>
 
-#define FP_DEV "/dev/dbox/oled0"
 static int initialized = 0;
 static hw_caps_t caps;
 
@@ -256,7 +255,7 @@ hw_caps_t *get_hwcaps(void)
 	strcpy(caps.startup_file, "STARTUP_LINUX");
 	strcpy(caps.boxvendor, "AX");
 	strcpy(caps.boxname, "HD60");
-	strcpy(caps.boxarch, "HI3798M");
+	strcpy(caps.boxarch, "HI3798MV200");
 #endif
 #if BOXMODEL_HD61
 	caps.has_CI = 2;
@@ -274,7 +273,7 @@ hw_caps_t *get_hwcaps(void)
 	strcpy(caps.startup_file, "STARTUP_LINUX");
 	strcpy(caps.boxvendor, "AX");
 	strcpy(caps.boxname, "HD61");
-	strcpy(caps.boxarch, "HI3798M");
+	strcpy(caps.boxarch, "HI3798MV200");
 #endif
 #if BOXMODEL_MULTIBOXSE
 	caps.has_CI = 0;
@@ -282,9 +281,9 @@ hw_caps_t *get_hwcaps(void)
 	caps.can_cpufreq = 0;
 	caps.can_shutdown = 1;
 	caps.display_xres = 4;
-	caps.display_type = HW_DISPLAY_LED_ONLY;
+	caps.display_type = HW_DISPLAY_NONE;
 	caps.display_can_deepstandby = 0;
-	caps.display_can_set_brightness = 1;
+	caps.display_can_set_brightness = 0;
 	caps.display_can_umlauts = 0;
 	caps.display_has_statusline = 0;
 	caps.display_has_colon = 1;
@@ -294,7 +293,7 @@ hw_caps_t *get_hwcaps(void)
 	strcpy(caps.startup_file, "STARTUP_LINUX");
 	strcpy(caps.boxvendor, "Maxytec");
 	strcpy(caps.boxname, "Multibox SE 4K");
-	strcpy(caps.boxarch, "HI3798M");
+	strcpy(caps.boxarch, "HI3798MV200");
 #endif
 #if BOXMODEL_OSMINI4K
 	caps.has_CI = 0;

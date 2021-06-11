@@ -35,7 +35,6 @@ typedef enum
 	CT_VP9
 } video_codec_type_t;
 
-
 typedef enum
 {
 	STREAMTYPE_UNKNOWN = -1,
@@ -58,7 +57,7 @@ typedef enum
 	STREAMTYPE_MJPEG = 30,
 	STREAMTYPE_RV30 = 31,  /* rv30: RealVideo 8, suspected to based largely on an early draft of H.264 (included with RealPlayer 8)*/
 	STREAMTYPE_RV40 = 32, /* RealVideo 9, RealVideo 10*/
-	STREAMTYPE_AVS2 = 40,
+	STREAMTYPE_AVS2 = 40
 } video_stream_type_t;
 
 typedef enum
@@ -82,8 +81,4 @@ typedef enum
 	AUDIOTYPE_RAW = 0x30
 } audio_stream_type_t;
 
-
-
-
 #endif /* H_DVB_BCM_H */
-
