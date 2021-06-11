@@ -268,9 +268,9 @@ static bool transmitData(eDVBCISlot* slot, unsigned char* d, int len)
 eData sendData(eDVBCISlot* slot, unsigned char* data, int len)
 {
 #if HAVE_ARM_HARDWARE || HAVE_MIPS_HARDWARE
-		unsigned char *d = (unsigned char*) malloc(len);
-		memcpy(d, data, len);
-		transmitData(slot, d, len);
+	unsigned char *d = (unsigned char*) malloc(len);
+	memcpy(d, data, len);
+	transmitData(slot, d, len);
 #else
 	// only poll connection if we are not awaiting an answer
 	slot->pollConnection = false;
@@ -680,7 +680,10 @@ SlotIt cCA::FindFreeSlot(u64 TP, u8 source, u16 SID, ca_map_t camap, u8 scramble
 
 	for (it = slot_data.begin(); it != slot_data.end(); ++it)
 	{
-		if (!scrambled) { continue; }
+		if (!scrambled)
+		{
+			continue;
+		}
 
 		if ((*it)->init)
 			count++;
@@ -721,8 +724,17 @@ SlotIt cCA::FindFreeSlot(u64 TP, u8 source, u16 SID, ca_map_t camap, u8 scramble
 		if ((*it)->bsids.size())
 		{
 			for (i = 0; i < (*it)->bsids.size(); i++)
-				if ((*it)->bsids[i] == SID) {tmpSidBlackListed = true; break;}
-			if (i == (*it)->bsids.size()) {(*it)->SidBlackListed = false;}
+			{
+				if ((*it)->bsids[i] == SID)
+				{
+					tmpSidBlackListed = true;
+					break;
+				}
+			}
+			if (i == (*it)->bsids.size())
+			{
+				(*it)->SidBlackListed = false;
+			}
 		}
 
 		for (int j = 0; j < CI_MAX_MULTI; j++)
@@ -978,7 +990,7 @@ void cCA::extractPids(eDVBCISlot* slot)
 	int pos = 3;
 
 	slot->pids.clear();
-	
+
 	if (!(data[pos] & 0x80))
 		pos += 5;
 	else
@@ -1439,8 +1451,8 @@ void cCA::ci_removed(eDVBCISlot* slot)
 {
 	printf("cam (%d) status changed ->cam now _not_ present\n", slot->slot);
 #if HAVE_ARM_HARDWARE || HAVE_MIPS_HARDWARE
-		last_source = (int)slot->source;
-		setInputSource(slot, false);
+	last_source = (int)slot->source;
+	setInputSource(slot, false);
 #endif
 	if (slot->hasCCManager)
 		slot->ccmgrSession->ci_ccmgr_doClose(slot);
@@ -1917,16 +1929,16 @@ void cCA::setCheckLiveSlot(int check)
 
 void cCA::SetTSClock(u32 Speed, int slot)
 {
-/* TODO:
- * For now using the coolstream values from neutrino cam_menu
- * where 6 ( == 6000000 Hz ) means : 'normal'
- * and other values mean : 'high'
- * also only ci0 will be changed
- * for more than one ci slot code must be changed in neutrino cam_menu
- * and in zapit where ci_clock is set during start.
- * and here too.
- * On the other hand: or ci_clock will be set here for all ci slots ????
- */ 
+	/* TODO:
+	 * For now using the coolstream values from neutrino cam_menu
+	 * where 6 ( == 6000000 Hz ) means : 'normal'
+	 * and other values mean : 'high'
+	 * also only ci0 will be changed
+	 * for more than one ci slot code must be changed in neutrino cam_menu
+	 * and in zapit where ci_clock is set during start.
+	 * and here too.
+	 * On the other hand: or ci_clock will be set here for all ci slots ????
+	 */
 	char buf[64];
 	snprintf(buf, 64, "/proc/stb/tsmux/ci%d_tsclk", slot);
 	FILE *ci = fopen(buf, "wb");
@@ -1935,8 +1947,7 @@ void cCA::SetTSClock(u32 Speed, int slot)
 	{
 		if (Speed > 9 * 1000000)
 			fprintf(ci, "extra_high");
-		else
-		if (Speed > 6 * 1000000)
+		else if (Speed > 6 * 1000000)
 			fprintf(ci, "high");
 		else
 			fprintf(ci, "normal");

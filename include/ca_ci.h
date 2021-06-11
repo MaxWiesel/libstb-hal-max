@@ -261,7 +261,7 @@ typedef std::list<eDVBCISlot*>::iterator SlotIt;
 class cCA {
 private:
 	/// Static instance of the CA module
-//	static cCA *inst;
+	//static cCA *inst;
 	/// Private constructor (singleton method)
 	cCA(void);
 	/// Private data for the CA module
