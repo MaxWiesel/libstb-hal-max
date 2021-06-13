@@ -4,7 +4,6 @@
 #include "hal_debug.h"
 #define hal_debug(args...) _hal_debug(HAL_DEBUG_CA, this, args)
 
-
 static cCA *inst = NULL;
 
 /* those are all dummies for now.. */
@@ -21,6 +20,7 @@ cCA::~cCA()
 cCA *cCA::GetInstance()
 {
 	_hal_debug(HAL_DEBUG_CA, NULL, "%s\n", __FUNCTION__);
+
 	if (inst == NULL)
 		inst = new cCA();
 

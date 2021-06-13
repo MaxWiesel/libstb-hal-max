@@ -117,14 +117,17 @@ static int writeData(WriterAVCallData_t *call, bool is_vp6, bool is_vp9)
 
 	if (is_vp6)
 		++len;
+
 	PesHeader[pes_header_len++] = (len & 0xFF000000) >> 24;
 	PesHeader[pes_header_len++] = (len & 0x00FF0000) >> 16;
 	PesHeader[pes_header_len++] = (len & 0x0000FF00) >> 8;
 	PesHeader[pes_header_len++] = (len & 0x000000FF) >> 0;
 	PesHeader[pes_header_len++] = 0;
 	PesHeader[pes_header_len++] = STB_VUPLUS != GetSTBType() && is_vp9 ? 1 : 0;
+
 	if (is_vp6)
 		PesHeader[pes_header_len++] = 0;
+
 	iov[0].iov_len = pes_header_len;
 	iov[1].iov_base = call->data;
 	iov[1].iov_len = call->len;
@@ -136,8 +139,10 @@ static int writeData(WriterAVCallData_t *call, bool is_vp6, bool is_vp9)
 		UpdatePesHeaderPayloadSize(PesHeader, payload_len);
 		// it looks like for VUPLUS drivers PES header must be written separately
 		int ret = call->WriteV(call->fd, iov, 1);
+
 		if (iov[0].iov_len != (unsigned)ret)
 			return ret;
+
 		ret = call->WriteV(call->fd, iov + 1, 1);
 		return iov[0].iov_len + ret;
 	}
@@ -149,9 +154,13 @@ static int writeData(WriterAVCallData_t *call, bool is_vp6, bool is_vp9)
 		int offs = 0;
 		int bytes = payload_len - 10 - 8;
 		UpdatePesHeaderPayloadSize(PesHeader, payload_len);
+
 		// pes header
-		if (pes_header_len != (unsigned)WriteExt(call->WriteV, call->fd, PesHeader, pes_header_len)) return -1;
-		if (bytes != WriteExt(call->WriteV, call->fd, call->data, bytes)) return -1;
+		if (pes_header_len != (unsigned)WriteExt(call->WriteV, call->fd, PesHeader, pes_header_len))
+			return -1;
+
+		if (bytes != WriteExt(call->WriteV, call->fd, call->data, bytes))
+			return -1;
 
 		offs += bytes;
 
@@ -159,6 +168,7 @@ static int writeData(WriterAVCallData_t *call, bool is_vp6, bool is_vp9)
 		{
 			int left = call->len - bytes;
 			int wr = 0x8000;
+
 			if (wr > left)
 				wr = left;
 
@@ -173,8 +183,11 @@ static int writeData(WriterAVCallData_t *call, bool is_vp6, bool is_vp9)
 
 			UpdatePesHeaderPayloadSize(PesHeader, wr + 3);
 
-			if (pes_header_len != (unsigned)WriteExt(call->WriteV, call->fd, PesHeader, pes_header_len)) return -1;
-			if (wr != WriteExt(call->WriteV, call->fd, call->data + offs, wr)) return -1;
+			if (pes_header_len != (unsigned)WriteExt(call->WriteV, call->fd, PesHeader, pes_header_len))
+				return -1;
+
+			if (wr != WriteExt(call->WriteV, call->fd, call->data + offs, wr))
+				return -1;
 
 			bytes += wr;
 			offs += wr;
@@ -201,7 +214,8 @@ static int writeData(WriterAVCallData_t *call, bool is_vp6, bool is_vp9)
 		PesHeader[29] = 0xFF;
 		PesHeader[33] = 0x85;
 
-		if (pes_header_len != (unsigned)WriteExt(call->WriteV, call->fd, PesHeader, 184)) return -1;
+		if (pes_header_len != (unsigned)WriteExt(call->WriteV, call->fd, PesHeader, 184))
+			return -1;
 
 		return 1;
 	}

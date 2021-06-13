@@ -7,7 +7,7 @@
 #include "init.h"
 #include <config.h>
 
-typedef void (*cs_messenger) (unsigned int msg, unsigned int data);
+typedef void (*cs_messenger)(unsigned int msg, unsigned int data);
 
 inline void cs_api_init()
 {
@@ -19,8 +19,8 @@ inline void cs_api_exit()
 	hal_api_exit();
 };
 
-#define cs_malloc_uncached	malloc
-#define cs_free_uncached	free
+#define cs_malloc_uncached malloc
+#define cs_free_uncached free
 
 // Callback function helpers
 #if HAVE_DUCKBOX_HARDWARE \

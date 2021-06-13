@@ -197,7 +197,7 @@ static int writeData(void *_call)
 		while (Position < call->len)
 		{
 			int32_t PacketLength = (call->len - Position) <= MAX_PES_PACKET_SIZE ?
-			    (call->len - Position) : MAX_PES_PACKET_SIZE;
+				(call->len - Position) : MAX_PES_PACKET_SIZE;
 
 			int32_t Remaining = call->len - Position - PacketLength;
 
@@ -220,21 +220,28 @@ static int writeData(void *_call)
 					memcpy(&PesHeader[HeaderLength], Vc1FrameStartCode, sizeof(Vc1FrameStartCode));
 					HeaderLength += sizeof(Vc1FrameStartCode);
 				}
+
 				insertSampleHeader = 0;
 			}
 
 			struct iovec iov[2];
+
 			iov[0].iov_base = PesHeader;
+
 			iov[0].iov_len = HeaderLength;
+
 			iov[1].iov_base = call->data + Position;
+
 			iov[1].iov_len = PacketLength;
 
 			ssize_t l = call->WriteV(call->fd, iov, 2);
+
 			if (l < 0)
 			{
 				len = l;
 				break;
 			}
+
 			len += l;
 
 			Position += PacketLength;

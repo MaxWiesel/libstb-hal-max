@@ -41,7 +41,7 @@ hw_caps_t *get_hwcaps(void)
 	caps.display_type = HW_DISPLAY_GFX;
 	caps.display_can_deepstandby = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_can_set_brightness = 0;	// 0 because we use graphlcd/lcd4linux
-	caps.display_can_umlauts = 0;	/* need test */
+	caps.display_can_umlauts = 0;		/* need test */
 	caps.display_has_statusline = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_has_colon = 0;
 	caps.has_button_timer = 1;
@@ -62,7 +62,7 @@ hw_caps_t *get_hwcaps(void)
 	caps.display_type = HW_DISPLAY_GFX;
 	caps.display_can_deepstandby = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_can_set_brightness = 0;	// 0 because we use graphlcd/lcd4linux
-	caps.display_can_umlauts = 0;	/* need test */
+	caps.display_can_umlauts = 0;		/* need test */
 	caps.display_has_statusline = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_has_colon = 0;
 	caps.has_button_timer = 1;
@@ -83,7 +83,7 @@ hw_caps_t *get_hwcaps(void)
 	caps.display_type = HW_DISPLAY_GFX;
 	caps.display_can_deepstandby = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_can_set_brightness = 0;	// 0 because we use graphlcd/lcd4linux
-	caps.display_can_umlauts = 0;	/* need test */
+	caps.display_can_umlauts = 0;		/* need test */
 	caps.display_has_statusline = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_has_colon = 0;
 	caps.has_button_timer = 1;
@@ -105,7 +105,7 @@ hw_caps_t *get_hwcaps(void)
 	caps.display_type = HW_DISPLAY_GFX;
 	caps.display_can_deepstandby = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_can_set_brightness = 0;	// 0 because we use graphlcd/lcd4linux
-	caps.display_can_umlauts = 0;	/* need test */
+	caps.display_can_umlauts = 0;		/* need test */
 	caps.display_has_statusline = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_has_colon = 0;
 	caps.has_button_timer = 1;
@@ -146,7 +146,7 @@ hw_caps_t *get_hwcaps(void)
 	caps.display_type = HW_DISPLAY_GFX;
 	caps.display_can_deepstandby = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_can_set_brightness = 0;	// 0 because we use graphlcd/lcd4linux
-	caps.display_can_umlauts = 0;	/* need test */
+	caps.display_can_umlauts = 0;		/* need test */
 	caps.display_has_statusline = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_has_colon = 0;
 	caps.has_button_timer = 1;
@@ -345,7 +345,7 @@ hw_caps_t *get_hwcaps(void)
 	caps.display_type = HW_DISPLAY_GFX;
 	caps.display_can_deepstandby = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_can_set_brightness = 0;	// 0 because we use graphlcd/lcd4linux
-	caps.display_can_umlauts = 0;	/* need test */
+	caps.display_can_umlauts = 0;		/* need test */
 	caps.display_has_statusline = 0;	// 0 because we use graphlcd/lcd4linux
 	caps.display_has_colon = 0;
 	caps.has_button_timer = 1;

@@ -115,18 +115,18 @@ typedef enum
 typedef struct
 {
 	SubtitleCodecId_t codecId;
-	uint32_t          trackId;
-	uint8_t          *data;
-	uint32_t          len;
-	int64_t           pts;
-	int64_t           dts;
-	uint8_t          *private_data;
-	uint32_t          private_size;
+	uint32_t  trackId;
+	uint8_t  *data;
+	uint32_t  len;
+	int64_t   pts;
+	int64_t   dts;
+	uint8_t  *private_data;
+	uint32_t  private_size;
 
 	int64_t           durationMS; // duration in miliseconds
 
-	int         width;
-	int         height;
+	int width;
+	int height;
 } WriterSubCallData_t;
 
 typedef struct SubWriter_s

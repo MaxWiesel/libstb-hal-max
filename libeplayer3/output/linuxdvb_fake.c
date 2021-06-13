@@ -96,7 +96,6 @@ int LinuxDvbStop(Context_t *context, char *type);
 #define getLinuxDVBMutex() pthread_mutex_lock(&LinuxDVBmutex)
 #define releaseLinuxDVBMutex() pthread_mutex_unlock(&LinuxDVBmutex)
 
-
 int LinuxDvbOpen(Context_t *context __attribute__((unused)), char *type)
 {
 	uint8_t video = !strcmp("video", type);
@@ -233,7 +232,7 @@ static int Write(Context_t *context, void *_out)
 	audio = !strcmp("audio", out->type);
 
 	linuxdvb_printf(20, "DataLength=%u PrivateLength=%u Pts=%"PRIu64" FrameRate=%d\n",
-	    out->len, out->extralen, out->pts, out->frameRate);
+		out->len, out->extralen, out->pts, out->frameRate);
 	linuxdvb_printf(20, "v%d a%d\n", video, audio);
 
 	if (video)
@@ -262,9 +261,11 @@ static int Write(Context_t *context, void *_out)
 			pfd[0].fd = videofd;
 			pfd[0].events = POLLPRI;
 			int pollret = poll(pfd, 1, 0);
+
 			if (pollret > 0 && pfd[0].revents & POLLPRI)
 			{
 				struct video_event evt;
+
 				if (ioctl(videofd, VIDEO_GET_EVENT, &evt) == -1)
 				{
 					linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -309,6 +310,7 @@ static int Write(Context_t *context, void *_out)
 					usleep((out->pts - last_pts) / 90 * 900);
 					//usleep((out->pts - last_pts) / 90 * 500);
 				}
+
 				last_pts = out->pts;
 			}
 
@@ -414,6 +416,7 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			ret = LinuxDvbOpen(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_CLOSE:
 		{
 			ret = LinuxDvbClose(context, (char *)argument);
@@ -421,12 +424,14 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			sCURRENT_PTS = 0;
 			break;
 		}
+
 		case OUTPUT_PLAY:   // 4
 		{
 			sCURRENT_PTS = 0;
 			ret = LinuxDvbPlay(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_STOP:
 		{
 			reset(context);
@@ -434,6 +439,7 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			sCURRENT_PTS = 0;
 			break;
 		}
+
 		case OUTPUT_FLUSH:
 		{
 			ret = LinuxDvbFlush(context, (char *)argument);
@@ -441,21 +447,25 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			sCURRENT_PTS = 0;
 			break;
 		}
+
 		case OUTPUT_PAUSE:
 		{
 			ret = LinuxDvbPause(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_CONTINUE:
 		{
 			ret = LinuxDvbContinue(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_AVSYNC:
 		{
 			ret = LinuxDvbAVSync(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_CLEAR:
 		{
 			ret = LinuxDvbClear(context, (char *)argument);
@@ -463,6 +473,7 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			sCURRENT_PTS = 0;
 			break;
 		}
+
 		case OUTPUT_PTS:
 		{
 			unsigned long long int pts = 0;
@@ -470,21 +481,25 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			*((unsigned long long int *)argument) = (unsigned long long int)pts;
 			break;
 		}
+
 		case OUTPUT_SWITCH:
 		{
 			ret = LinuxDvbSwitch(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_SLOWMOTION:
 		{
 			return LinuxDvbSlowMotion(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_AUDIOMUTE:
 		{
 			return LinuxDvbAudioMute(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_GET_FRAME_COUNT:
 		{
 			unsigned long long int frameCount = 0;
@@ -492,33 +507,40 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			*((unsigned long long int *)argument) = (unsigned long long int)frameCount;
 			break;
 		}
+
 		case OUTPUT_GET_PROGRESSIVE:
 		{
 			ret = cERR_LINUXDVB_NO_ERROR;
 			*((int *)argument) = videoInfo.progressive;
 			break;
 		}
+
 		case OUTPUT_SET_BUFFER_SIZE:
 		{
 			ret = cERR_LINUXDVB_ERROR;
+
 			if (!isBufferedOutput)
 			{
 				uint32_t bufferSize = *((uint32_t *)argument);
 				ret = cERR_LINUXDVB_NO_ERROR;
+
 				if (bufferSize > 0)
 				{
 					LinuxDvbBuffSetSize(bufferSize);
 					isBufferedOutput = true;
 				}
 			}
+
 			break;
 		}
+
 		case OUTPUT_GET_BUFFER_SIZE:
 		{
 			ret = cERR_LINUXDVB_NO_ERROR;
 			*((uint32_t *)argument) = LinuxDvbBuffGetSize();
 			break;
 		}
+
 		default:
 			linuxdvb_err("ContainerCmd %d not supported!\n", command);
 			ret = cERR_LINUXDVB_ERROR;

@@ -141,25 +141,31 @@ static int writeData(WriterAVCallData_t *call)
 		uint32_t block_align    = pcmPrivateData->block_align;
 
 		int32_t format_tag = 0;
+
 		switch (pcmPrivateData->codec_id)
 		{
 			case AV_CODEC_ID_WMAV1:
 				format_tag = 0x160;
 				break;
+
 			case AV_CODEC_ID_WMAV2:
 				format_tag = 0x161;
 				break;
+
 			case AV_CODEC_ID_WMAPRO:
 				format_tag = 0x162;
 				break;
+
 			case AV_CODEC_ID_WMALOSSLESS:
 				format_tag = 0x163;
 				break;
+
 			case AV_CODEC_ID_VORBIS:
 				bits_per_sample = 8;
 				byte_rate = 32000;
 				block_align = 1;
 				break;
+
 			default:
 				format_tag = 0xFFFF;
 				break;

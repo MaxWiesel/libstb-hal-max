@@ -5,7 +5,6 @@
 
 #include "flv2mpeg4/flv2mpeg4.h"
 
-
 typedef struct
 {
 	flv2mpeg4_CTX *ctx;
@@ -19,6 +18,7 @@ typedef struct
 static int flv2mpeg4_context_write_packet_cb(void *usr_data, int keyframe __attribute__((unused)), int pts __attribute__((unused)), const uint8_t *buf, int size)
 {
 	Flv2Mpeg4Context *ctx = usr_data;
+
 	if (!ctx)
 	{
 		return -1;
@@ -48,6 +48,7 @@ static int flv2mpeg4_context_write_packet_cb(void *usr_data, int keyframe __attr
 static int flv2mpeg4_context_write_extradata_cb(void *usr_data, int width __attribute__((unused)), int height __attribute__((unused)), int bitrate __attribute__((unused)), const uint8_t *extradata, int extradatasize)
 {
 	Flv2Mpeg4Context *ctx = usr_data;
+
 	if (!ctx)
 	{
 		return -1;
@@ -78,10 +79,12 @@ static int flv2mpeg4_write_packet(Context_t *out_ctx, Flv2Mpeg4Context *mpeg4p2_
 	}
 
 	*pts_current = track->pts = calcPts(cAVIdx, track->stream, pkt->pts);
+
 	if ((*pts_current > *pts_latest) && (*pts_current != INVALID_PTS_VALUE))
 	{
 		*pts_latest = *pts_current;
 	}
+
 	track->dts = calcPts(cAVIdx, track->stream, pkt->dts);
 
 	mpeg4p2_ctx->out_ctx = out_ctx;

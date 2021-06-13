@@ -97,10 +97,10 @@ static uint32_t breakBufferFillSize = 0;
 static int32_t prepareClipPlay(int32_t uNoOfChannels, int32_t uSampleRate, int32_t uBitsPerSample, uint8_t bLittleEndian __attribute__((unused)))
 {
 	printf("rate: %d ch: %d bits: %d (%d bps)\n",
-	    uSampleRate/*Format->dwSamplesPerSec*/,
-	    uNoOfChannels/*Format->wChannels*/,
-	    uBitsPerSample/*Format->wBitsPerSample*/,
-	    (uBitsPerSample/*Format->wBitsPerSample*/ / 8)
+		uSampleRate/*Format->dwSamplesPerSec*/,
+		uNoOfChannels/*Format->wChannels*/,
+		uBitsPerSample/*Format->wBitsPerSample*/,
+		(uBitsPerSample/*Format->wBitsPerSample*/ / 8)
 	);
 
 	SubFrameLen = 0;
@@ -116,26 +116,32 @@ static int32_t prepareClipPlay(int32_t uNoOfChannels, int32_t uSampleRate, int32
 		case 48000:
 			SubFrameLen = 40;
 			break;
+
 		case 96000:
 			lpcm_prv[8] |= 0x10;
 			SubFrameLen = 80;
 			break;
+
 		case 192000:
 			lpcm_prv[8] |= 0x20;
 			SubFrameLen = 160;
 			break;
+
 		case 44100:
 			lpcm_prv[8] |= 0x80;
 			SubFrameLen = 40;
 			break;
+
 		case 88200:
 			lpcm_prv[8] |= 0x90;
 			SubFrameLen = 80;
 			break;
+
 		case 176400:
 			lpcm_prv[8] |= 0xA0;
 			SubFrameLen = 160;
 			break;
+
 		default:
 			break;
 	}
@@ -155,8 +161,10 @@ static int32_t prepareClipPlay(int32_t uNoOfChannels, int32_t uSampleRate, int32
 	{
 		case 24:
 			lpcm_prv[7] |= 0x20;
+
 		case 16:
 			break;
+
 		default:
 			printf("inappropriate bits per sample (%d) - must be 16 or 24\n", uBitsPerSample);
 			return 1;
@@ -205,32 +213,41 @@ static int32_t writeData(void *_call)
 	{
 		uint32_t codecID = (uint32_t)pcmPrivateData->codec_id;
 		uint8_t LE = 0;
+
 		switch (codecID)
 		{
 			case AV_CODEC_ID_PCM_S8:
 			case AV_CODEC_ID_PCM_U8:
 				break;
+
 			case AV_CODEC_ID_PCM_S16LE:
 			case AV_CODEC_ID_PCM_U16LE:
 				LE = 1;
+
 			case AV_CODEC_ID_PCM_S16BE:
 			case AV_CODEC_ID_PCM_U16BE:
 				break;
+
 			case AV_CODEC_ID_PCM_S24LE:
 			case AV_CODEC_ID_PCM_U24LE:
 				LE = 1;
+
 			case AV_CODEC_ID_PCM_S24BE:
 			case AV_CODEC_ID_PCM_U24BE:
 				break;
+
 			case AV_CODEC_ID_PCM_S32LE:
 			case AV_CODEC_ID_PCM_U32LE:
 				LE = 1;
+
 			case AV_CODEC_ID_PCM_S32BE:
 			case AV_CODEC_ID_PCM_U32BE:
 				break;
+
 			default:
 				break;
 		}
+
 		initialHeader = 0;
 		prepareClipPlay(pcmPrivateData->channels, pcmPrivateData->sample_rate, pcmPrivateData->bits_per_coded_sample, LE);
 	}
@@ -268,11 +285,15 @@ static int32_t writeData(void *_call)
 		}
 
 		struct iovec iov[3];
+
 		iov[0].iov_base = PesHeader;
+
 		iov[1].iov_base = lpcm_prv;
+
 		iov[1].iov_len = sizeof(lpcm_prv);
 
 		iov[2].iov_base = injectBuffer;
+
 		iov[2].iov_len = SubFrameLen;
 
 		//write the PCM data
@@ -312,11 +333,13 @@ static int32_t writeData(void *_call)
 
 		iov[0].iov_len = InsertPesHeader(PesHeader, iov[1].iov_len + iov[2].iov_len, PCM_PES_START_CODE, call->Pts, 0);
 		int32_t len = call->WriteV(call->fd, iov, 3);
+
 		if (len < 0)
 		{
 			break;
 		}
 	}
+
 	free(injectBuffer);
 
 	return size;

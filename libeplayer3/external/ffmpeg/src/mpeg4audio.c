@@ -68,8 +68,10 @@ const uint8_t ff_mpeg4audio_channels[8] =
 static inline int get_object_type(GetBitContext *gb)
 {
 	int object_type = get_bits(gb, 5);
+
 	if (object_type == AOT_ESCAPE)
 		object_type = 32 + get_bits(gb, 6);
+
 	return object_type;
 }
 
@@ -83,6 +85,7 @@ uint8_t get_chan_config(int channels)
 {
 	uint8_t chan_config = 0;
 	unsigned int i;
+
 	for (i = 0; i < FF_ARRAY_ELEMS(ff_mpeg4audio_channels); i++)
 	{
 		if (channels == ff_mpeg4audio_channels[i])
@@ -91,11 +94,11 @@ uint8_t get_chan_config(int channels)
 			break;
 		}
 	}
+
 	return chan_config;
 }
 
-int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf,
-    int bit_size, int sync_extension)
+int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf, int bit_size, int sync_extension)
 {
 	GetBitContext gb;
 	int specific_config_bitindex, ret;
@@ -104,26 +107,32 @@ int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf,
 		return AVERROR_INVALIDDATA;
 
 	ret = init_get_bits(&gb, buf, bit_size);
+
 	if (ret < 0)
 		return ret;
 
 	c->object_type = get_object_type(&gb);
 	c->sample_rate = get_sample_rate(&gb, &c->sampling_index);
 	c->chan_config = get_bits(&gb, 4);
+
 	if (c->chan_config < (int)FF_ARRAY_ELEMS(ff_mpeg4audio_channels))
 		c->channels = ff_mpeg4audio_channels[c->chan_config];
+
 	c->sbr = -1;
 	c->ps  = -1;
+
 	if (c->object_type == AOT_SBR || (c->object_type == AOT_PS &&
-	    // check for W6132 Annex YYYY draft MP3onMP4
-	    !(show_bits(&gb, 3) & 0x03 && !(show_bits(&gb, 9) & 0x3F))))
+			// check for W6132 Annex YYYY draft MP3onMP4
+			!(show_bits(&gb, 3) & 0x03 && !(show_bits(&gb, 9) & 0x3F))))
 	{
 		if (c->object_type == AOT_PS)
 			c->ps = 1;
+
 		c->ext_object_type = AOT_SBR;
 		c->sbr = 1;
 		c->ext_sample_rate = get_sample_rate(&gb, &c->ext_sampling_index);
 		c->object_type = get_object_type(&gb);
+
 		if (c->object_type == AOT_ER_BSAC)
 			c->ext_chan_config = get_bits(&gb, 4);
 	}
@@ -132,11 +141,13 @@ int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf,
 		c->ext_object_type = AOT_NULL;
 		c->ext_sample_rate = 0;
 	}
+
 	specific_config_bitindex = get_bits_count(&gb);
 
 	if (c->object_type == AOT_ALS)
 	{
 		skip_bits(&gb, 5);
+
 		if (show_bits_long(&gb, 24) != MKBETAG('\0', 'A', 'L', 'S'))
 			skip_bits_long(&gb, 24);
 
@@ -154,14 +165,18 @@ int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf,
 			{
 				get_bits(&gb, 11);
 				c->ext_object_type = get_object_type(&gb);
+
 				if (c->ext_object_type == AOT_SBR && (c->sbr = get_bits1(&gb)) == 1)
 				{
 					c->ext_sample_rate = get_sample_rate(&gb, &c->ext_sampling_index);
+
 					if (c->ext_sample_rate == c->sample_rate)
 						c->sbr = -1;
 				}
+
 				if (get_bits_left(&gb) > 11 && get_bits(&gb, 11) == 0x548)
 					c->ps = get_bits1(&gb);
+
 				break;
 			}
 			else
@@ -172,6 +187,7 @@ int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf,
 	//PS requires SBR
 	if (!c->sbr)
 		c->ps = 0;
+
 	//Limit implicit PS to the HE-AACv2 Profile
 	if ((c->ps == -1 && c->object_type != AOT_AAC_LC) || c->channels & ~0x01)
 		c->ps = 0;
@@ -179,9 +195,7 @@ int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf,
 	return specific_config_bitindex;
 }
 
-static av_always_inline unsigned int copy_bits(PutBitContext *pb,
-    GetBitContext *gb,
-    int bits)
+static av_always_inline unsigned int copy_bits(PutBitContext *pb, GetBitContext *gb, int bits)
 {
 	unsigned int el = get_bits(gb, bits);
 	put_bits(pb, bits, el);
@@ -200,19 +214,26 @@ int avpriv_copy_pce_data(PutBitContext *pb, GetBitContext *gb)
 	four_bit_ch  = copy_bits(pb, gb, 2);    //LFE
 	four_bit_ch += copy_bits(pb, gb, 3);    //Data
 	five_bit_ch += copy_bits(pb, gb, 4);    //Coupling
+
 	if (copy_bits(pb, gb, 1))               //Mono Mixdown
 		copy_bits(pb, gb, 4);
+
 	if (copy_bits(pb, gb, 1))               //Stereo Mixdown
 		copy_bits(pb, gb, 4);
+
 	if (copy_bits(pb, gb, 1))               //Matrix Mixdown
 		copy_bits(pb, gb, 3);
+
 	for (bits = five_bit_ch * 5 + four_bit_ch * 4; bits > 16; bits -= 16)
 		copy_bits(pb, gb, 16);
+
 	if (bits)
 		copy_bits(pb, gb, bits);
+
 	avpriv_align_put_bits(pb);
 	align_get_bits(gb);
 	comment_size = copy_bits(pb, gb, 8);
+
 	for (; comment_size > 0; comment_size--)
 		copy_bits(pb, gb, 8);
 

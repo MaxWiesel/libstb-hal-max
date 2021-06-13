@@ -88,11 +88,13 @@ bool WriterDIVX::Write(AVPacket *packet, int64_t pts)
 	iov[ic].iov_base = FakeHeaders;
 	iov[ic++].iov_len = FakeHeaderLength;
 
-	if (initialHeader) {
+	if (initialHeader)
+	{
 		iov[ic].iov_base = get_codecpar(stream)->extradata;
 		iov[ic++].iov_len = get_codecpar(stream)->extradata_size;
 		initialHeader = false;
 	}
+
 	iov[ic].iov_base = packet->data;
 	iov[ic++].iov_len = packet->size;
 
@@ -107,4 +109,4 @@ WriterDIVX::WriterDIVX()
 	Register(this, AV_CODEC_ID_MSMPEG4V3, VIDEO_ENCODING_MPEG4P2);
 }
 
-static WriterDIVX writer_divx __attribute__ ((init_priority (300)));
+static WriterDIVX writer_divx __attribute__((init_priority(300)));

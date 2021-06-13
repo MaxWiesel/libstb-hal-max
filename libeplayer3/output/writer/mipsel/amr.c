@@ -118,14 +118,19 @@ static int writeData(WriterAVCallData_t *call)
 	}
 
 	struct iovec iov[2];
+
 	iov[0].iov_base = PesHeader;
+
 	iov[0].iov_len = headerSize;
+
 	iov[1].iov_base = call->data;
+
 	iov[1].iov_len = call->len;
 
 	int len = call->WriteV(call->fd, iov, 2);
 
 	amr_printf(10, "amr_Write-< len=%d\n", len);
+
 	return len;
 }
 

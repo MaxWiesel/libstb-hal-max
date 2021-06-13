@@ -23,7 +23,9 @@ void hal_api_init()
 {
 	if (!initialized)
 		hal_debug_init();
+
 	hal_info("%s begin, initialized=%d, debug=0x%02x\n", __FUNCTION__, (int)initialized, debuglevel);
+
 	if (!initialized)
 	{
 		cCpuFreqManager f;
@@ -43,6 +45,7 @@ void hal_api_init()
 		proc_put("/proc/stb/frontend/fbc/fcc", buffer, strlen(buffer));
 #endif
 	}
+
 	initialized = true;
 	hal_info("%s end\n", __FUNCTION__);
 }

@@ -53,20 +53,22 @@ static inline char *getExtension(char *name)
 	if (name)
 	{
 		char *ext = strrchr(name, '.');
+
 		if (ext)
 		{
 			return ext + 1;
 		}
 	}
+
 	return NULL;
 }
 
 static inline uint32_t ReadUint32(uint8_t *buffer)
 {
 	uint32_t num = (uint32_t)buffer[0] << 24 |
-	    (uint32_t)buffer[1] << 16 |
-	    (uint32_t)buffer[2] << 8  |
-	    (uint32_t)buffer[3];
+		(uint32_t)buffer[1] << 16 |
+		(uint32_t)buffer[2] << 8  |
+		(uint32_t)buffer[3];
 	return num;
 }
 

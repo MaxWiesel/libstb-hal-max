@@ -5,10 +5,11 @@
 #include <stdint.h>
 #include <vector>
 
-typedef enum {
+typedef enum
+{
 	PLAYMODE_TS = 0,
 	PLAYMODE_FILE,
-} playmode_t; 
+} playmode_t;
 
 struct AVFormatContext;
 class cPlayback
@@ -52,7 +53,7 @@ class cPlayback
 		void GetMetadata(std::vector<std::string> &keys, std::vector<std::string> &values);
 		//
 		~cPlayback();
-		AVFormatContext *GetAVFormatContext(){ return NULL; }
+		AVFormatContext *GetAVFormatContext() { return NULL; }
 		void ReleaseAVFormatContext() {}
 };
 

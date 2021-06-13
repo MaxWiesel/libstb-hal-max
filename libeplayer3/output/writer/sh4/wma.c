@@ -114,11 +114,17 @@ static int writeData(void *_call)
 		}
 
 		struct iovec iov[2];
+
 		iov[0].iov_base = PesHeader;
+
 		iov[0].iov_len = InsertPesHeader(PesHeader, call->private_size, MPEG_AUDIO_PES_START_CODE, 0, 0);
+
 		iov[1].iov_base = call->private_data;
+
 		iov[1].iov_len = call->private_size;
+
 		len = call->WriteV(call->fd, iov, 2);
+
 		initialHeader = 0;
 	}
 

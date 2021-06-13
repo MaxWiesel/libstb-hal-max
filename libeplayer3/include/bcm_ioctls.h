@@ -52,11 +52,11 @@ typedef enum
 	STREAMTYPE_DIVX311 = 13,
 	STREAMTYPE_DIVX4 = 14,
 	STREAMTYPE_DIVX5 = 15,
-	STREAMTYPE_VB6 = 18, /* 17 is also valid for ZGEMMA STBs*/
+	STREAMTYPE_VB6 = 18,   /* 17 is also valid for ZGEMMA STBs*/
 	STREAMTYPE_SPARK = 21,
 	STREAMTYPE_MJPEG = 30,
 	STREAMTYPE_RV30 = 31,  /* rv30: RealVideo 8, suspected to based largely on an early draft of H.264 (included with RealPlayer 8)*/
-	STREAMTYPE_RV40 = 32, /* RealVideo 9, RealVideo 10*/
+	STREAMTYPE_RV40 = 32,  /* RealVideo 9, RealVideo 10*/
 	STREAMTYPE_AVS2 = 40
 } video_stream_type_t;
 

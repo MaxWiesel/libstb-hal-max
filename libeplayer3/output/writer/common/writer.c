@@ -53,6 +53,7 @@
 void FlushPipe(int pipefd)
 {
 	char tmp;
+
 	while (1 == read(pipefd, &tmp, 1));
 }
 

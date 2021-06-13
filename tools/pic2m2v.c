@@ -40,9 +40,11 @@ int main(int argc, char **argv)
 		fprintf(stderr, "usage: pic2m2v /path/pic1.jpg [/path/pic2.jpg...]\n\n");
 		return 1;
 	}
+
 	strcpy(destname, "/var/cache");
 	mkdir(destname, 0755);
 	argv++;
+
 	for (fname = *argv; fname != NULL; fname = *++argv)
 	{
 		if (stat(fname, &st2))
@@ -50,6 +52,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "pic2m2v: could not stat '%s' (%m)\n", fname);
 			continue;
 		}
+
 		strcpy(destname, "/var/cache");
 		/* the cache filename is (example for /share/tuxbox/neutrino/icons/radiomode.jpg):
 		   /var/cache/share.tuxbox.neutrino.icons.radiomode.jpg.m2v
@@ -57,9 +60,12 @@ int main(int argc, char **argv)
 		   TODO: this could cause name clashes, use a hashing function instead... */
 		strcat(destname, fname);
 		p = &destname[strlen("/var/cache/")];
+
 		while ((p = strchr(p, '/')) != NULL)
-			*p = '.';
+			* p = '.';
+
 		strcat(destname, ".m2v");
+
 		/* ...then check if it exists already... */
 		if (stat(destname, &st) || (st.st_mtime != st2.st_mtime) || (st.st_size == 0))
 		{
@@ -69,7 +75,7 @@ int main(int argc, char **argv)
 			printf("converting %s -> %s\n", fname, destname);
 			/* it does not exist or has a different date, so call ffmpeg... */
 			sprintf(cmd, "ffmpeg -y -f mjpeg -i '%s' -s %s '%s' </dev/null",
-							fname, TARGETRES, destname);
+				fname, TARGETRES, destname);
 			system(cmd); /* TODO: use libavcodec to directly convert it */
 			utime(destname, &u);
 		}

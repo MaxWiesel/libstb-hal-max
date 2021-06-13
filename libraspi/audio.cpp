@@ -27,7 +27,7 @@
 #define hal_debug(args...) _hal_debug(HAL_DEBUG_AUDIO, this, args)
 #define hal_info(args...) _hal_info(HAL_DEBUG_AUDIO, this, args)
 
-cAudio * audioDecoder = NULL;
+cAudio *audioDecoder = NULL;
 
 cAudio::cAudio(void *, void *, void *)
 {
@@ -119,7 +119,7 @@ void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &m
 	bitrate = 0;	/* not used, but easy to get :-) */
 	mode = 0;	/* default: stereo */
 	hal_debug("%s t: %d l: %d f: %d b: %d m: %d\n",
-		  __func__, type, layer, freq, bitrate, mode);
+		__func__, type, layer, freq, bitrate, mode);
 }
 
 void cAudio::SetSRS(int /*iq_enable*/, int /*nmgr_enable*/, int /*iq_mode*/, int /*iq_level*/)

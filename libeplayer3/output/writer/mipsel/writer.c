@@ -133,6 +133,7 @@ ssize_t WriteWithRetry(Context_t *context, int pipefd, int fd, void *pDVBMtx __a
 		//tv.tv_usec = 100000; // 100ms
 
 		retval = select(maxFd + 1, &rfds, &wfds, NULL, NULL); //&tv);
+
 		if (retval < 0)
 		{
 			break;
@@ -154,6 +155,7 @@ ssize_t WriteWithRetry(Context_t *context, int pipefd, int fd, void *pDVBMtx __a
 		if (FD_ISSET(fd, &wfds))
 		{
 			ret = write(fd, buf, size);
+
 			if (ret < 0)
 			{
 				switch (errno)
@@ -161,10 +163,12 @@ ssize_t WriteWithRetry(Context_t *context, int pipefd, int fd, void *pDVBMtx __a
 					case EINTR:
 					case EAGAIN:
 						continue;
+
 					default:
 						retval = -3;
 						break;
 				}
+
 				if (retval < 0)
 				{
 					break;
@@ -179,8 +183,10 @@ ssize_t WriteWithRetry(Context_t *context, int pipefd, int fd, void *pDVBMtx __a
 				tv.tv_sec = 0;
 				tv.tv_usec = 10000; // 10ms
 				retval = select(pipefd + 1, &rfds, NULL, NULL, &tv);
+
 				if (retval)
 					FlushPipe(pipefd);
+
 				continue;
 			}
 
@@ -188,6 +194,7 @@ ssize_t WriteWithRetry(Context_t *context, int pipefd, int fd, void *pDVBMtx __a
 			buf += ret;
 		}
 	}
+
 	return 0;
 }
 
@@ -195,9 +202,11 @@ ssize_t write_with_retry(int fd, const void *buf, int size)
 {
 	ssize_t ret;
 	int retval = 0;
+
 	while (size > 0 && 0 == PlaybackDieNow(0))
 	{
 		ret = write(fd, buf, size);
+
 		if (ret < 0)
 		{
 			switch (errno)
@@ -206,10 +215,12 @@ ssize_t write_with_retry(int fd, const void *buf, int size)
 				case EAGAIN:
 					usleep(1000);
 					continue;
+
 				default:
 					retval = -3;
 					break;
 			}
+
 			if (retval < 0)
 			{
 				break;
@@ -232,6 +243,7 @@ ssize_t write_with_retry(int fd, const void *buf, int size)
 			}
 		}
 	}
+
 	return 0;
 }
 
@@ -239,15 +251,18 @@ ssize_t writev_with_retry(int fd, const struct iovec *iov, int ic)
 {
 	ssize_t len = 0;
 	int i = 0;
+
 	for (i = 0; i < ic; ++i)
 	{
 		write_with_retry(fd, iov[i].iov_base, iov[i].iov_len);
 		len += iov[i].iov_len;
+
 		if (PlaybackDieNow(0))
 		{
 			return -1;
 		}
 	}
+
 	return len;
 }
 

@@ -57,7 +57,6 @@
 /* Types                         */
 /* ***************************** */
 
-
 /* ***************************** */
 /* Varaibles                     */
 /* ***************************** */
@@ -94,6 +93,7 @@ void UpdatePesHeaderPayloadSize(uint8_t *data, int32_t size)
 {
 	if (size > MAX_PES_PACKET_SIZE || size < 0)
 		size = 0;
+
 	data[4] = size >> 8;
 	data[5] = size & 0xFF;
 }
@@ -154,6 +154,7 @@ int32_t InsertPesHeader(uint8_t *data, int32_t size, uint8_t stream_id, uint64_t
 	{
 		PutBits(&ld2, 0x0, 8); // PES_header_data_length
 	}
+
 	//9 = 8+1
 
 	if (pts != INVALID_PTS_VALUE)
@@ -166,6 +167,7 @@ int32_t InsertPesHeader(uint8_t *data, int32_t size, uint8_t stream_id, uint64_t
 		PutBits(&ld2, pts & 0x7fff, 15);
 		PutBits(&ld2, 0x1, 1);
 	}
+
 	//14 = 9+5
 
 	if (pic_start_code)

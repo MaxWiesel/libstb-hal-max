@@ -74,8 +74,10 @@ void PutBits(BitPacker_t *ld, unsigned int code, unsigned int length)
 	bit_left = ld->Remaining;
 
 #ifdef DEBUG_PUTBITS
+
 	if (ld->debug)
 		dprintf("code = %d, length = %d, bit_buf = 0x%x, bit_left = %d\n", code, length, bit_buf, bit_left);
+
 #endif /* DEBUG_PUTBITS */
 
 	if (length < bit_left)
@@ -101,8 +103,10 @@ void PutBits(BitPacker_t *ld, unsigned int code, unsigned int length)
 	}
 
 #ifdef DEBUG_PUTBITS
+
 	if (ld->debug)
 		dprintf("bit_left = %d, bit_buf = 0x%x\n", bit_left, bit_buf);
+
 #endif /* DEBUG_PUTBITS */
 
 	/* writeback */
@@ -113,16 +117,20 @@ void PutBits(BitPacker_t *ld, unsigned int code, unsigned int length)
 void FlushBits(BitPacker_t *ld)
 {
 	ld->BitBuffer <<= ld->Remaining;
+
 	while (ld->Remaining < 32)
 	{
 #ifdef DEBUG_PUTBITS
+
 		if (ld->debug)
 			dprintf("flushing 0x%2.2x\n", ld->BitBuffer >> 24);
+
 #endif /* DEBUG_PUTBITS */
 		*ld->Ptr++ = ld->BitBuffer >> 24;
 		ld->BitBuffer <<= 8;
 		ld->Remaining += 8;
 	}
+
 	ld->Remaining = 32;
 	ld->BitBuffer = 0;
 }
@@ -130,6 +138,7 @@ void FlushBits(BitPacker_t *ld)
 stb_type_t GetSTBType()
 {
 	static stb_type_t type = STB_UNKNOWN;
+
 	if (type == STB_UNKNOWN)
 	{
 //		struct stat buffer;
@@ -138,7 +147,7 @@ stb_type_t GetSTBType()
 			type = STB_DREAMBOX;
 		}
 		else if (access("/proc/stb/info/vumodel", F_OK) != -1 &&
-		    access("/proc/stb/info/boxtype", F_OK) == -1)
+			access("/proc/stb/info/boxtype", F_OK) == -1)
 		{
 			// some STB like Octagon SF4008 has also /proc/stb/info/vumodel
 			// but VU PLUS does not have /proc/stb/info/boxtype

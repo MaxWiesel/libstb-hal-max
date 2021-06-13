@@ -2,7 +2,7 @@
 
 #include "playback_lib.h"
 
-static const char * FILENAME = "playback-dummy";
+static const char *FILENAME = "playback-dummy";
 
 bool cPlayback::Open(playmode_t)
 {
@@ -15,7 +15,7 @@ void cPlayback::Close(void)
 
 bool cPlayback::Start(std::string filename, std::string headers)
 {
-	return Start((char*) filename.c_str(),0,0,0,0,0, headers);
+	return Start((char *) filename.c_str(), 0, 0, 0, 0, 0, headers);
 }
 
 bool cPlayback::Start(char *filename, int vpid, int vtype, int apid, int ac3, int duration, std::string /*headers*/)
@@ -58,7 +58,7 @@ bool cPlayback::GetPosition(int &position, int &duration)
 
 bool cPlayback::SetPosition(int position, bool)
 {
-	printf("%s:%s %d\n", FILENAME, __func__,position);
+	printf("%s:%s %d\n", FILENAME, __func__, position);
 	return true;
 }
 

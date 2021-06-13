@@ -141,9 +141,11 @@ int LinuxDvbOpen(Context_t *context __attribute__((unused)), char *type)
 		if (isBufferedOutput)
 			LinuxDvbBuffOpen(context, type, videofd, &LinuxDVBmutex);
 	}
+
 	if (audio && audiofd < 0)
 	{
 		audiofd = open(AUDIODEV, O_RDWR);
+
 		if (audiofd < 0)
 		{
 			linuxdvb_err("failed to open %s - errno %d\n", AUDIODEV, errno);
@@ -151,6 +153,7 @@ int LinuxDvbOpen(Context_t *context __attribute__((unused)), char *type)
 
 			if (videofd < 0)
 				close(videofd);
+
 			return cERR_LINUXDVB_ERROR;
 		}
 
@@ -235,6 +238,7 @@ int LinuxDvbPlay(Context_t *context, char *type)
 		if (writer == NULL)
 		{
 			linuxdvb_err("cannot found writer for encoding %s using default\n", Encoding);
+
 			if (ioctl(videofd, VIDEO_SET_ENCODING, VIDEO_ENCODING_AUTO) == -1)
 			{
 				linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -245,6 +249,7 @@ int LinuxDvbPlay(Context_t *context, char *type)
 		else
 		{
 			linuxdvb_printf(20, "found writer %s for encoding %s\n", writer->caps->name, Encoding);
+
 			if (ioctl(videofd, VIDEO_SET_ENCODING, writer->caps->dvbEncoding) == -1)
 			{
 				linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -259,6 +264,7 @@ int LinuxDvbPlay(Context_t *context, char *type)
 			linuxdvb_err("VIDEO_PLAY: %s\n", strerror(errno));
 			ret = cERR_LINUXDVB_ERROR;
 		}
+
 		free(Encoding);
 	}
 
@@ -274,6 +280,7 @@ int LinuxDvbPlay(Context_t *context, char *type)
 		if (writer == NULL)
 		{
 			linuxdvb_err("cannot found writer for encoding %s using default\n", Encoding);
+
 			if (ioctl(audiofd, AUDIO_SET_ENCODING, (void *)AUDIO_ENCODING_MP3) == -1)
 			{
 				linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -284,6 +291,7 @@ int LinuxDvbPlay(Context_t *context, char *type)
 		else
 		{
 			linuxdvb_printf(20, "found writer %s for encoding %s\n", writer->caps->name, Encoding);
+
 			if (ioctl(audiofd, AUDIO_SET_ENCODING, writer->caps->dvbEncoding) == -1)
 			{
 				linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -298,6 +306,7 @@ int LinuxDvbPlay(Context_t *context, char *type)
 			linuxdvb_err("AUDIO_PLAY: %s\n", strerror(errno));
 			ret = cERR_LINUXDVB_ERROR;
 		}
+
 		free(Encoding);
 	}
 
@@ -328,6 +337,7 @@ int LinuxDvbStop(Context_t *context __attribute__((unused)), char *type)
 			linuxdvb_err("ioctl failed with errno %d\n", errno);
 			linuxdvb_err("VIDEO_SET_SPEED: %s\n", strerror(errno));
 		}
+
 		if (ioctl(videofd, VIDEO_STOP, NULL) == -1)
 		{
 			linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -350,6 +360,7 @@ int LinuxDvbStop(Context_t *context __attribute__((unused)), char *type)
 			linuxdvb_err("ioctl failed with errno %d\n", errno);
 			linuxdvb_err("AUDIO_SET_SPEED: %s\n", strerror(errno));
 		}
+
 		if (ioctl(audiofd, AUDIO_STOP, NULL) == -1)
 		{
 			linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -382,6 +393,7 @@ int LinuxDvbPause(Context_t *context __attribute__((unused)), char *type)
 			ret = cERR_LINUXDVB_ERROR;
 		}
 	}
+
 	if (audio && audiofd != -1)
 	{
 		if (ioctl(audiofd, AUDIO_PAUSE, NULL) == -1)
@@ -414,6 +426,7 @@ int LinuxDvbContinue(Context_t *context __attribute__((unused)), char *type)
 			ret = cERR_LINUXDVB_ERROR;
 		}
 	}
+
 	if (audio && audiofd != -1)
 	{
 		if (ioctl(audiofd, AUDIO_CONTINUE, NULL) == -1)
@@ -428,7 +441,6 @@ int LinuxDvbContinue(Context_t *context __attribute__((unused)), char *type)
 		LinuxDvbBuffResume(context);
 
 	linuxdvb_printf(10, "exiting\n");
-
 
 	return ret;
 }
@@ -489,7 +501,6 @@ int LinuxDvbAudioMute(Context_t *context __attribute__((unused)), char *flag)
 
 	return ret;
 }
-
 
 int LinuxDvbFlush(Context_t *context __attribute__((unused)), char *type)
 {
@@ -619,7 +630,6 @@ int LinuxDvbFastForward(Context_t *context, char *type)
 }
 #endif
 
-
 int LinuxDvbReverse(Context_t *context __attribute__((unused)), char *type __attribute__((unused)))
 {
 	int ret = cERR_LINUXDVB_NO_ERROR;
@@ -660,6 +670,7 @@ int LinuxDvbSlowMotion(Context_t *context, char *type)
 int LinuxDvbAVSync(Context_t *context, char *type __attribute__((unused)))
 {
 	int ret = cERR_LINUXDVB_NO_ERROR;
+
 	/* konfetti: this one is dedicated to audiofd so we
 	 * are ignoring what is given by type! I think we should
 	 * remove this param. Therefor we should add a variable
@@ -781,7 +792,8 @@ int LinuxDvbGetFrameCount(Context_t *context __attribute__((unused)), unsigned l
 			linuxdvb_err("VIDEO_GET_PLAY_INFO: %s\n", strerror(errno));
 			ret = cERR_LINUXDVB_ERROR;
 		}
-		else linuxdvb_err("V: %llu\n", playInfo.frame_count);
+		else
+			linuxdvb_err("V: %llu\n", playInfo.frame_count);
 	}
 	else if (audiofd != -1)
 	{
@@ -791,7 +803,8 @@ int LinuxDvbGetFrameCount(Context_t *context __attribute__((unused)), unsigned l
 			linuxdvb_err("AUDIO_GET_PLAY_INFO: %s\n", strerror(errno));
 			ret = cERR_LINUXDVB_ERROR;
 		}
-		else linuxdvb_err("A: %llu\n", playInfo.frame_count);
+		else
+			linuxdvb_err("A: %llu\n", playInfo.frame_count);
 	}
 	else
 	{
@@ -821,6 +834,7 @@ int LinuxDvbSwitch(Context_t *context, char *type)
 		if (audio && audiofd != -1)
 		{
 			char *Encoding = NULL;
+
 			if (context && context->manager && context->manager->audio)
 			{
 				context->manager->audio->Command(context, MANAGER_GETENCODING, &Encoding);
@@ -846,6 +860,7 @@ int LinuxDvbSwitch(Context_t *context, char *type)
 				if (writer == NULL)
 				{
 					linuxdvb_err("cannot found writer for encoding %s using default\n", Encoding);
+
 					if (ioctl(audiofd, AUDIO_SET_ENCODING, AUDIO_ENCODING_MP3) == -1)
 					{
 						linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -855,6 +870,7 @@ int LinuxDvbSwitch(Context_t *context, char *type)
 				else
 				{
 					linuxdvb_printf(10, "found writer %s for encoding %s\n", writer->caps->name, Encoding);
+
 					if (ioctl(audiofd, AUDIO_SET_ENCODING, writer->caps->dvbEncoding) == -1)
 					{
 						linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -867,6 +883,7 @@ int LinuxDvbSwitch(Context_t *context, char *type)
 					linuxdvb_err("ioctl failed with errno %d\n", errno);
 					linuxdvb_err("AUDIO_PLAY: %s\n", strerror(errno));
 				}
+
 				free(Encoding);
 			}
 			else
@@ -878,6 +895,7 @@ int LinuxDvbSwitch(Context_t *context, char *type)
 		if (video && videofd != -1)
 		{
 			char *Encoding = NULL;
+
 			if (context && context->manager && context->manager->video)
 			{
 				context->manager->video->Command(context, MANAGER_GETENCODING, &Encoding);
@@ -901,6 +919,7 @@ int LinuxDvbSwitch(Context_t *context, char *type)
 				if (writer == NULL)
 				{
 					linuxdvb_err("cannot found writer for encoding %s using default\n", Encoding);
+
 					if (ioctl(videofd, VIDEO_SET_ENCODING, (void *) VIDEO_ENCODING_AUTO) == -1)
 					{
 						linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -910,6 +929,7 @@ int LinuxDvbSwitch(Context_t *context, char *type)
 				else
 				{
 					linuxdvb_printf(10, "found writer %s for encoding %s\n", writer->caps->name, Encoding);
+
 					if (ioctl(videofd, VIDEO_SET_ENCODING, writer->caps->dvbEncoding) == -1)
 					{
 						linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -925,6 +945,7 @@ int LinuxDvbSwitch(Context_t *context, char *type)
 					linuxdvb_err("ioctl failed with errno %d\n", errno);
 					linuxdvb_err("VIDEO_PLAY: %s\n", strerror(errno));
 				}
+
 				free(Encoding);
 			}
 			else
@@ -963,7 +984,7 @@ static int Write(void *_context, void *_out)
 	audio = !strcmp("audio", out->type);
 
 	linuxdvb_printf(20, "DataLength=%u PrivateLength=%u Pts=%llu FrameRate=%f\n",
-	    out->len, out->extralen, out->pts, out->frameRate);
+		out->len, out->extralen, out->pts, out->frameRate);
 	linuxdvb_printf(20, "v%d a%d\n", video, audio);
 
 	if (video)
@@ -992,9 +1013,11 @@ static int Write(void *_context, void *_out)
 			pfd[0].fd = videofd;
 			pfd[0].events = POLLPRI;
 			int pollret = poll(pfd, 1, 0);
+
 			if (pollret > 0 && pfd[0].revents & POLLPRI)
 			{
 				struct video_event evt;
+
 				if (ioctl(videofd, VIDEO_GET_EVENT, &evt) == -1)
 				{
 					linuxdvb_err("ioctl failed with errno %d\n", errno);
@@ -1174,6 +1197,7 @@ static int Command(void *_context, OutputCmd_t command, void *argument)
 			ret = LinuxDvbOpen(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_CLOSE:
 		{
 			ret = LinuxDvbClose(context, (char *)argument);
@@ -1181,12 +1205,14 @@ static int Command(void *_context, OutputCmd_t command, void *argument)
 			sCURRENT_PTS = 0;
 			break;
 		}
+
 		case OUTPUT_PLAY:   // 4
 		{
 			sCURRENT_PTS = 0;
 			ret = LinuxDvbPlay(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_STOP:
 		{
 			reset(context);
@@ -1194,6 +1220,7 @@ static int Command(void *_context, OutputCmd_t command, void *argument)
 			sCURRENT_PTS = 0;
 			break;
 		}
+
 		case OUTPUT_FLUSH:
 		{
 			ret = LinuxDvbFlush(context, (char *)argument);
@@ -1201,31 +1228,37 @@ static int Command(void *_context, OutputCmd_t command, void *argument)
 			sCURRENT_PTS = 0;
 			break;
 		}
+
 		case OUTPUT_PAUSE:
 		{
 			ret = LinuxDvbPause(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_CONTINUE:
 		{
 			ret = LinuxDvbContinue(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_FASTFORWARD:
 		{
 			return LinuxDvbFastForward(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_REVERSE:
 		{
 			return LinuxDvbReverse(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_AVSYNC:
 		{
 			ret = LinuxDvbAVSync(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_CLEAR:
 		{
 			reset(context);
@@ -1234,6 +1267,7 @@ static int Command(void *_context, OutputCmd_t command, void *argument)
 			sCURRENT_PTS = 0;
 			break;
 		}
+
 		case OUTPUT_PTS:
 		{
 			unsigned long long int pts = 0;
@@ -1241,26 +1275,31 @@ static int Command(void *_context, OutputCmd_t command, void *argument)
 			*((unsigned long long int *)argument) = (unsigned long long int)pts;
 			break;
 		}
+
 		case OUTPUT_SWITCH:
 		{
 			ret = LinuxDvbSwitch(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_SLOWMOTION:
 		{
 			return LinuxDvbSlowMotion(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_AUDIOMUTE:
 		{
 			return LinuxDvbAudioMute(context, (char *)argument);
 			break;
 		}
+
 		case OUTPUT_DISCONTINUITY_REVERSE:
 		{
 			return LinuxDvbReverseDiscontinuity(context, (int *)argument);
 			break;
 		}
+
 		case OUTPUT_GET_FRAME_COUNT:
 		{
 			unsigned long long int frameCount = 0;
@@ -1268,33 +1307,40 @@ static int Command(void *_context, OutputCmd_t command, void *argument)
 			*((unsigned long long int *)argument) = (unsigned long long int)frameCount;
 			break;
 		}
+
 		case OUTPUT_GET_PROGRESSIVE:
 		{
 			ret = cERR_LINUXDVB_NO_ERROR;
 			*((int *)argument) = videoInfo.progressive;
 			break;
 		}
+
 		case OUTPUT_SET_BUFFER_SIZE:
 		{
 			ret = cERR_LINUXDVB_ERROR;
+
 			if (!isBufferedOutput)
 			{
 				uint32_t bufferSize = *((uint32_t *)argument);
 				ret = cERR_LINUXDVB_NO_ERROR;
+
 				if (bufferSize > 0)
 				{
 					LinuxDvbBuffSetSize(bufferSize);
 					isBufferedOutput = true;
 				}
 			}
+
 			break;
 		}
+
 		case OUTPUT_GET_BUFFER_SIZE:
 		{
 			ret = cERR_LINUXDVB_NO_ERROR;
 			*((uint32_t *)argument) = LinuxDvbBuffGetSize();
 			break;
 		}
+
 		default:
 			linuxdvb_err("ContainerCmd %d not supported!\n", command);
 			ret = cERR_LINUXDVB_ERROR;

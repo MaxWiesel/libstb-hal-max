@@ -62,10 +62,12 @@ static const uint32 vlce_inter_MCBPC_bits[28] =
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static inline void encode_DC(BW *p, int level, int n)
 {
-	if (level < -255 || level > 255) printf("dc overflow\n");
+	if (level < -255 || level > 255)
+		printf("dc overflow\n");
 
 #if 1
 	level += 256;
+
 	if (n < 4)
 	{
 		put_bits(p, uni_DCtab_lum_len[level], uni_DCtab_lum_bits[level]);
@@ -74,12 +76,14 @@ static inline void encode_DC(BW *p, int level, int n)
 	{
 		put_bits(p, uni_DCtab_chrom_len[level], uni_DCtab_chrom_bits[level]);
 	}
+
 #else
 
 	int size, v;
 	/* find number of bits */
 	size = 0;
 	v = abs(level);
+
 	while (v)
 	{
 		v >>= 1;
@@ -102,7 +106,9 @@ static inline void encode_DC(BW *p, int level, int n)
 	{
 		if (level < 0)
 			level = (-level) ^ ((1 << size) - 1);
+
 		put_bits(p, size, level);
+
 		if (size > 8)
 			put_bits(p, 1, 1);
 	}
@@ -115,8 +121,8 @@ static inline void encode_escape_3(BW *p, int last, int run, int level)
 {
 #if 0
 	put_bits(p,
-	    7 + 2 + 1 + 6 + 1 + 12 + 1, //30bit
-	    (3 << 23) + (3 << 21) + (last << 20) + (run << 14) + (1 << 13) + (((level - 64) & 0xfff) << 1) + 1);
+		7 + 2 + 1 + 6 + 1 + 12 + 1, //30bit
+		(3 << 23) + (3 << 21) + (last << 20) + (run << 14) + (1 << 13) + (((level - 64) & 0xfff) << 1) + 1);
 #else
 	put_bits(p, 7, 3); // escape
 	put_bits(p, 2, 3); // escape3
@@ -156,10 +162,12 @@ static inline void encode_AC(BW *p, M4V_BLOCK *block, int intra)
 	for (; i < last_index; i++)
 	{
 		int level = block->block[scan_table[i]];
+
 		if (level)
 		{
 			int run = i - last_non_zero - 1;
 			level += 64;
+
 			if ((level & (~127)) == 0)
 			{
 				const int index = UNI_MPEG4_ENC_INDEX(0, run, level);
@@ -178,6 +186,7 @@ static inline void encode_AC(BW *p, M4V_BLOCK *block, int intra)
 		int level = block->block[scan_table[i]];
 		int run = i - last_non_zero - 1;
 		level += 64;
+
 		if ((level & (~127)) == 0)
 		{
 			const int index = UNI_MPEG4_ENC_INDEX(1, run, level);
@@ -188,6 +197,7 @@ static inline void encode_AC(BW *p, M4V_BLOCK *block, int intra)
 			encode_escape_3(p, 1, run, level);
 		}
 	}
+
 #else
 	const RL *rl;
 	int last, sign, code;
@@ -204,6 +214,7 @@ static inline void encode_AC(BW *p, M4V_BLOCK *block, int intra)
 	for (; i <= last_index; i++)
 	{
 		const int slevel = block->block[scan_table[i]];
+
 		if (slevel)
 		{
 			int level;
@@ -211,6 +222,7 @@ static inline void encode_AC(BW *p, M4V_BLOCK *block, int intra)
 			last = (i == last_index);
 			sign = 0;
 			level = slevel;
+
 			if (level < 0)
 			{
 				sign = 1;
@@ -219,24 +231,32 @@ static inline void encode_AC(BW *p, M4V_BLOCK *block, int intra)
 
 			code = get_rl_index(rl, last, run, level);
 			put_bits(p, rl->table_vlc[code][1], rl->table_vlc[code][0]);
+
 			if (code == rl->n)
 			{
 				int level1, run1;
 				level1 = level - rl->max_level[run][last];
+
 				if (level1 < 1)
 					goto esc2;
 
 				code = get_rl_index(rl, last, run, level1);
+
 				if (code == rl->n)
 				{
 esc2:
 					put_bits(p, 1, 1);
+
 					if (level > 64)
 						goto esc3;
+
 					run1 = run - rl->max_run[level][last] - 1;
+
 					if (run1 < 0)
 						goto esc3;
+
 					code = get_rl_index(rl, last, run1, level);
+
 					if (code == rl->n)
 					{
 esc3:
@@ -268,12 +288,12 @@ esc3:
 			{
 				put_bits(p, 1, sign);
 			}
+
 			last_non_zero = i;
 		}
 	}
 
 #endif
-
 
 }
 
@@ -312,7 +332,6 @@ static inline void encode_inter_8x8_MCBPC(BW *bw, int cbpc)
 	put_bits(bw, vlce_inter_MCBPC_bits[cbpc + 16], vlce_inter_MCBPC_code[cbpc + 16]);
 }
 
-
 // same as H.263
 static inline void encode_cbpy(BW *bw, int cbpy)
 {
@@ -323,6 +342,7 @@ static inline void encode_cbpy(BW *bw, int cbpy)
 static inline void encode_dquant(BW *bw, int dquant)
 {
 	const uint32 dquant_code[5] = {1, 0, -1, 2, 3};
+
 	if (dquant)
 	{
 		put_bits(bw, 2, dquant_code[dquant + 2]);
@@ -333,19 +353,24 @@ static inline void encode_dquant(BW *bw, int dquant)
 static inline void encode_motion(BW *bw, VLCDEC *mv_x, VLCDEC *mv_y)
 {
 	put_vlcdec(bw, mv_x);
+
 	if (mv_x->bits_ex)
 	{
 		put_bits(bw, 1, mv_x->value_ex & 1);
+
 		if (mv_x->bits_ex > 1)
 		{
 			put_bits(bw, mv_x->bits_ex - 1, mv_x->value_ex >> 1);
 		}
 
 	}
+
 	put_vlcdec(bw, mv_y);
+
 	if (mv_y->bits_ex)
 	{
 		put_bits(bw, 1, mv_y->value_ex & 1);
+
 		if (mv_y->bits_ex > 1)
 		{
 			put_bits(bw, mv_y->bits_ex - 1, mv_y->value_ex >> 1);
@@ -371,7 +396,8 @@ static inline void encode_mb_inter_internal(BW *bw, M4V_MICROBLOCK *mb)
 	cbpy = cbp >> 2;
 	cbpy ^= 0xF;
 
-	if (mb->dquant) cbpc += 8;
+	if (mb->dquant)
+		cbpc += 8;
 
 	switch (mb->mv_type)
 	{
@@ -381,14 +407,17 @@ static inline void encode_mb_inter_internal(BW *bw, M4V_MICROBLOCK *mb)
 			encode_dquant(bw, mb->dquant);
 			encode_motion(bw, &mb->mv_x[0], &mb->mv_y[0]);
 			break;
+
 		case MV_TYPE_8X8:
 			encode_inter_8x8_MCBPC(bw, cbpc);
 			encode_cbpy(bw, cbpy);
 			encode_dquant(bw, mb->dquant);
+
 			for (i = 0; i < 4; i++)
 			{
 				encode_motion(bw, &mb->mv_x[i], &mb->mv_y[i]);
 			}
+
 			break;
 	}
 
@@ -412,14 +441,19 @@ static inline void encode_mb_intra_internal(BW *bw, M4V_MICROBLOCK *mb, int ifra
 	}
 
 	cbpc = cbp & 3;
+
 	if (iframe)
 	{
-		if (mb->dquant) cbpc += 4;
+		if (mb->dquant)
+			cbpc += 4;
+
 		encode_intra_I_MCBPC(bw, cbpc);
 	}
 	else
 	{
-		if (mb->dquant) cbpc += 8;
+		if (mb->dquant)
+			cbpc += 8;
+
 		encode_intra_P_MCBPC(bw, cbpc);
 	}
 
@@ -429,7 +463,6 @@ static inline void encode_mb_intra_internal(BW *bw, M4V_MICROBLOCK *mb, int ifra
 
 	encode_cbpy(bw, cbpy);
 	encode_dquant(bw, mb->dquant);
-
 
 	for (i = 0; i < 6; i++)
 	{
@@ -482,7 +515,9 @@ static inline int encode_vol_header(BW *p, M4V_VOL *vol)
 	put_bits(p, 2, 0); // shape_type
 	put_bits(p, 1, 1); // marker
 
-	if (vol->time_bits != 5) return -1; // for vop_time_increment_resolution = 30
+	if (vol->time_bits != 5)
+		return -1; // for vop_time_increment_resolution = 30
+
 	put_bits(p, 16, 30); // *** vop_time_increment_resolution = 30
 
 	put_bits(p, 1, 1); // marker
@@ -512,6 +547,7 @@ static inline int encode_vop_header(BW *p, M4V_VOP *vop, int time_bits, int vop_
 //	static int time_old = 0;
 
 	int time_incr = vop->icount;
+
 	if (vop->time != 0)
 		time_incr = 0;
 
@@ -519,7 +555,6 @@ static inline int encode_vop_header(BW *p, M4V_VOP *vop, int time_bits, int vop_
 	put_bits(p, 16, VOP_STARTCODE);
 
 	put_bits(p, 2, vop->picture_type);
-
 
 //	printf("not_code:%d vop_time: %d\n", vop_not_coded, vop->time);
 
@@ -536,6 +571,7 @@ static inline int encode_vop_header(BW *p, M4V_VOP *vop, int time_bits, int vop_
 	// !!!!!
 	while (time_incr--)
 		put_bits(p, 1, 1);
+
 	put_bits(p, 1, 0);
 
 	put_bits(p, 1, 1); // marker
@@ -663,6 +699,7 @@ void m4v_encode_P_mb(BW *bw, M4V_MICROBLOCK *mb)
 int m4v_encode_I_dcpred(M4V_MICROBLOCK *mb, M4V_DCPRED *dcpred, int mb_x, int mb_y)
 {
 	int n;
+
 	if (mb->intra)
 	{
 		dcpred_set_qscale(dcpred, mb->qscale);
@@ -674,5 +711,6 @@ int m4v_encode_I_dcpred(M4V_MICROBLOCK *mb, M4V_DCPRED *dcpred, int mb_x, int mb
 			mb->block[n].block[0] = level;
 		}
 	}
+
 	return 0;
 }

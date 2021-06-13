@@ -97,6 +97,7 @@ static int32_t PreparCodecData(unsigned char *data, unsigned int cd_len, unsigne
 			if (cd_len > 22)
 			{
 				int i;
+
 				if (data[0] != 0)
 				{
 					h265_printf(10, "Unsupported extra data version %d, decoding may fail", (int)data[0]);
@@ -105,18 +106,22 @@ static int32_t PreparCodecData(unsigned char *data, unsigned int cd_len, unsigne
 				*NalLength = (data[21] & 3) + 1;
 				int num_param_sets = data[22];
 				uint32_t pos = 23;
+
 				for (i = 0; i < num_param_sets; i++)
 				{
 					int j;
+
 					if (pos + 3 > cd_len)
 					{
 						h265_printf(10, "Buffer underrun in extra header (%d >= %u)", pos + 3, cd_len);
 						break;
 					}
+
 					// ignore flags + NAL type (1 byte)
 					int nal_type = data[pos] & 0x3f;
 					int nal_count = data[pos + 1] << 8 | data[pos + 2];
 					pos += 3;
+
 					for (j = 0; j < nal_count; j++)
 					{
 						if (pos + 2 > cd_len)
@@ -124,13 +129,16 @@ static int32_t PreparCodecData(unsigned char *data, unsigned int cd_len, unsigne
 							h265_printf(10, "Buffer underrun in extra nal header (%d >= %u)\n", pos + 2, cd_len);
 							break;
 						}
+
 						int nal_size = data[pos] << 8 | data[pos + 1];
 						pos += 2;
+
 						if (pos + nal_size > cd_len)
 						{
 							h265_printf(10, "Buffer underrun in extra nal (%d >= %u)\n", pos + 2 + nal_size, cd_len);
 							break;
 						}
+
 						if ((nal_type == 0x20 || nal_type == 0x21 || nal_type == 0x22) && ((tmp_len + 4 + nal_size) < sizeof(tmp)))  // use only VPS, SPS, PPS nals
 						{
 							memcpy(tmp + tmp_len, "\x00\x00\x00\x01", 4);
@@ -142,6 +150,7 @@ static int32_t PreparCodecData(unsigned char *data, unsigned int cd_len, unsigne
 						{
 							h264_err("Ignoring nal as tmp buffer is too small tmp_len + nal = %d\n", tmp_len + 4 + nal_size);
 						}
+
 						pos += nal_size;
 					}
 				}
@@ -185,9 +194,12 @@ static int writeData(WriterAVCallData_t *call)
 
 	TimeDelta = call->FrameRate;
 	TimeScale = call->FrameScale;
+
 	/* avoid compiler warnings */
 	if (TimeDelta) {}
+
 	if (TimeScale) {}
+
 	VideoPts  = call->Pts;
 
 	h265_printf(20, "VideoPts %lld - %d %d\n", call->Pts, TimeDelta, TimeScale);
@@ -212,6 +224,7 @@ static int writeData(WriterAVCallData_t *call)
 
 		iov[ic++].iov_base = PesHeader;
 		initialHeader = 0;
+
 		if (initialHeader)
 		{
 			initialHeader = 0;
@@ -262,6 +275,7 @@ static int writeData(WriterAVCallData_t *call)
 	if (CodecData != NULL)
 	{
 		uint32_t pos = 0;
+
 		do
 		{
 			if (ic >= IOVEC_SIZE)
@@ -273,6 +287,7 @@ static int writeData(WriterAVCallData_t *call)
 
 			uint32_t pack_len = 0;
 			uint32_t i = 0;
+
 			for (i = 0; i < NalLengthBytes; i++, pos++)
 			{
 				pack_len <<= 8;
@@ -302,6 +317,7 @@ static int writeData(WriterAVCallData_t *call)
 
 		len = call->WriteV(call->fd, iov, ic);
 		PacketLength += iov[0].iov_len;
+
 		if (PacketLength != len)
 		{
 			h264_err("<<<< not all data have been written [%d/%d]\n", len, PacketLength);

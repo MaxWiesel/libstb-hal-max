@@ -49,7 +49,6 @@
 #define hal_debug(args...) _hal_debug(HAL_DEBUG_INIT, this, args)
 #define hal_info(args...) _hal_info(HAL_DEBUG_INIT, this, args)
 
-
 extern cVideo *videoDecoder;
 extern cAudio *audioDecoder;
 
@@ -63,6 +62,7 @@ GLFramebuffer::GLFramebuffer(int x, int y)
 	glfb_priv = new GLFbPC(x, y, osd_buf);
 	si = glfb_priv->getScreenInfo();
 	start();
+
 	while (!glfb_priv->mInitDone)
 		usleep(1);
 }
@@ -119,17 +119,21 @@ GLFbPC::GLFbPC(int x, int y, std::vector<unsigned char> &buf): mReInit(true), mS
 
 	unlink("/tmp/neutrino.input");
 	mkfifo("/tmp/neutrino.input", 0600);
-	input_fd = open("/tmp/neutrino.input", O_RDWR|O_CLOEXEC|O_NONBLOCK);
+	input_fd = open("/tmp/neutrino.input", O_RDWR | O_CLOEXEC | O_NONBLOCK);
+
 	if (input_fd < 0)
 		hal_info("%s: could not open /tmp/neutrino.input FIFO: %m\n", __func__);
+
 	initKeys();
 }
 
 GLFbPC::~GLFbPC()
 {
 	mShutDown = true;
+
 	if (input_fd >= 0)
 		close(input_fd);
+
 	osd_buf->clear();
 }
 
@@ -221,9 +225,10 @@ void GLFramebuffer::run()
 
 	/* init the good stuff */
 	GLenum err = glewInit();
-	if(err == GLEW_OK)
+
+	if (err == GLEW_OK)
 	{
-		if((!GLEW_VERSION_1_5)||(!GLEW_EXT_pixel_buffer_object)||(!GLEW_ARB_texture_non_power_of_two))
+		if ((!GLEW_VERSION_1_5) || (!GLEW_EXT_pixel_buffer_object) || (!GLEW_ARB_texture_non_power_of_two))
 		{
 			hal_info("GLFB: Sorry, your graphics card is not supported. "
 				"Needs at least OpenGL 1.5, pixel buffer objects and NPOT textures.\n");
@@ -245,6 +250,7 @@ void GLFramebuffer::run()
 	}
 	else
 		hal_info("GLFB: error initializing glew: %d\n", err);
+
 	hal_info("GLFB: GL thread stopping\n");
 }
 
@@ -262,7 +268,8 @@ void GLFbPC::setupCtx()
 }
 
 void GLFbPC::setupOSDBuffer()
-{	/* the OSD buffer size can be decoupled from the actual
+{
+	/* the OSD buffer size can be decoupled from the actual
 	   window size since the GL can blit-stretch with no
 	   trouble at all, ah, the luxury of ignorance... */
 	// mMutex.lock();
@@ -303,7 +310,6 @@ void GLFbPC::setupGLObjects()
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-
 void GLFbPC::releaseGLObjects()
 {
 	glDeleteBuffers(1, &mState.pbo);
@@ -312,27 +318,29 @@ void GLFbPC::releaseGLObjects()
 	glDeleteTextures(1, &mState.displaytex);
 }
 
-
 /* static */ void GLFbPC::rendercb()
 {
 	glfb_priv->render();
 }
 
-
 /* static */ void GLFbPC::keyboardcb(unsigned char key, int /*x*/, int /*y*/)
 {
 	hal_debug_c("GLFB::%s: 0x%x\n", __func__, key);
 	struct input_event ev;
+
 	if (key == 'f')
 	{
-		hal_info_c("GLFB::%s: toggle fullscreen %s\n", __func__, glfb_priv->mFullscreen?"off":"on");
+		hal_info_c("GLFB::%s: toggle fullscreen %s\n", __func__, glfb_priv->mFullscreen ? "off" : "on");
 		glfb_priv->mFullscreen = !(glfb_priv->mFullscreen);
 		glfb_priv->mReInit = true;
 		return;
 	}
+
 	std::map<unsigned char, int>::const_iterator i = glfb_priv->mKeyMap.find(key);
+
 	if (i == glfb_priv->mKeyMap.end())
 		return;
+
 	ev.code  = i->second;
 	ev.value = 1; /* key own */
 	ev.type  = EV_KEY;
@@ -348,8 +356,10 @@ void GLFbPC::releaseGLObjects()
 	hal_debug_c("GLFB::%s: 0x%x\n", __func__, key);
 	struct input_event ev;
 	std::map<int, int>::const_iterator i = glfb_priv->mSpecialMap.find(key);
+
 	if (i == glfb_priv->mSpecialMap.end())
 		return;
+
 	ev.code  = i->second;
 	ev.value = 1;
 	ev.type  = EV_KEY;
@@ -364,10 +374,11 @@ int sleep_us = 30000;
 
 void GLFbPC::render()
 {
-	if(mShutDown)
+	if (mShutDown)
 		glutLeaveMainLoop();
 
 	mReInitLock.lock();
+
 	if (mReInit)
 	{
 		int xoff = 0;
@@ -376,30 +387,36 @@ void GLFbPC::render()
 		mReInit = false;
 		mX = &_mX[mFullscreen];
 		mY = &_mY[mFullscreen];
-		if (mFullscreen) {
+
+		if (mFullscreen)
+		{
 			int x = glutGet(GLUT_SCREEN_WIDTH);
 			int y = glutGet(GLUT_SCREEN_HEIGHT);
 			*mX = x;
 			*mY = y;
 			AVRational a = { x, y };
+
 			if (av_cmp_q(a, mOA) < 0)
 				*mY = x * mOA.den / mOA.num;
 			else if (av_cmp_q(a, mOA) > 0)
 				*mX = y * mOA.num / mOA.den;
+
 			xoff = (x - *mX) / 2;
 			yoff = (y - *mY) / 2;
 			glutFullScreen();
-		} else
+		}
+		else
 			*mX = *mY * mOA.num / mOA.den;
+
 		hal_info("%s: reinit mX:%d mY:%d xoff:%d yoff:%d fs %d\n",
 			__func__, *mX, *mY, xoff, yoff, mFullscreen);
 		glViewport(xoff, yoff, *mX, *mY);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		float aspect = static_cast<float>(*mX)/ *mY;
+		float aspect = static_cast<float>(*mX) / *mY;
 		float osdaspect = static_cast<float>(mOA.den) / mOA.num;
 
-		glOrtho(aspect*-osdaspect, aspect*osdaspect, -1.0, 1.0, -1.0, 1.0 );
+		glOrtho(aspect * -osdaspect, aspect * osdaspect, -1.0, 1.0, -1.0, 1.0);
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 
 		glMatrixMode(GL_MODELVIEW);
@@ -409,12 +426,16 @@ void GLFbPC::render()
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
+
 	mReInitLock.unlock();
+
 	if (!mFullscreen && (*mX != glutGet(GLUT_WINDOW_WIDTH) || *mY != glutGet(GLUT_WINDOW_HEIGHT)))
 		glutReshapeWindow(*mX, *mY);
 
 	bltDisplayBuffer(); /* decoded video stream */
-	if (mState.blit) {
+
+	if (mState.blit)
+	{
 		/* only blit manually after fb->blit(), this helps to find missed blit() calls */
 		mState.blit = false;
 		hal_debug("GLFB::%s blit!\n", __func__);
@@ -431,49 +452,67 @@ void GLFbPC::render()
 		xscale = 1.0;
 		int cmp = (mCrop == DISPLAY_AR_MODE_NONE) ? 0 : av_cmp_q(mVA, mOA);
 		const AVRational a149 = { 14, 9 };
-		switch (cmp) {
+
+		switch (cmp)
+		{
 			default:
 			case INT_MIN:	/* invalid */
 			case 0:		/* identical */
 				hal_debug("%s: mVA == mOA (or fullscreen mode :-)\n", __func__);
 				break;
+
 			case 1:		/* mVA > mOA -- video is wider than display */
 				hal_debug("%s: mVA > mOA\n", __func__);
 				xscale = av_q2d(mVA) / av_q2d(mOA);
-				switch (mCrop) {
+
+				switch (mCrop)
+				{
 					case DISPLAY_AR_MODE_PANSCAN:
 						break;
+
 					case DISPLAY_AR_MODE_LETTERBOX:
 						zoom = av_q2d(mOA) / av_q2d(mVA);
 						break;
+
 					case DISPLAY_AR_MODE_PANSCAN2:
 						zoom = av_q2d(mOA) / av_q2d(a149);
 						break;
+
 					default:
 						break;
 				}
+
 				break;
+
 			case -1:	/* mVA < mOA -- video is taller than display */
 				hal_debug("%s: mVA < mOA\n", __func__);
 				xscale = av_q2d(mVA) / av_q2d(mOA);
-				switch (mCrop) {
+
+				switch (mCrop)
+				{
 					case DISPLAY_AR_MODE_LETTERBOX:
 						break;
+
 					case DISPLAY_AR_MODE_PANSCAN2:
-						if (av_cmp_q(a149, mOA) < 0) {
+						if (av_cmp_q(a149, mOA) < 0)
+						{
 							zoom = av_q2d(mVA) * av_q2d(a149) / av_q2d(mOA);
 							break;
 						}
-						/* fallthrough for output format 14:9 */
+
+					/* fallthrough for output format 14:9 */
 					case DISPLAY_AR_MODE_PANSCAN:
 						zoom = av_q2d(mOA) / av_q2d(mVA);
 						break;
+
 					default:
 						break;
 				}
+
 				break;
 		}
 	}
+
 	glBindTexture(GL_TEXTURE_2D, mState.displaytex);
 	drawSquare(zoom, xscale);
 	glBindTexture(GL_TEXTURE_2D, mState.osdtex);
@@ -483,10 +522,13 @@ void GLFbPC::render()
 	glutSwapBuffers();
 
 	GLuint err = glGetError();
+
 	if (err != 0)
 		hal_info("GLFB::%s: GLError:%d 0x%04x\n", __func__, err, err);
+
 	if (sleep_us > 0)
 		usleep(sleep_us);
+
 	glutPostRedisplay();
 }
 
@@ -500,16 +542,23 @@ void GLFbPC::checkReinit(int x, int y)
 	static int last_x = 0, last_y = 0;
 
 	mReInitLock.lock();
-	if (!mFullscreen && !mReInit && (x != *mX || y != *mY)) {
-		if (x != *mX && abs(x - last_x) > 2) {
+
+	if (!mFullscreen && !mReInit && (x != *mX || y != *mY))
+	{
+		if (x != *mX && abs(x - last_x) > 2)
+		{
 			*mX = x;
 			*mY = *mX * mOA.den / mOA.num;
-		} else if (y != *mY && abs(y - last_y) > 2) {
+		}
+		else if (y != *mY && abs(y - last_y) > 2)
+		{
 			*mY = y;
 			*mX = *mY * mOA.num / mOA.den;
 		}
+
 		mReInit = true;
 	}
+
 	mReInitLock.unlock();
 	last_x = x;
 	last_y = y;
@@ -517,25 +566,30 @@ void GLFbPC::checkReinit(int x, int y)
 
 void GLFbPC::drawSquare(float size, float x_factor)
 {
-	GLfloat vertices[] = {
-		 1.0f,  1.0f,
+	GLfloat vertices[] =
+	{
+		1.0f,  1.0f,
 		-1.0f,  1.0f,
 		-1.0f, -1.0f,
-		 1.0f, -1.0f,
+		1.0f, -1.0f,
 	};
 
 	GLubyte indices[] = { 0, 1, 2, 3 };
 
-	GLfloat texcoords[] = {
-		 1.0, 0.0,
-		 0.0, 0.0,
-		 0.0, 1.0,
-		 1.0, 1.0,
+	GLfloat texcoords[] =
+	{
+		1.0, 0.0,
+		0.0, 0.0,
+		0.0, 1.0,
+		1.0, 1.0,
 	};
-	if (x_factor > -99.0) { /* x_factor == -100 => OSD */
+
+	if (x_factor > -99.0)   /* x_factor == -100 => OSD */
+	{
 		if (videoDecoder &&
-		    videoDecoder->pig_x > 0 && videoDecoder->pig_y > 0 &&
-		    videoDecoder->pig_w > 0 && videoDecoder->pig_h > 0) {
+			videoDecoder->pig_x > 0 && videoDecoder->pig_y > 0 &&
+			videoDecoder->pig_w > 0 && videoDecoder->pig_h > 0)
+		{
 			/* these calculations even consider cropping and panscan mode
 			 * maybe this could be done with some clever opengl tricks? */
 			double w2 = (double)mState.width * 0.5l;
@@ -555,7 +609,8 @@ void GLFbPC::drawSquare(float size, float x_factor)
 			vertices[6] = vertices[0];	/* bottom right x */
 			vertices[7] = vertices[5];	/* bottom right y */
 		}
-	} else
+	}
+	else
 		x_factor = 1.0; /* OSD */
 
 	glPushMatrix();
@@ -569,7 +624,6 @@ void GLFbPC::drawSquare(float size, float x_factor)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glPopMatrix();
 }
-
 
 void GLFbPC::bltOSDBuffer()
 {
@@ -587,21 +641,29 @@ void GLFbPC::bltDisplayBuffer()
 {
 	if (!videoDecoder) /* cannot start yet */
 		return;
+
 	static bool warn = true;
 	cVideo::SWFramebuffer *buf = videoDecoder->getDecBuf();
-	if (!buf) {
+
+	if (!buf)
+	{
 		if (warn)
 			hal_info("GLFB::%s did not get a buffer...\n", __func__);
+
 		warn = false;
 		return;
 	}
+
 	warn = true;
 	int w = buf->width(), h = buf->height();
+
 	if (w == 0 || h == 0)
 		return;
 
 	AVRational a = buf->AR();
-	if (a.den != 0 && a.num != 0 && av_cmp_q(a, _mVA)) {
+
+	if (a.den != 0 && a.num != 0 && av_cmp_q(a, _mVA))
+	{
 		_mVA = a;
 		/* _mVA is the raw buffer's aspect, mVA is the real scaled output aspect */
 		av_reduce(&mVA.num, &mVA.den, w * a.num, h * a.den, INT_MAX);
@@ -622,25 +684,33 @@ void GLFbPC::bltDisplayBuffer()
 	int64_t apts = 0;
 	/* 18000 is the magic value for A/V sync in my libao->pulseaudio->intel_hda setup */
 	int64_t vpts = buf->pts() + 18000;
+
 	if (audioDecoder)
 		apts = audioDecoder->getPts();
-	if (apts != last_apts) {
+
+	if (apts != last_apts)
+	{
 		int rate, dummy1, dummy2;
+
 		if (apts < vpts)
-			sleep_us = (sleep_us * 2 + (vpts - apts)*10/9) / 3;
+			sleep_us = (sleep_us * 2 + (vpts - apts) * 10 / 9) / 3;
 		else if (sleep_us > 1000)
 			sleep_us -= 1000;
+
 		last_apts = apts;
 		videoDecoder->getPictureInfo(dummy1, dummy2, rate);
+
 		if (rate > 0)
 			rate = 2000000 / rate; /* limit to half the frame rate */
 		else
 			rate = 50000; /* minimum 20 fps */
+
 		if (sleep_us > rate)
 			sleep_us = rate;
 		else if (sleep_us < 1)
 			sleep_us = 1;
 	}
+
 	hal_debug("vpts: 0x%" PRIx64 " apts: 0x%" PRIx64 " diff: %6.3f sleep_us %d buf %d\n",
-			buf->pts(), apts, (buf->pts() - apts)/90000.0, sleep_us, videoDecoder->buf_num);
+		buf->pts(), apts, (buf->pts() - apts) / 90000.0, sleep_us, videoDecoder->buf_num);
 }

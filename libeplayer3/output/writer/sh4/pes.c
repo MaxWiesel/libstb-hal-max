@@ -98,6 +98,7 @@ int InsertPesHeader(unsigned char *data, int size, unsigned char stream_id, unsi
 	PutBits(&ld2, 0x0, 8);
 	PutBits(&ld2, 0x1, 8);  // Start Code
 	PutBits(&ld2, stream_id, 8); // Stream_id = Audio Stream
+
 	//4
 	if (-1 == size)
 	{
@@ -107,6 +108,7 @@ int InsertPesHeader(unsigned char *data, int size, unsigned char stream_id, unsi
 	{
 		PutBits(&ld2, size + 3 + (pts != INVALID_PTS_VALUE ? 5 : 0) + (pic_start_code ? (5) : 0), 16); // PES_packet_length
 	}
+
 	//6 = 4+2
 	PutBits(&ld2, 0x2, 2);  // 10
 	PutBits(&ld2, 0x0, 2);  // PES_Scrambling_control
@@ -137,6 +139,7 @@ int InsertPesHeader(unsigned char *data, int size, unsigned char stream_id, unsi
 		PutBits(&ld2, 0x5, 8);
 	else
 		PutBits(&ld2, 0x0, 8); // PES_header_data_length
+
 	//9 = 8+1
 
 	if (pts != INVALID_PTS_VALUE)
@@ -149,6 +152,7 @@ int InsertPesHeader(unsigned char *data, int size, unsigned char stream_id, unsi
 		PutBits(&ld2, pts & 0x7fff, 15);
 		PutBits(&ld2, 0x1, 1);
 	}
+
 	//14 = 9+5
 
 	if (pic_start_code)

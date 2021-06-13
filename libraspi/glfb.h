@@ -23,20 +23,20 @@
 
 class GLFramebuffer : public OpenThreads::Thread
 {
-public:
-	GLFramebuffer(int x, int y);
-	~GLFramebuffer();
-	std::vector<unsigned char> *getOSDBuffer() { return &osd_buf; } /* pointer to OSD bounce buffer */
-	void blit();
-	fb_var_screeninfo getScreenInfo() { return si; }
+	public:
+		GLFramebuffer(int x, int y);
+		~GLFramebuffer();
+		std::vector<unsigned char> *getOSDBuffer() { return &osd_buf; } /* pointer to OSD bounce buffer */
+		void blit();
+		fb_var_screeninfo getScreenInfo() { return si; }
 
-private:
-	void *pdata;	/* not yet used */
-	fb_var_screeninfo si;
-	std::vector<unsigned char> osd_buf; /* silly bounce buffer */
-	void run();	/* for OpenThreads::Thread */
+	private:
+		void *pdata;	/* not yet used */
+		fb_var_screeninfo si;
+		std::vector<unsigned char> osd_buf; /* silly bounce buffer */
+		void run();	/* for OpenThreads::Thread */
 
-	void setup();
-	void blit_osd();
+		void setup();
+		void blit_osd();
 };
 #endif

@@ -117,7 +117,7 @@
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 #ifndef IRMP_EXT_LOGGING
-#define IRMP_EXT_LOGGING                        0       // 1:log, 0: do not log  ; 
+#define IRMP_EXT_LOGGING                        0       // 1:log, 0: do not log  ;
 #endif
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -138,50 +138,50 @@
  */
 #if IRMP_SUPPORT_SIEMENS_PROTOCOL == 1 && F_INTERRUPTS < 15000
 #  warning F_INTERRUPTS too low, SIEMENS protocol disabled (should be at least 15000)
-#  undef IRMP_SUPPORT_SIEMENS_PROTOCOL
-#  define IRMP_SUPPORT_SIEMENS_PROTOCOL         0
+#undef IRMP_SUPPORT_SIEMENS_PROTOCOL
+#define IRMP_SUPPORT_SIEMENS_PROTOCOL         0
 #endif
 
 #if IRMP_SUPPORT_RUWIDO_PROTOCOL == 1 && F_INTERRUPTS < 15000
 #  warning F_INTERRUPTS too low, RUWIDO protocol disabled (should be at least 15000)
-#  undef IRMP_SUPPORT_RUWIDO_PROTOCOL
-#  define IRMP_SUPPORT_RUWIDO_PROTOCOL          0
+#undef IRMP_SUPPORT_RUWIDO_PROTOCOL
+#define IRMP_SUPPORT_RUWIDO_PROTOCOL          0
 #endif
 
 #if IRMP_SUPPORT_RECS80_PROTOCOL == 1 && F_INTERRUPTS < 15000
 #  warning F_INTERRUPTS too low, RECS80 protocol disabled (should be at least 15000)
-#  undef IRMP_SUPPORT_RECS80_PROTOCOL
-#  define IRMP_SUPPORT_RECS80_PROTOCOL          0
+#undef IRMP_SUPPORT_RECS80_PROTOCOL
+#define IRMP_SUPPORT_RECS80_PROTOCOL          0
 #endif
 
 #if IRMP_SUPPORT_RECS80EXT_PROTOCOL == 1 && F_INTERRUPTS < 15000
 #  warning F_INTERRUPTS too low, RECS80EXT protocol disabled (should be at least 15000)
-#  undef IRMP_SUPPORT_RECS80EXT_PROTOCOL
-#  define IRMP_SUPPORT_RECS80EXT_PROTOCOL       0
+#undef IRMP_SUPPORT_RECS80EXT_PROTOCOL
+#define IRMP_SUPPORT_RECS80EXT_PROTOCOL       0
 #endif
 
 #if IRMP_SUPPORT_LEGO_PROTOCOL == 1 && F_INTERRUPTS < 20000
 #  warning F_INTERRUPTS too low, LEGO protocol disabled (should be at least 20000)
-#  undef IRMP_SUPPORT_LEGO_PROTOCOL
-#  define IRMP_SUPPORT_LEGO_PROTOCOL            0
+#undef IRMP_SUPPORT_LEGO_PROTOCOL
+#define IRMP_SUPPORT_LEGO_PROTOCOL            0
 #endif
 
 #if IRMP_SUPPORT_JVC_PROTOCOL == 1 && IRMP_SUPPORT_NEC_PROTOCOL == 0
 #  warning JVC protocol needs also NEC protocol, NEC protocol enabled
-#  undef IRMP_SUPPORT_NEC_PROTOCOL
-#  define IRMP_SUPPORT_NEC_PROTOCOL             1
+#undef IRMP_SUPPORT_NEC_PROTOCOL
+#define IRMP_SUPPORT_NEC_PROTOCOL             1
 #endif
 
 #if IRMP_SUPPORT_NEC16_PROTOCOL == 1 && IRMP_SUPPORT_NEC_PROTOCOL == 0
 #  warning NEC16 protocol needs also NEC protocol, NEC protocol enabled
-#  undef IRMP_SUPPORT_NEC_PROTOCOL
-#  define IRMP_SUPPORT_NEC_PROTOCOL             1
+#undef IRMP_SUPPORT_NEC_PROTOCOL
+#define IRMP_SUPPORT_NEC_PROTOCOL             1
 #endif
 
 #if IRMP_SUPPORT_NEC42_PROTOCOL == 1 && IRMP_SUPPORT_NEC_PROTOCOL == 0
 #  warning NEC42 protocol needs also NEC protocol, NEC protocol enabled
-#  undef IRMP_SUPPORT_NEC_PROTOCOL
-#  define IRMP_SUPPORT_NEC_PROTOCOL             1
+#undef IRMP_SUPPORT_NEC_PROTOCOL
+#define IRMP_SUPPORT_NEC_PROTOCOL             1
 #endif
 
 #if F_INTERRUPTS > 20000

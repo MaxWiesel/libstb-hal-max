@@ -34,6 +34,7 @@ int PNGPlugin_saveRGBAImage(const char *filename, const unsigned char *data, int
 {
 	if (SaveRGBAImage_handle != NULL)
 		return SaveRGBAImage_handle(filename, data, width, height);
+
 	return -1;
 }
 
@@ -44,6 +45,7 @@ int PNGPlugin_init(void)
 	else
 	{
 		handle = dlopen("exteplayer3png.so", RTLD_LAZY);
+
 		if (handle)
 		{
 			char *error = NULL;
@@ -58,8 +60,10 @@ int PNGPlugin_init(void)
 				plugin_err("%s\n", error);
 				return -2;
 			}
+
 			return 0;
 		}
+
 		plugin_err("%s\n", dlerror());
 	}
 
@@ -75,5 +79,6 @@ int PNGPlugin_term(void)
 		SaveRGBAImage_handle = NULL;
 		return 0;
 	}
+
 	return -1;
 }

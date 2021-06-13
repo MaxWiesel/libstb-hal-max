@@ -44,7 +44,7 @@
 
 #include <linux/types.h>
 
-#define CEC_MAX_MSG_SIZE	16
+#define CEC_MAX_MSG_SIZE 16
 
 /**
  * struct cec_msg - CEC message structure.
@@ -87,7 +87,8 @@
  *		driver.
  * @tx_error_cnt: The number of 'Error' events. Set by the driver.
  */
-struct cec_msg {
+struct cec_msg
+{
 	__u64 tx_ts;
 	__u64 rx_ts;
 	__u32 len;
@@ -150,7 +151,7 @@ static inline bool cec_msg_is_broadcast(const struct cec_msg *msg)
  * message) and the initiator and destination are filled in.
  */
 static inline void cec_msg_init(struct cec_msg *msg,
-				__u8 initiator, __u8 destination)
+	__u8 initiator, __u8 destination)
 {
 	memset(msg, 0, sizeof(*msg));
 	msg->msg[0] = (initiator << 4) | destination;
@@ -167,11 +168,11 @@ static inline void cec_msg_init(struct cec_msg *msg,
  * case the change is done in place.
  */
 static inline void cec_msg_set_reply_to(struct cec_msg *msg,
-					struct cec_msg *orig)
+	struct cec_msg *orig)
 {
 	/* The destination becomes the initiator and vice versa */
 	msg->msg[0] = (cec_msg_destination(orig) << 4) |
-		      cec_msg_initiator(orig);
+		cec_msg_initiator(orig);
 	msg->reply = msg->timeout = 0;
 }
 
@@ -191,10 +192,13 @@ static inline bool cec_msg_status_is_ok(const struct cec_msg *msg)
 {
 	if (msg->tx_status && !(msg->tx_status & CEC_TX_STATUS_OK))
 		return false;
+
 	if (msg->rx_status && !(msg->rx_status & CEC_RX_STATUS_OK))
 		return false;
+
 	if (!msg->tx_status && !msg->rx_status)
 		return false;
+
 	return !(msg->rx_status & CEC_RX_STATUS_FEATURE_ABORT);
 }
 
@@ -242,18 +246,18 @@ static inline bool cec_msg_status_is_ok(const struct cec_msg *msg)
 
 #define CEC_LOG_ADDR_MASK_TV		(1 << CEC_LOG_ADDR_TV)
 #define CEC_LOG_ADDR_MASK_RECORD	((1 << CEC_LOG_ADDR_RECORD_1) | \
-					 (1 << CEC_LOG_ADDR_RECORD_2) | \
-					 (1 << CEC_LOG_ADDR_RECORD_3))
+	(1 << CEC_LOG_ADDR_RECORD_2) | \
+	(1 << CEC_LOG_ADDR_RECORD_3))
 #define CEC_LOG_ADDR_MASK_TUNER		((1 << CEC_LOG_ADDR_TUNER_1) | \
-					 (1 << CEC_LOG_ADDR_TUNER_2) | \
-					 (1 << CEC_LOG_ADDR_TUNER_3) | \
-					 (1 << CEC_LOG_ADDR_TUNER_4))
+	(1 << CEC_LOG_ADDR_TUNER_2) | \
+	(1 << CEC_LOG_ADDR_TUNER_3) | \
+	(1 << CEC_LOG_ADDR_TUNER_4))
 #define CEC_LOG_ADDR_MASK_PLAYBACK	((1 << CEC_LOG_ADDR_PLAYBACK_1) | \
-					 (1 << CEC_LOG_ADDR_PLAYBACK_2) | \
-					 (1 << CEC_LOG_ADDR_PLAYBACK_3))
+	(1 << CEC_LOG_ADDR_PLAYBACK_2) | \
+	(1 << CEC_LOG_ADDR_PLAYBACK_3))
 #define CEC_LOG_ADDR_MASK_AUDIOSYSTEM	(1 << CEC_LOG_ADDR_AUDIOSYSTEM)
 #define CEC_LOG_ADDR_MASK_BACKUP	((1 << CEC_LOG_ADDR_BACKUP_1) | \
-					 (1 << CEC_LOG_ADDR_BACKUP_2))
+	(1 << CEC_LOG_ADDR_BACKUP_2))
 #define CEC_LOG_ADDR_MASK_SPECIFIC	(1 << CEC_LOG_ADDR_SPECIFIC)
 #define CEC_LOG_ADDR_MASK_UNREGISTERED	(1 << CEC_LOG_ADDR_UNREGISTERED)
 
@@ -347,7 +351,8 @@ static inline bool cec_is_unconfigured(__u16 log_addr_mask)
  * @capabilities: capabilities of the CEC adapter.
  * @version: version of the CEC adapter framework.
  */
-struct cec_caps {
+struct cec_caps
+{
 	char driver[32];
 	char name[32];
 	__u32 available_log_addrs;
@@ -373,7 +378,8 @@ struct cec_caps {
  *	address. Set by the caller.
  * @features:	CEC 2.0: The logical address features. Set by the caller.
  */
-struct cec_log_addrs {
+struct cec_log_addrs
+{
 	__u8 log_addr[CEC_MAX_LOG_ADDRS];
 	__u16 log_addr_mask;
 	__u8 cec_version;
@@ -409,7 +415,8 @@ struct cec_log_addrs {
  * @phys_addr: the current physical address
  * @log_addr_mask: the current logical address mask
  */
-struct cec_event_state_change {
+struct cec_event_state_change
+{
 	__u16 phys_addr;
 	__u16 log_addr_mask;
 };
@@ -418,7 +425,8 @@ struct cec_event_state_change {
  * struct cec_event_lost_msgs - tells you how many messages were lost due.
  * @lost_msgs: how many messages were lost.
  */
-struct cec_event_lost_msgs {
+struct cec_event_lost_msgs
+{
 	__u32 lost_msgs;
 };
 
@@ -431,11 +439,13 @@ struct cec_event_lost_msgs {
  * @lost_msgs: the event payload for CEC_EVENT_LOST_MSGS.
  * @raw: array to pad the union.
  */
-struct cec_event {
+struct cec_event
+{
 	__u64 ts;
 	__u32 event;
 	__u32 flags;
-	union {
+	union
+	{
 		struct cec_event_state_change state_change;
 		struct cec_event_lost_msgs lost_msgs;
 		__u32 raw[16];
@@ -508,7 +518,6 @@ struct cec_event {
 #define CEC_MSG_IMAGE_VIEW_ON				0x04
 #define CEC_MSG_TEXT_VIEW_ON				0x0d
 
-
 /* Routing Control Feature */
 
 /*
@@ -522,10 +531,8 @@ struct cec_event {
 #define CEC_MSG_ROUTING_INFORMATION			0x81
 #define CEC_MSG_SET_STREAM_PATH				0x86
 
-
 /* Standby Feature */
 #define CEC_MSG_STANDBY					0x36
-
 
 /* One Touch Record Feature */
 #define CEC_MSG_RECORD_OFF				0x0b
@@ -601,7 +608,6 @@ struct cec_event {
 
 #define CEC_MSG_RECORD_TV_SCREEN			0x0f
 
-
 /* Timer Programming Feature */
 #define CEC_MSG_CLEAR_ANALOGUE_TIMER			0x33
 /* Recording Sequence Operand (recording_seq) */
@@ -662,7 +668,6 @@ struct cec_event {
 #define CEC_OP_PROG_ERROR_CLOCK_FAILURE			0x0a
 #define CEC_OP_PROG_ERROR_DUPLICATE			0x0e
 
-
 /* System Information Feature */
 #define CEC_MSG_CEC_VERSION				0x9e
 /* CEC Version Operand (cec_version) */
@@ -720,7 +725,6 @@ struct cec_event {
 
 #define CEC_MSG_GIVE_FEATURES				0xa5	/* HDMI 2.0 */
 
-
 /* Deck Control Feature */
 #define CEC_MSG_DECK_CONTROL				0x42
 /* Deck Control Mode Operand (deck_control_mode) */
@@ -771,7 +775,6 @@ struct cec_event {
 #define CEC_OP_PLAY_MODE_PLAY_SLOW_REV_MED		0x1a
 #define CEC_OP_PLAY_MODE_PLAY_SLOW_REV_MAX		0x1b
 
-
 /* Tuner Control Feature */
 #define CEC_MSG_GIVE_TUNER_DEVICE_STATUS		0x08
 #define CEC_MSG_SELECT_ANALOGUE_SERVICE			0x92
@@ -788,7 +791,6 @@ struct cec_event {
 #define CEC_MSG_TUNER_STEP_DECREMENT			0x06
 #define CEC_MSG_TUNER_STEP_INCREMENT			0x05
 
-
 /* Vendor Specific Commands Feature */
 
 /*
@@ -803,7 +805,6 @@ struct cec_event {
 #define CEC_MSG_VENDOR_REMOTE_BUTTON_DOWN		0x8a
 #define CEC_MSG_VENDOR_REMOTE_BUTTON_UP			0x8b
 
-
 /* OSD Display Feature */
 #define CEC_MSG_SET_OSD_STRING				0x64
 /* Display Control Operand (disp_ctl) */
@@ -811,11 +812,9 @@ struct cec_event {
 #define CEC_OP_DISP_CTL_UNTIL_CLEARED			0x40
 #define CEC_OP_DISP_CTL_CLEAR				0x80
 
-
 /* Device OSD Transfer Feature */
 #define CEC_MSG_GIVE_OSD_NAME				0x46
 #define CEC_MSG_SET_OSD_NAME				0x47
-
 
 /* Device Menu Control Feature */
 #define CEC_MSG_MENU_REQUEST				0x8d
@@ -859,7 +858,6 @@ struct cec_event {
 
 #define CEC_MSG_USER_CONTROL_RELEASED			0x45
 
-
 /* Remote Control Passthrough Feature */
 
 /*
@@ -867,7 +865,6 @@ struct cec_event {
  *	CEC_MSG_USER_CONTROL_PRESSED
  *	CEC_MSG_USER_CONTROL_RELEASED
  */
-
 
 /* Power Status Feature */
 #define CEC_MSG_GIVE_DEVICE_POWER_STATUS		0x8f
@@ -877,7 +874,6 @@ struct cec_event {
 #define CEC_OP_POWER_STATUS_STANDBY			1
 #define CEC_OP_POWER_STATUS_TO_ON			2
 #define CEC_OP_POWER_STATUS_TO_STANDBY			3
-
 
 /* General Protocol Messages */
 #define CEC_MSG_FEATURE_ABORT				0x00
@@ -890,7 +886,6 @@ struct cec_event {
 #define CEC_OP_ABORT_UNDETERMINED			5
 
 #define CEC_MSG_ABORT					0xff
-
 
 /* System Audio Control Feature */
 
@@ -919,7 +914,6 @@ struct cec_event {
 #define CEC_OP_AUD_FMT_ID_CEA861			0
 #define CEC_OP_AUD_FMT_ID_CEA861_CXT			1
 
-
 /* Audio Rate Control Feature */
 #define CEC_MSG_SET_AUDIO_RATE				0x9a
 /* Audio Rate Operand (audio_rate) */
@@ -931,7 +925,6 @@ struct cec_event {
 #define CEC_OP_AUD_RATE_NARROW_FAST			5
 #define CEC_OP_AUD_RATE_NARROW_SLOW			6
 
-
 /* Audio Return Channel Control Feature */
 #define CEC_MSG_INITIATE_ARC				0xc0
 #define CEC_MSG_REPORT_ARC_INITIATED			0xc1
@@ -939,7 +932,6 @@ struct cec_event {
 #define CEC_MSG_REQUEST_ARC_INITIATION			0xc3
 #define CEC_MSG_REQUEST_ARC_TERMINATION			0xc4
 #define CEC_MSG_TERMINATE_ARC				0xc5
-
 
 /* Dynamic Audio Lipsync Feature */
 /* Only for CEC 2.0 and up */
@@ -953,7 +945,6 @@ struct cec_event {
 #define CEC_OP_AUD_OUT_COMPENSATED_DELAY		1
 #define CEC_OP_AUD_OUT_COMPENSATED_NO_DELAY		2
 #define CEC_OP_AUD_OUT_COMPENSATED_PARTIAL_DELAY	3
-
 
 /* Capability Discovery and Control Feature */
 #define CEC_MSG_CDC_MESSAGE				0xf8

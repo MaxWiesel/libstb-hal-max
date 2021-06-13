@@ -15,7 +15,7 @@ struct AVFormatContext;
 
 class cPlayback
 {
-	friend class CStreamInfo2;
+		friend class CStreamInfo2;
 
 	private:
 		static OpenThreads::Mutex mutex;

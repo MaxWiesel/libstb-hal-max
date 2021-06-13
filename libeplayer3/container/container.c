@@ -46,6 +46,7 @@ static void printContainerCapabilities()
 			container_printf(10, "%s ", AvailableContainer[i]->Capabilities[j]);
 		}
 	}
+
 	container_printf(10, "\n");
 }
 
@@ -85,7 +86,6 @@ static int32_t selectContainer(Context_t *context, char *extension)
 	return ret;
 }
 
-
 static int Command(Context_t *context, ContainerCmd_t command, void *argument __attribute__((unused)))
 {
 	int ret = 0;
@@ -99,16 +99,19 @@ static int Command(Context_t *context, ContainerCmd_t command, void *argument __
 			ret = selectContainer(context, (char *) argument);
 			break;
 		}
+
 		case CONTAINER_CAPABILITIES:
 		{
 			printContainerCapabilities();
 			break;
 		}
+
 		case CONTAINER_DEL:
 		{
 			context->container->selectedContainer = NULL;
 			break;
 		}
+
 		default:
 			container_err("%s::%s ContainerCmd %d not supported!\n", __FILE__, __FUNCTION__, command);
 			break;
@@ -116,7 +119,6 @@ static int Command(Context_t *context, ContainerCmd_t command, void *argument __
 
 	return ret;
 }
-
 
 ContainerHandler_t ContainerHandler =
 {

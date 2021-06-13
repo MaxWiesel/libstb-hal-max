@@ -31,22 +31,22 @@ class cRecord;
 class cPlayback;
 class cDemux
 {
-	friend class cRecord;
-	friend class cPlayback;
+		friend class cRecord;
+		friend class cPlayback;
 	public:
-		bool Open(DMX_CHANNEL_TYPE pes_type, void * x = NULL, int y = 0);
+		bool Open(DMX_CHANNEL_TYPE pes_type, void *x = NULL, int y = 0);
 		void Close(void);
 		bool Start(bool record = false);
 		bool Stop(void);
 		int Read(unsigned char *buff, int len, int Timeout = 0);
-		bool sectionFilter(unsigned short pid, const unsigned char * const filter, const unsigned char * const mask, int len, int Timeout = 0, const unsigned char * const negmask = NULL);
+		bool sectionFilter(unsigned short pid, const unsigned char *const filter, const unsigned char *const mask, int len, int Timeout = 0, const unsigned char *const negmask = NULL);
 		bool pesFilter(const unsigned short pid);
 		void SetSyncMode(AVSYNC_TYPE mode);
-		void * getBuffer();
-		void * getChannel();
+		void *getBuffer();
+		void *getChannel();
 		DMX_CHANNEL_TYPE getChannelType(void) { return dmx_type; };
 		bool addPid(unsigned short pid);
-		void getSTC(int64_t * STC);
+		void getSTC(int64_t *STC);
 		int getUnit(void);
 		static bool SetSource(int unit, int source);
 		static int GetSource(int unit);

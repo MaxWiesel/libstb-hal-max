@@ -53,8 +53,8 @@ int InsertPesHeader(uint8_t *data, int size, uint8_t stream_id, int64_t pts, int
 {
 	BitPacker_t ld2 = { data, 0, 32 };
 
-    /* if (size > MAX_PES_PACKET_SIZE)
-        size = 0;		// unbounded */
+	/* if (size > MAX_PES_PACKET_SIZE)
+	    size = 0;		// unbounded */
 
 	PutBits(&ld2, 0x0, 8);
 	PutBits(&ld2, 0x0, 8);
@@ -88,9 +88,11 @@ int InsertPesHeader(uint8_t *data, int size, uint8_t stream_id, int64_t pts, int
 		PutBits(&ld2, 0x5, 8);
 	else
 		PutBits(&ld2, 0x0, 8);	// PES_header_data_length
+
 	//9 = 8+1
 
-	if (pts != INVALID_PTS_VALUE) {
+	if (pts != INVALID_PTS_VALUE)
+	{
 		PutBits(&ld2, 0x2, 4);
 		PutBits(&ld2, (pts >> 30) & 0x7, 3);
 		PutBits(&ld2, 0x1, 1);
@@ -99,9 +101,11 @@ int InsertPesHeader(uint8_t *data, int size, uint8_t stream_id, int64_t pts, int
 		PutBits(&ld2, pts & 0x7fff, 15);
 		PutBits(&ld2, 0x1, 1);
 	}
+
 	//14 = 9+5
 
-	if (pic_start_code) {
+	if (pic_start_code)
+	{
 		PutBits(&ld2, 0x0, 8);
 		PutBits(&ld2, 0x0, 8);
 		PutBits(&ld2, 0x1, 8);	// Start Code

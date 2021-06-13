@@ -19,8 +19,10 @@ eDVBCICAManagerSession::~eDVBCICAManagerSession()
 int eDVBCICAManagerSession::receivedAPDU(const unsigned char *tag, const void *data, int len)
 {
 	printf("[CI CA] SESSION(%d)/CA %02x %02x %02x: ", session_nb, tag[0], tag[1], tag[2]);
+
 	for (int i = 0; i < len; i++)
-		printf("%02x ", ((const unsigned char*)data)[i]);
+		printf("%02x ", ((const unsigned char *)data)[i]);
+
 	printf("\n");
 
 	if ((tag[0] == 0x9f) && (tag[1] == 0x80))
@@ -30,11 +32,13 @@ int eDVBCICAManagerSession::receivedAPDU(const unsigned char *tag, const void *d
 			case 0x31:
 			{
 				printf("[CI CA] ca info:\n");
+
 				for (int i = 0; i < len; i += 2)
 				{
-					printf("%04x ", (((const unsigned char*)data)[i] << 8) | (((const unsigned char*)data)[i + 1]));
-					caids.push_back((((const unsigned char*)data)[i] << 8) | (((const unsigned char*)data)[i + 1]));
+					printf("%04x ", (((const unsigned char *)data)[i] << 8) | (((const unsigned char *)data)[i + 1]));
+					caids.push_back((((const unsigned char *)data)[i] << 8) | (((const unsigned char *)data)[i + 1]));
 				}
+
 				if (!caids.empty())
 				{
 					for (u32 i = 0; i < caids.size(); i++)
@@ -56,6 +60,7 @@ int eDVBCICAManagerSession::receivedAPDU(const unsigned char *tag, const void *d
 						}
 					}
 				}
+
 				std::sort(caids.begin(), caids.end());
 				printf("\n");
 
@@ -64,11 +69,13 @@ int eDVBCICAManagerSession::receivedAPDU(const unsigned char *tag, const void *d
 				slot->camgrSession = this;
 			}
 			break;
+
 			default:
 				printf("[CI CA] unknown APDU tag 9F 80 %02x\n", tag[2]);
 				break;
 		}
 	}
+
 	return 0;
 }
 
@@ -83,9 +90,11 @@ int eDVBCICAManagerSession::doAction()
 			state = stateFinal;
 			return 0;
 		}
+
 		case stateFinal:
 			printf("[CI CA] stateFinal and action should not happen\n");
-			// fall through
+
+		// fall through
 		default:
 			return 0;
 	}

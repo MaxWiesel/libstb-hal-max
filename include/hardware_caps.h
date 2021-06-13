@@ -21,7 +21,6 @@ typedef enum
 	HW_DISPLAY_GFX
 } display_type_t;
 
-
 typedef struct hw_caps
 {
 	int has_fan;

@@ -106,7 +106,7 @@ static int writeData(void *_call)
 	while (Position < call->len)
 	{
 		int32_t PacketLength = (call->len - Position) <= MAX_PES_PACKET_SIZE ?
-		    (call->len - Position) : MAX_PES_PACKET_SIZE;
+			(call->len - Position) : MAX_PES_PACKET_SIZE;
 
 		int32_t Remaining = call->len - Position - PacketLength;
 
@@ -119,11 +119,13 @@ static int writeData(void *_call)
 		iov[1].iov_len = PacketLength;
 
 		ssize_t l = call->WriteV(call->fd, iov, 2);
+
 		if (l < 0)
 		{
 			len = l;
 			break;
 		}
+
 		len += l;
 
 		Position += PacketLength;

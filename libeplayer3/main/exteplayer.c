@@ -78,6 +78,7 @@ static Context_t *g_player = NULL;
 static void TerminateAllSockets(void)
 {
 	int i;
+
 	for (i = 0; i < 1024; ++i)
 	{
 		if (0 == shutdown(i, SHUT_RDWR))
@@ -113,6 +114,7 @@ int32_t GetGraphicWindowHeight()
 static void TerminateWakeUp()
 {
 	int ret = write(g_pfd[1], "x", 1);
+
 	if (ret != 1)
 	{
 		printf("TerminateWakeUp write return %d\n", ret);
@@ -129,6 +131,7 @@ static void *TermThreadFun(void *arg __attribute__((unused)))
 	fd_set readfds;
 
 	unlink(socket_path);
+
 	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
 	{
 		perror("TermThreadFun socket error");
@@ -167,10 +170,12 @@ static void *TermThreadFun(void *arg __attribute__((unused)))
 	{
 		pthread_mutex_lock(&playbackStartMtx);
 		PlaybackDieNow(1);
+
 		if (isPlaybackStarted)
 			TerminateAllSockets();
 		else
 			kill(getpid(), SIGINT);
+
 		pthread_mutex_unlock(&playbackStartMtx);
 	}
 
@@ -186,10 +191,12 @@ static void map_inter_file_path(char *filename)
 	if (0 == strncmp(filename, "iptv://", 7))
 	{
 		FILE *f = fopen(filename + 7, "r");
+
 		if (NULL != f)
 		{
 			size_t num = fread(filename, 1, IPTV_MAX_FILE_PATH - 1, f);
 			fclose(f);
+
 			if (num > 0 && filename[num - 1] == '\n')
 			{
 				filename[num - 1] = '\0';
@@ -231,6 +238,7 @@ static void SetBuffering()
 {
 	static char buff[2048];
 	memset(buff, '\0', sizeof(buff));
+
 	if (setvbuf(stderr, buff, _IOLBF, sizeof(buff)))
 	{
 		printf("SetBuffering: failed to change the buffer of stderr\n");
@@ -253,11 +261,13 @@ static void SetNice(int prio)
 	};
 	sched_setscheduler(0, SCHED_RR, &param);
 #else
+
 	//int prevPrio = getpriority(PRIO_PROCESS, 0);
 	if (-1 == setpriority(PRIO_PROCESS, 0, prio))
 	{
 		printf("setpriority - failed\n");
 	}
+
 #endif
 }
 
@@ -276,6 +286,7 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 		{
 			char **TrackList = NULL;
 			ptrManager->Command(g_player, MANAGER_LIST, &TrackList);
+
 			if (NULL != TrackList)
 			{
 				int i = 0;
@@ -284,26 +295,32 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 				char Name[] = "          ";
 				E2iStartMsg();
 				E2iSendMsg("{\"%c_%c\": [", argvBuff[0], argvBuff[1]);
+
 				for (i = 0; TrackList[i] != NULL; i += 2)
 				{
 					pch = strtok(TrackList[i], " ");
+
 					if (pch != NULL)
 					{
 						Id = atoi(pch);
 						pch = strtok(NULL, " ");
+
 						if (pch != NULL)
 						{
 							snprintf(Name, sizeof(Name), "%s", pch);
 						}
 					}
+
 					if (0 < i)
 					{
 						E2iSendMsg(", ");
 					}
+
 					E2iSendMsg("{\"id\":%d,\"e\":\"%s\",\"n\":\"%s\"}", Id, TrackList[i + 1], Name);
 					free(TrackList[i]);
 					free(TrackList[i + 1]);
 				}
+
 				E2iSendMsg("]}\n");
 				E2iEndMsg();
 				free(TrackList);
@@ -313,12 +330,15 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 				// not tracks
 				E2iSendMsg("{\"%c_%c\": []}\n", argvBuff[0], argvBuff[1]);
 			}
+
 			break;
 		}
+
 		case 'c':
 		{
 			TrackDescription_t *track = NULL;
 			ptrManager->Command(g_player, MANAGER_GET_TRACK_DESC, &track);
+
 			if (NULL != track)
 			{
 				if ('a' == argvBuff[0] || 's' == argvBuff[0])
@@ -328,8 +348,9 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 				else // video
 				{
 					E2iSendMsg("{\"%c_%c\":{\"id\":%d,\"e\":\"%s\",\"n\":\"%s\",\"w\":%d,\"h\":%d,\"f\":%u,\"p\":%d,\"an\":%d,\"ad\":%d}}\n", \
-					    argvBuff[0], argvBuff[1], track->Id, track->Encoding, track->Name, track->width, track->height, track->frame_rate, track->progressive, track->aspect_ratio_num, track->aspect_ratio_den);
+						argvBuff[0], argvBuff[1], track->Id, track->Encoding, track->Name, track->width, track->height, track->frame_rate, track->progressive, track->aspect_ratio_num, track->aspect_ratio_den);
 				}
+
 				free(track->Encoding);
 				free(track->Name);
 				free(track);
@@ -346,8 +367,10 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 					E2iSendMsg("{\"%c_%c\":{\"id\":%d,\"e\":\"%s\",\"n\":\"%s\",\"w\":%d,\"h\":%d,\"f\":%u,\"p\":%d}}\n", argvBuff[0], argvBuff[1], -1, "", "", -1, -1, 0, -1);
 				}
 			}
+
 			break;
 		}
+
 		default:
 		{
 			/* switch command available only for audio and subtitle tracks */
@@ -355,29 +378,36 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 			{
 				int ok = 0;
 				int id = -1;
+
 				if ('i' == argvBuff[1])
 				{
 					int idx = -1;
 					ok = sscanf(argvBuff + 2, "%d", &idx);
+
 					if (idx >= 0)
 					{
 						char **TrackList = NULL;
 						ptrManager->Command(g_player, MANAGER_LIST, &TrackList);
+
 						if (NULL != TrackList)
 						{
 							int i = 0;
 							char *pch;
+
 							for (i = 0; TrackList[i] != NULL; i += 2)
 							{
 								if (idx == i)
 								{
 									pch = strtok(TrackList[i], " ");
+
 									if (pch != NULL)
 										id = atoi(pch);
 								}
+
 								free(TrackList[i]);
 								free(TrackList[i + 1]);
 							}
+
 							free(TrackList);
 						}
 					}
@@ -397,6 +427,7 @@ static int HandleTracks(const Manager_t *ptrManager, const PlaybackCmd_t playbac
 					E2iSendMsg("{\"%c_%c\":{\"id\":%d,\"sts\":%d}}\n", argvBuff[0], 's', id, commandRetVal);
 				}
 			}
+
 			break;
 		}
 	}
@@ -413,6 +444,7 @@ static int ParseParams(int argc, char *argv[], PlayFiles_t *playbackFiles, int *
 {
 	int ret = 0;
 	int c;
+
 	while ((c = getopt(argc, argv, "G:W:H:A:V:U:we3dlsrimva:n:x:u:c:h:o:p:P:t:9:0:1:4:f:b:F:S:O:")) != -1)
 	{
 		switch (c)
@@ -420,18 +452,27 @@ static int ParseParams(int argc, char *argv[], PlayFiles_t *playbackFiles, int *
 			case 'G':
 				g_graphic_sub_path = optarg;
 				break;
+
 			case 'W':
 			{
 				int val = atoi(optarg);
-				if (val) g_windows_width = val;
+
+				if (val)
+					g_windows_width = val;
+
 				break;
 			}
+
 			case 'H':
 			{
 				int val = atoi(optarg);
-				if (val) g_windows_height = val;
+
+				if (val)
+					g_windows_height = val;
+
 				break;
 			}
+
 			case 'a':
 			{
 				int flag = atoi(optarg);
@@ -440,66 +481,83 @@ static int ParseParams(int argc, char *argv[], PlayFiles_t *playbackFiles, int *
 				aac_latm_software_decoder_set(flag & 0x02);
 				break;
 			}
+
 			case 'e':
 				printf("Software decoder will be used for EAC3 codec\n");
 				eac3_software_decoder_set(1);
 				break;
+
 			case 'A':
 				printf("Software decoder will be used for AMR codec\n");
 				amr_software_decoder_set(atoi(optarg));
 				break;
+
 			case 'V':
 				printf("Software decoder will be used for VORBIS codec\n");
 				vorbis_software_decoder_set(atoi(optarg));
 				break;
+
 			case 'U':
 				printf("Software decoder will be used for OPUS codec\n");
 				vorbis_software_decoder_set(atoi(optarg));
 				break;
+
 			case '3':
 				printf("Software decoder will be used for AC3 codec\n");
 				ac3_software_decoder_set(1);
 				break;
+
 			case 'd':
 				printf("Software decoder will be used for DTS codec\n");
 				dts_software_decoder_set(1);
 				break;
+
 			case 'm':
 				printf("Software decoder will be used for MP3 codec\n");
 				mp3_software_decoder_set(1);
 				break;
+
 			case 'w':
 				printf("Software decoder will be used for WMA codec\n");
 				wma_software_decoder_set(1);
 				break;
+
 			case 'l':
 				printf("Audio software decoding as LPCM\n");
 				insert_pcm_as_lpcm_set(1);
 				break;
+
 			case 's':
 				printf("Software decoder will decode to stereo\n");
 				stereo_software_decoder_set(1);
 				break;
+
 			case 'r':
 				printf("Software decoder do not use PCM resampling\n");
 				pcm_resampling_set(0);
 				break;
+
 			case 'o':
 				printf("Set progressive download to %d\n", atoi(optarg));
 				progressive_playback_set(atoi(optarg));
 				break;
+
 			case 'p':
 				SetNice(atoi(optarg));
 				break;
+
 			case 'P':
 				sel_program_id_set(atoi(optarg));
 				break;
+
 			case 't':
 				*pAudioTrackIdx = atoi(optarg);
 				break;
+
 			case '9':
 				*subtitleTrackIdx = atoi(optarg);
 				break;
+
 			case 'x':
 				if (optarg[0] != '\0')
 				{
@@ -509,62 +567,79 @@ static int ParseParams(int argc, char *argv[], PlayFiles_t *playbackFiles, int *
 					playbackFiles->szSecondFile[IPTV_MAX_FILE_PATH] = '\0';
 					map_inter_file_path(playbackFiles->szSecondFile);
 				}
+
 				break;
+
 			case 'h':
 				ffmpeg_av_dict_set("headers", optarg, 0);
 				break;
+
 			case 'u':
 				ffmpeg_av_dict_set("user-agent", optarg, 0);
 				break;
+
 			case 'c':
 				printf("For now cookies should be set via headers option!\n");
 				ffmpeg_av_dict_set("cookies", optarg, 0);
 				break;
+
 			case 'i':
 				printf("Play in (infinity) loop.\n");
 				PlaybackHandler.isLoopMode = 1;
 				break;
+
 			case 'v':
 				printf("Use live TS stream mode.\n");
 				PlaybackHandler.isTSLiveMode = 1;
 				break;
+
 			case 'n':
 				printf("Force rtmp protocol implementation\n");
 				rtmp_proto_impl_set(atoi(optarg));
 				break;
+
 			case '0':
 				ffmpeg_av_dict_set("video_rep_index", optarg, 0);
 				break;
+
 			case '1':
 				ffmpeg_av_dict_set("audio_rep_index", optarg, 0);
 				break;
+
 			case '4':
 #ifdef HAVE_FLV2MPEG4_CONVERTER
 				flv2mpeg4_converter_set(atoi(optarg));
 #endif
 				break;
+
 			case 'f':
 			{
 				char *ffopt = strdup(optarg);
 				char *ffval = strchr(ffopt, '=');
+
 				if (ffval)
 				{
 					*ffval = '\0';
 					ffval += 1;
 					ffmpeg_av_dict_set(ffopt, ffval, 0);
 				}
+
 				free(ffopt);
 				break;
 			}
+
 			case 'b':
 				*linuxDvbBufferSizeMB = 1024 * 1024 * atoi(optarg);
 				break;
+
 			case 'S':
 				playbackFiles->iFirstFileSize = (uint64_t) strtoull(optarg, (char **)NULL, 10);
 				break;
+
 			case 'O':
 				playbackFiles->iFirstMoovAtomOffset = (uint64_t) strtoull(optarg, (char **)NULL, 10);
 				break;
+
 			case 'F':
 				if (optarg[0] != '\0')
 				{
@@ -574,7 +649,9 @@ static int ParseParams(int argc, char *argv[], PlayFiles_t *playbackFiles, int *
 					playbackFiles->szFirstMoovAtomFile[IPTV_MAX_FILE_PATH] = '\0';
 					map_inter_file_path(playbackFiles->szFirstMoovAtomFile);
 				}
+
 				break;
+
 			default:
 				printf("?? getopt returned character code 0%o ??\n", c);
 				ret = -1;
@@ -591,6 +668,7 @@ static int ParseParams(int argc, char *argv[], PlayFiles_t *playbackFiles, int *
 		{
 			strcpy(playbackFiles->szFirstFile, "file://");
 		}
+
 		strcat(playbackFiles->szFirstFile, argv[optind]);
 		playbackFiles->szFirstFile[IPTV_MAX_FILE_PATH - 1] = '\0';
 		map_inter_file_path(playbackFiles->szFirstFile);
@@ -601,6 +679,7 @@ static int ParseParams(int argc, char *argv[], PlayFiles_t *playbackFiles, int *
 	{
 		ret = -1;
 	}
+
 	return ret;
 }
 
@@ -669,6 +748,7 @@ int main(int argc, char *argv[])
 	}
 
 	g_player = malloc(sizeof(Context_t));
+
 	if (NULL == g_player)
 	{
 		printf("g_player allocate error\n");
@@ -676,6 +756,7 @@ int main(int argc, char *argv[])
 	}
 
 	pthread_mutex_init(&playbackStartMtx, NULL);
+
 	do
 	{
 		int flags = 0;
@@ -689,6 +770,7 @@ int main(int argc, char *argv[])
 
 		/* Make read end nonblocking */
 		flags |= O_NONBLOCK;
+
 		if (fcntl(g_pfd[0], F_SETFL, flags) == -1)
 			break;
 
@@ -697,6 +779,7 @@ int main(int argc, char *argv[])
 
 		/* Make write end nonblocking */
 		flags |= O_NONBLOCK;
+
 		if (fcntl(g_pfd[1], F_SETFL, flags) == -1)
 			break;
 
@@ -725,6 +808,7 @@ int main(int argc, char *argv[])
 		g_player->output->Command(g_player, OUTPUT_SET_BUFFER_SIZE, &linuxDvbBufferSizeMB);
 
 	g_player->manager->video->Command(g_player, MANAGER_REGISTER_UPDATED_TRACK_INFO, UpdateVideoTrack);
+
 	if (strncmp(playbackFiles.szFirstFile, "rtmp", 4) && strncmp(playbackFiles.szFirstFile, "ffrtmp", 4))
 	{
 		g_player->playback->noprobe = 1;
@@ -732,12 +816,14 @@ int main(int argc, char *argv[])
 
 	commandRetVal = g_player->playback->Command(g_player, PLAYBACK_OPEN, &playbackFiles);
 	E2iSendMsg("{\"PLAYBACK_OPEN\":{\"OutputName\":\"%s\", \"file\":\"%s\", \"sts\":%d}}\n", g_player->output->Name, playbackFiles.szFirstFile, commandRetVal);
+
 	if (commandRetVal < 0)
 	{
 		if (NULL != g_player)
 		{
 			free(g_player);
 		}
+
 		return 10;
 	}
 
@@ -757,21 +843,25 @@ int main(int argc, char *argv[])
 
 			HandleTracks(g_player->manager->video, (PlaybackCmd_t) -1, "vc");
 			HandleTracks(g_player->manager->audio, (PlaybackCmd_t) -1, "al");
+
 			if (audioTrackIdx >= 0)
 			{
 				static char cmd[128] = ""; // static to not allocate on stack
 				sprintf(cmd, "ai%d\n", audioTrackIdx);
 				commandRetVal = HandleTracks(g_player->manager->audio, PLAYBACK_SWITCH_AUDIO, cmd);
 			}
+
 			HandleTracks(g_player->manager->audio, (PlaybackCmd_t) -1, "ac");
 
 			HandleTracks(g_player->manager->subtitle, (PlaybackCmd_t) -1, "sl");
+
 			if (subtitleTrackIdx >= 0)
 			{
 				static char cmd[128] = ""; // static to not allocate on stack
 				sprintf(cmd, "si%d\n", subtitleTrackIdx);
 				commandRetVal = HandleTracks(g_player->manager->subtitle, PLAYBACK_SWITCH_SUBTITLE, cmd);
 			}
+
 			HandleTracks(g_player->manager->subtitle, (PlaybackCmd_t) -1, "sc");
 		}
 
@@ -797,34 +887,40 @@ int main(int argc, char *argv[])
 					HandleTracks(g_player->manager->video, (PlaybackCmd_t) -1, argvBuff);
 					break;
 				}
+
 				case 'a':
 				{
 					HandleTracks(g_player->manager->audio, PLAYBACK_SWITCH_AUDIO, argvBuff);
 					break;
 				}
+
 				case 's':
 				{
 					HandleTracks(g_player->manager->subtitle, PLAYBACK_SWITCH_SUBTITLE, argvBuff);
 					break;
 				}
+
 				case 'q':
 				{
 					commandRetVal = g_player->playback->Command(g_player, PLAYBACK_STOP, NULL);
 					E2iSendMsg("{\"PLAYBACK_STOP\":{\"sts\":%d}}\n", commandRetVal);
 					break;
 				}
+
 				case 'c':
 				{
 					commandRetVal = g_player->playback->Command(g_player, PLAYBACK_CONTINUE, NULL);
 					E2iSendMsg("{\"PLAYBACK_CONTINUE\":{\"sts\":%d}}\n", commandRetVal);
 					break;
 				}
+
 				case 'p':
 				{
 					commandRetVal = g_player->playback->Command(g_player, PLAYBACK_PAUSE, NULL);
 					E2iSendMsg("{\"PLAYBACK_PAUSE\":{\"sts\":%d}}\n", commandRetVal);
 					break;
 				}
+
 				case 'm':
 				{
 					int speed = 0;
@@ -834,16 +930,20 @@ int main(int argc, char *argv[])
 					E2iSendMsg("{\"PLAYBACK_SLOWMOTION\":{\"speed\":%d, \"sts\":%d}}\n", speed, commandRetVal);
 					break;
 				}
+
 				case 'o':
 				{
 					int flags = 0;
+
 					if (1 == sscanf(argvBuff + 1, "%d", &flags))
 					{
 						progressive_playback_set(flags);
 						E2iSendMsg("{\"PROGRESSIVE_DOWNLOAD\":{\"flags\":%d, \"sts\":0}}\n", flags);
 					}
+
 					break;
 				}
+
 				case 'f':
 				{
 					int speed = 0;
@@ -853,6 +953,7 @@ int main(int argc, char *argv[])
 					E2iSendMsg("{\"PLAYBACK_FASTFORWARD\":{\"speed\":%d, \"sts\":%d}}\n", speed, commandRetVal);
 					break;
 				}
+
 				case 'b':
 				{
 					int speed = 0;
@@ -862,6 +963,7 @@ int main(int argc, char *argv[])
 					E2iSendMsg("{\"PLAYBACK_FASTBACKWARD\":{\"speed\":%d, \"sts\":%d}}\n", speed, commandRetVal);
 					break;
 				}
+
 				case 'g':
 				{
 					int32_t gotoPos = 0;
@@ -871,15 +973,18 @@ int main(int argc, char *argv[])
 					int8_t force = ('f' == argvBuff[1]) ? 1 : 0; // f - force, c - check
 
 					sscanf(argvBuff + 2, "%d", &gotoPos);
+
 					if (0 <= gotoPos || force)
 					{
 						commandRetVal = g_player->playback->Command(g_player, PLAYBACK_LENGTH, (void *)&length);
 						E2iSendMsg("{\"PLAYBACK_LENGTH\":{\"length\":%"PRId64", \"sts\":%d}}\n", length, commandRetVal);
 
 						lengthInt = (int32_t)length;
+
 						if (10 <= lengthInt || force)
 						{
 							sec = gotoPos;
+
 							if (!force && gotoPos >= lengthInt)
 							{
 								sec = lengthInt - 10;
@@ -889,8 +994,10 @@ int main(int argc, char *argv[])
 							E2iSendMsg("{\"PLAYBACK_SEEK_ABS\":{\"sec\":%"PRId64", \"sts\":%d}}\n", sec, commandRetVal);
 						}
 					}
+
 					break;
 				}
+
 				case 'k':
 				{
 					int32_t seek = 0;
@@ -917,9 +1024,11 @@ int main(int argc, char *argv[])
 						E2iSendMsg("{\"PLAYBACK_LENGTH\":{\"length\":%"PRId64", \"sts\":%d}}\n", length, commandRetVal);
 
 						lengthInt = (int32_t)length;
+
 						if (10 <= lengthInt || force)
 						{
 							int32_t ergSec = CurrentSec + seek;
+
 							if (!force && 0 > ergSec)
 							{
 								sec = CurrentSec * -1; // jump to start position
@@ -927,6 +1036,7 @@ int main(int argc, char *argv[])
 							else if (!force && ergSec >= lengthInt)
 							{
 								sec = (lengthInt - CurrentSec) - 5;
+
 								if (0 < sec)
 								{
 									sec = 0; // no jump we are at the end
@@ -937,11 +1047,14 @@ int main(int argc, char *argv[])
 								sec = seek;
 							}
 						}
+
 						commandRetVal = g_player->playback->Command(g_player, PLAYBACK_SEEK, (void *)&sec);
 						E2iSendMsg("{\"PLAYBACK_SEEK\":{\"sec\":%"PRId64", \"sts\":%d}}\n", sec, commandRetVal);
 					}
+
 					break;
 				}
+
 				case 'l':
 				{
 					int64_t length = 0;
@@ -949,10 +1062,12 @@ int main(int argc, char *argv[])
 					E2iSendMsg("{\"PLAYBACK_LENGTH\":{\"length\":%"PRId64", \"sts\":%d}}\n", length, commandRetVal);
 					break;
 				}
+
 				case 'j':
 				{
 					int64_t pts = 0;
 					commandRetVal = g_player->playback->Command(g_player, PLAYBACK_PTS, &pts);
+
 					if (0 == commandRetVal)
 					{
 						int64_t lastPts = 0;
@@ -972,34 +1087,40 @@ int main(int argc, char *argv[])
 							E2iSendMsg("{\"J\":{\"ms\":%"PRId64"}}\n", pts / 90);
 						}
 					}
+
 					break;
 				}
+
 				case 'i':
 				{
 					PlaybackHandler_t *ptrP = g_player->playback;
+
 					if (ptrP)
 					{
 						E2iSendMsg("{\"PLAYBACK_INFO\":{ \"isPlaying\":%s, \"isPaused\":%s, \"isForwarding\":%s, \"isSeeking\":%s, \"isCreationPhase\":%s,", \
-						    DUMP_BOOL(ptrP->isPlaying), DUMP_BOOL(ptrP->isPaused), DUMP_BOOL(ptrP->isForwarding), DUMP_BOOL(ptrP->isSeeking), DUMP_BOOL(ptrP->isCreationPhase));
+							DUMP_BOOL(ptrP->isPlaying), DUMP_BOOL(ptrP->isPaused), DUMP_BOOL(ptrP->isForwarding), DUMP_BOOL(ptrP->isSeeking), DUMP_BOOL(ptrP->isCreationPhase));
 						E2iSendMsg("\"BackWard\":%d, \"SlowMotion\":%d, \"Speed\":%d, \"AVSync\":%d,", ptrP->BackWard, ptrP->SlowMotion, ptrP->Speed, ptrP->AVSync);
 						E2iSendMsg(" \"isVideo\":%s, \"isAudio\":%s, \"isSubtitle\":%s, \"isDvbSubtitle\":%s, \"isTeletext\":%s, \"mayWriteToFramebuffer\":%s, \"abortRequested\":%s }}\n", \
-						    DUMP_BOOL(ptrP->isVideo), DUMP_BOOL(ptrP->isAudio), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(ptrP->abortRequested));
+							DUMP_BOOL(ptrP->isVideo), DUMP_BOOL(ptrP->isAudio), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(0), DUMP_BOOL(ptrP->abortRequested));
 					}
 
 					break;
 				}
+
 				case 'n':
 				{
 					//uint8_t loop = 0;
 					if ('1' == argvBuff[1] || '0' == argvBuff[1])
 					{
 						PlaybackHandler_t *ptrP = g_player->playback;
+
 						if (ptrP)
 						{
 							ptrP->isLoopMode = '1' == argvBuff[1] ? 1 : 0;
 							E2iSendMsg("{\"N\":{ \"isLoop\":%s }}\n", DUMP_BOOL(ptrP->isLoopMode));
 						}
 					}
+
 					break;
 				}
 

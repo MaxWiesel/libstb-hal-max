@@ -13,8 +13,8 @@
 
 extern int debuglevel;
 
-void _hal_debug(int facility, const void *, const char *fmt, ...) __attribute__ ((format (printf, 3, 4)));
-void _hal_info(int facility, const void *, const char *fmt, ...)  __attribute__ ((format (printf, 3, 4)));
+void _hal_debug(int facility, const void *, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
+void _hal_info(int facility, const void *, const char *fmt, ...)  __attribute__((format(printf, 3, 4)));
 
 void hal_debug_init(void);
 void hal_set_threadname(const char *name);

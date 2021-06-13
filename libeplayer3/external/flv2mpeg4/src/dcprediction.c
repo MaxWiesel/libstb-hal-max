@@ -25,7 +25,6 @@
 
 #include "dcprediction.h"
 
-
 // M4V ADDED
 static const uint8 mpeg4_y_dc_scale_table[32] =
 {
@@ -65,6 +64,7 @@ static inline int get_pred(int *dc_cur, int stride, int scale)
 static inline void set_dc_to_dc_cur(int *dc_cur, int level, int scale)
 {
 	level *= scale;
+
 	if (level & (~2047))
 	{
 		if (level < 0)
@@ -103,8 +103,12 @@ static inline int get_scale(M4V_DCPRED *pred, int n)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void dcpred_set_qscale(M4V_DCPRED *pred, int qscale)
 {
-	if (qscale < 0) qscale = 0;
-	if (qscale > 31) qscale = 31;
+	if (qscale < 0)
+		qscale = 0;
+
+	if (qscale > 31)
+		qscale = 31;
+
 	pred->y_dc_scale = mpeg4_y_dc_scale_table[qscale];
 	pred->c_dc_scale = mpeg4_c_dc_scale_table[qscale];
 }
@@ -112,6 +116,7 @@ void dcpred_set_qscale(M4V_DCPRED *pred, int qscale)
 void dcpred_set_pos(M4V_DCPRED *pred, int mb_x, int mb_y)
 {
 	int n;
+
 	for (n = 0; n < 6; n++)
 	{
 		pred->dc_cur[n] = get_dc_cur(pred, mb_x, mb_y, n);

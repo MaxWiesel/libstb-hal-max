@@ -68,6 +68,7 @@ static int ManagerAdd(Context_t *context, Track_t track)
 	{
 		Tracks = malloc(sizeof(Track_t) * TRACKWRAP);
 		int i;
+
 		for (i = 0; i < TRACKWRAP; i++)
 		{
 			Tracks[i].Id = -1;
@@ -81,6 +82,7 @@ static int ManagerAdd(Context_t *context, Track_t track)
 	}
 
 	int i;
+
 	for (i = 0; i < TRACKWRAP; i++)
 	{
 		if (Tracks[i].Id == track.Id)
@@ -134,12 +136,14 @@ static char **ManagerList(Context_t *context __attribute__((unused)))
 			{
 				continue;
 			}
+
 			size_t len = strlen(Tracks[i].Name) + 20;
 			char tmp[len];
 			snprintf(tmp, len, "%d %s\n", Tracks[i].Id, Tracks[i].Name);
 			tracklist[j] = strdup(tmp);
 			tracklist[j + 1] = strdup(Tracks[i].Encoding);
 		}
+
 		tracklist[j] = NULL;
 	}
 
@@ -160,6 +164,7 @@ static int ManagerDel(Context_t *context)
 		{
 			freeTrack(&Tracks[i]);
 		}
+
 		free(Tracks);
 		Tracks = NULL;
 	}
@@ -191,12 +196,14 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			ret = ManagerAdd(context, *track);
 			break;
 		}
+
 		case MANAGER_LIST:
 		{
 			container_ffmpeg_update_tracks(context, context->playback->uri, 0);
 			*((char ***)argument) = (char **)ManagerList(context);
 			break;
 		}
+
 		case MANAGER_GET:
 		{
 			if ((TrackCount > 0) && (CurrentTrack >= 0))
@@ -207,14 +214,17 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((int *)argument) = (int) -1;
 			}
+
 			break;
 		}
+
 		case MANAGER_GET_TRACK_DESC:
 		{
 			if ((TrackCount > 0) && (CurrentTrack >= 0))
 			{
 				TrackDescription_t *track =  malloc(sizeof(TrackDescription_t));
 				*((TrackDescription_t **)argument) = track;
+
 				if (track)
 				{
 					memset(track, 0, sizeof(TrackDescription_t));
@@ -233,8 +243,10 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((TrackDescription_t **)argument) = NULL;
 			}
+
 			break;
 		}
+
 		case MANAGER_GET_TRACK:
 		{
 			video_mgr_printf(20, "MANAGER_GET_TRACK\n");
@@ -247,8 +259,10 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((Track_t **)argument) = NULL;
 			}
+
 			break;
 		}
+
 		case MANAGER_GETENCODING:
 		{
 			if ((TrackCount > 0) && (CurrentTrack >= 0) && (Tracks[CurrentTrack].Encoding != NULL))
@@ -259,8 +273,10 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((char **)argument) = (char *)strdup("");
 			}
+
 			break;
 		}
+
 		case MANAGER_GETNAME:
 		{
 			if ((TrackCount > 0) && (CurrentTrack >= 0) && (Tracks[CurrentTrack].Name != NULL))
@@ -271,11 +287,14 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((char **)argument) = (char *)strdup("");
 			}
+
 			break;
 		}
+
 		case MANAGER_SET:
 		{
 			int i;
+
 			for (i = 0; i < TrackCount; i++)
 			{
 				if (Tracks[i].Id == *((int *)argument))
@@ -290,33 +309,42 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 				video_mgr_err("track id %d unknown\n", *((int *)argument));
 				ret = cERR_VIDEO_MGR_ERROR;
 			}
+
 			break;
 		}
+
 		case MANAGER_DEL:
 		{
 			ret = ManagerDel(context);
 			break;
 		}
+
 		case MANAGER_INIT_UPDATE:
 		{
 			int i;
+
 			for (i = 0; i < TrackCount; i++)
 			{
 				Tracks[i].pending = 1;
 			}
+
 			break;
 		}
+
 		case MANAGER_UPDATED_TRACK_INFO:
 		{
 			if (updatedTrackInfoFnc != NULL)
 				updatedTrackInfoFnc();
+
 			break;
 		}
+
 		case MANAGER_REGISTER_UPDATED_TRACK_INFO:
 		{
 			updatedTrackInfoFnc = (void (*)(void))argument;
 			break;
 		}
+
 		default:
 			video_mgr_err("ContainerCmd %d not supported!\n", command);
 			ret = cERR_VIDEO_MGR_ERROR;
@@ -326,7 +354,6 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 	video_mgr_printf(10, "returning %d\n", ret);
 	return ret;
 }
-
 
 struct Manager_s VideoManager =
 {

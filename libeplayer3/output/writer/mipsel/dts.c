@@ -111,6 +111,7 @@ static int writeData(WriterAVCallData_t *call)
 
 #ifdef CHECK_FOR_DTS_HD
 	int32_t pos = 0;
+
 	while ((pos + 4) <= Size)
 	{
 		// check for DTS-HD
@@ -119,12 +120,15 @@ static int writeData(WriterAVCallData_t *call)
 			Size = pos;
 			break;
 		}
+
 		++pos;
 	}
+
 #endif
 
 // #define DO_BYTESWAP
 #ifdef DO_BYTESWAP
+
 	/* 16-bit byte swap all data before injecting it */
 	for (i = 0; i < Size; i += 2)
 	{
@@ -132,6 +136,7 @@ static int writeData(WriterAVCallData_t *call)
 		Data[i] = Data[i + 1];
 		Data[i + 1] = Tmp;
 	}
+
 #endif
 
 	struct iovec iov[2];

@@ -12,7 +12,8 @@ typedef enum
 	AUDIO_SYNC_AUDIO_MASTER
 } AUDIO_SYNC_MODE;
 
-typedef enum {
+typedef enum
+{
 	HDMI_ENCODED_OFF,
 	HDMI_ENCODED_AUTO,
 	HDMI_ENCODED_FORCED
@@ -22,7 +23,7 @@ class mixerVolume;
 
 class cAudio
 {
-	friend class cPlayback;
+		friend class cPlayback;
 	private:
 		int fd;
 		bool Muted;
@@ -31,7 +32,7 @@ class cAudio
 		int mixer_fd;  /* if we are using the OSS mixer */
 		int mixer_num; /* oss mixer to use, if any */
 
-		int	StreamType;
+		int StreamType;
 		AUDIO_SYNC_MODE    SyncMode;
 		bool started;
 
@@ -78,9 +79,9 @@ class cAudio
 		/* select channels */
 		int setChannel(int channel);
 		int PrepareClipPlay(int uNoOfChannels, int uSampleRate, int uBitsPerSample, int bLittleEndian);
-		int WriteClip(unsigned char * buffer, int size);
+		int WriteClip(unsigned char *buffer, int size);
 		int StopClip();
-		void getAudioInfo(int &type, int &layer, int& freq, int &bitrate, int &mode);
+		void getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &mode);
 		void SetSRS(int iq_enable, int nmgr_enable, int iq_mode, int iq_level);
 		bool IsHdmiDDSupported() { return true; };
 		void SetHdmiDD(bool enable);

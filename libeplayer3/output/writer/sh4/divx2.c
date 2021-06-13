@@ -81,6 +81,7 @@ static uint8_t updateCodecData(uint8_t *data, int32_t size)
 	static int32_t oldSize = 0;
 
 	uint8_t update = 0;
+
 	if (data != NULL && size > 0)
 	{
 		if (size != oldSize)
@@ -90,6 +91,7 @@ static uint8_t updateCodecData(uint8_t *data, int32_t size)
 		else
 		{
 			uint32_t i = 0;
+
 			for (i = 0; i < size; i++)
 			{
 				if (data[i] != oldData[i])
@@ -107,6 +109,7 @@ static uint8_t updateCodecData(uint8_t *data, int32_t size)
 		{
 			free(oldData);
 		}
+
 		oldData = malloc(size);
 		memcpy(oldData, data, size);
 		oldSize = size;
