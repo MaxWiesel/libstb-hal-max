@@ -246,7 +246,11 @@ void write_frame(AVFrame *in_frame, int fd)
 
 	static const unsigned char pes_header[] = {0x0, 0x0, 0x1, 0xe0, 0x00, 0x00, 0x80, 0x80, 0x5, 0x21, 0x0, 0x1, 0x0, 0x1};
 
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59,0,100)
 	AVCodec *codec = avcodec_find_encoder(AV_CODEC_ID_MPEG2VIDEO);
+#else
+	const AVCodec *codec = avcodec_find_encoder(AV_CODEC_ID_MPEG2VIDEO);
+#endif
 
 	if (codec)
 	{
@@ -381,7 +385,11 @@ int decode_frame(AVCodecContext *codecContext, AVPacket &packet, int fd)
 
 AVCodecContext *open_codec(AVMediaType mediaType, AVFormatContext *formatContext)
 {
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59,0,100)
 	AVCodec *codec = NULL;
+#else
+	const AVCodec *codec = NULL;
+#endif
 	AVCodecContext *codecContext = NULL;
 	int stream_index;
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(57,25,101)
