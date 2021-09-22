@@ -390,7 +390,7 @@ void cAudio::run()
 	hal_info("====================== start decoder thread ================================\n");
 	/* libavcodec & friends */
 
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59,0,100)
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59, 0, 100)
 	AVInputFormat *inp;
 	AVCodec *codec;
 #else

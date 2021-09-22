@@ -287,7 +287,7 @@ bool cVideo::ShowPicture(const char *fname)
 	AVFormatContext *avfc = NULL;
 	AVCodecContext *c = NULL;
 	AVCodecParameters *p = NULL;
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59,0,100)
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59, 0, 100)
 	AVCodec *codec;
 #else
 	const AVCodec *codec;
@@ -548,7 +548,7 @@ static int my_read(void *, uint8_t *buf, int buf_size)
 void cVideo::run(void)
 {
 	hal_info("====================== start decoder thread ================================\n");
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59,0,100)
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59, 0, 100)
 	AVInputFormat *inp;
 	AVCodec *codec;
 #else

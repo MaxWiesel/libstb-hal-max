@@ -2058,7 +2058,7 @@ int32_t container_ffmpeg_init_av_context(Context_t *context, char *filename, uin
 
 	if (avContextTab[AVIdx] != NULL)
 	{
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59,0,100)
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(59, 0, 100)
 		avContextTab[AVIdx]->iformat->flags |= AVFMT_SEEK_TO_PTS;
 #endif
 		avContextTab[AVIdx]->flags = AVFMT_FLAG_GENPTS;
