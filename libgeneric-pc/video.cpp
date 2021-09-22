@@ -349,20 +349,6 @@ bool cVideo::ShowPicture(const char *fname)
 		goto out_free;
 	}
 
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57,37,100)
-	av_ret = avcodec_decode_video2(c, frame, &got_frame, &avpkt);
-
-	if (av_ret < 0)
-	{
-		hal_info("%s: avcodec_decode_video2 %d\n", __func__, av_ret);
-		av_packet_unref(&avpkt);
-		goto out_free;
-	}
-
-	if (avpkt.size > av_ret)
-		hal_info("%s: WARN: pkt->size %d != len %d\n", __func__, avpkt.size, av_ret);
-
-#else
 	av_ret = avcodec_send_packet(c, &avpkt);
 
 	if (av_ret != 0 && av_ret != AVERROR(EAGAIN))
@@ -378,7 +364,6 @@ bool cVideo::ShowPicture(const char *fname)
 		goto out_free;
 
 	got_frame = 1;
-#endif
 
 	if (got_frame)
 	{
@@ -672,25 +657,6 @@ void cVideo::run(void)
 		}
 
 		int got_frame = 0;
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57,37,100)
-		av_ret = avcodec_decode_video2(c, frame, &got_frame, &avpkt);
-
-		if (av_ret < 0)
-		{
-			if (warn_d - time(NULL) > 4)
-			{
-				hal_info("%s: avcodec_decode_video2 %d\n", __func__, av_ret);
-				warn_d = time(NULL);
-			}
-
-			av_packet_unref(&avpkt);
-			continue;
-		}
-
-		if (avpkt.size > av_ret)
-			hal_info("%s: WARN: pkt->size %d != len %d\n", __func__, avpkt.size, av_ret);
-
-#else
 		av_ret = avcodec_send_packet(c, &avpkt);
 
 		if (av_ret != 0 && av_ret != AVERROR(EAGAIN))
@@ -710,7 +676,6 @@ void cVideo::run(void)
 		if (!av_ret)
 			got_frame = 1;
 
-#endif
 		still_m.lock();
 
 		if (got_frame && ! stillpicture)
@@ -754,19 +719,16 @@ void cVideo::run(void)
 #endif
 				/* a/v delay determined experimentally :-) */
 #if USE_OPENGL
-
 				if (v_format == VIDEO_FORMAT_MPEG2)
 					vpts += 90000 * 4 / 10; /* 400ms */
 				else
 					vpts += 90000 * 3 / 10; /* 300ms */
-
 #endif
 #if USE_CLUTTER
 
 				/* no idea why there's a difference between OpenGL and clutter rendering... */
 				if (v_format == VIDEO_FORMAT_MPEG2)
 					vpts += 90000 * 3 / 10; /* 300ms */
-
 #endif
 				f->pts(vpts);
 				AVRational a = av_guess_sample_aspect_ratio(avfc, avfc->streams[0], frame);
@@ -939,7 +901,6 @@ bool cVideo::GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get
 	if (get_video)
 	{
 #if USE_OPENGL //memcpy dont work with copy BGR24 to RGB32
-
 		if (vid_w != xres || vid_h != yres)  /* scale video into data... */
 		{
 #endif
@@ -950,14 +911,12 @@ bool cVideo::GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get
 				free(data);
 				return false;
 			}
-
 #if USE_OPENGL //memcpy dont work with copy BGR24 to RGB32
 		}
 		else   /* get_video and no fancy scaling needed */
 		{
 			memcpy(data, &video[0], xres * yres * sizeof(uint32_t));
 		}
-
 #endif
 	}
 

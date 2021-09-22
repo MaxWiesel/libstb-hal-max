@@ -265,13 +265,6 @@ void write_frame(AVFrame *in_frame, int fd)
 				AVPacket pkt;
 				av_init_packet(&pkt);
 				/* encode the image */
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57,37,100)
-				int got_output = 0;
-				int ret = avcodec_encode_video2(codec_context, &pkt, in_frame, &got_output);
-
-				if (ret != -1)
-				{
-#else
 				int ret = avcodec_send_frame(codec_context, in_frame);
 
 				if (!ret)
@@ -282,22 +275,13 @@ void write_frame(AVFrame *in_frame, int fd)
 
 				if (!ret)
 				{
-#endif
 					int i = 1;
 					/* get the delayed frames */
 					in_frame->pts = i;
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57,37,100)
-					ret = avcodec_encode_video2(codec_context, &pkt, 0, &got_output);
-
-					if (ret != -1 && got_output)
-					{
-#else
 					ret = avcodec_receive_packet(codec_context, &pkt);
 
 					if (!ret)
 					{
-#endif
-
 						if ((pkt.data[3] >> 4) != 0xE)
 						{
 							write_all(fd, pes_header, sizeof(pes_header));
@@ -325,16 +309,6 @@ int decode_frame(AVCodecContext *codecContext, AVPacket &packet, int fd)
 
 	if (frame)
 	{
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57,37,100)
-		int decode_ok = 0;
-
-		if ((avcodec_decode_video2(codecContext, frame, &decode_ok, &packet)) < 0 || !decode_ok)
-		{
-			av_frame_free(&frame);
-			return -1;
-		}
-
-#else
 		int ret;
 		ret = avcodec_send_packet(codecContext, &packet);
 
@@ -354,7 +328,6 @@ int decode_frame(AVCodecContext *codecContext, AVPacket &packet, int fd)
 			return -1;
 		}
 
-#endif
 		AVFrame *dest_frame = av_frame_alloc();
 
 		if (dest_frame)
@@ -392,31 +365,6 @@ AVCodecContext *open_codec(AVMediaType mediaType, AVFormatContext *formatContext
 #endif
 	AVCodecContext *codecContext = NULL;
 	int stream_index;
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(57,25,101)
-	stream_index = av_find_best_stream(formatContext, mediaType, -1, -1, NULL, 0);
-
-	if (stream_index >= 0)
-	{
-		codecContext = formatContext->streams[stream_index]->codec;
-
-		if (codecContext)
-		{
-			codec = avcodec_find_decoder(codecContext->codec_id);
-
-			if (codec)
-			{
-				if ((avcodec_open2(codecContext, codec, NULL)) != 0)
-				{
-					return NULL;
-				}
-			}
-
-			return codecContext;
-		}
-	}
-
-	return NULL;
-#else
 	stream_index = av_find_best_stream(formatContext, mediaType, -1, -1, &codec, 0);
 
 	if (stream_index >= 0)
@@ -440,7 +388,6 @@ AVCodecContext *open_codec(AVMediaType mediaType, AVFormatContext *formatContext
 	}
 
 	return NULL;
-#endif
 }
 
 int image_to_mpeg2(const char *image_name, int fd)

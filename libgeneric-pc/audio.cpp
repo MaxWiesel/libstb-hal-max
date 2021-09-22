@@ -547,9 +547,6 @@ void cAudio::run()
 		if (av_read_frame(avfc, &avpkt) < 0)
 			break;
 
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57,37,100)
-		avcodec_decode_audio4(c, frame, &gotframe, &avpkt);
-#else
 		av_ret = avcodec_send_packet(c, &avpkt);
 
 		if (av_ret != 0 && av_ret != AVERROR(EAGAIN))
@@ -569,8 +566,6 @@ void cAudio::run()
 				gotframe = 1;
 			}
 		}
-
-#endif
 
 		if (gotframe && thread_started)
 		{
