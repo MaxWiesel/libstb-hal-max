@@ -365,6 +365,7 @@ AVCodecContext *open_codec(AVMediaType mediaType, AVFormatContext *formatContext
 #endif
 	AVCodecContext *codecContext = NULL;
 	int stream_index;
+
 	stream_index = av_find_best_stream(formatContext, mediaType, -1, -1, &codec, 0);
 
 	if (stream_index >= 0)
@@ -393,10 +394,6 @@ AVCodecContext *open_codec(AVMediaType mediaType, AVFormatContext *formatContext
 int image_to_mpeg2(const char *image_name, int fd)
 {
 	int ret = 0;
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
-	av_register_all();
-	avcodec_register_all();
-#endif
 
 	AVFormatContext *formatContext = avformat_alloc_context();
 

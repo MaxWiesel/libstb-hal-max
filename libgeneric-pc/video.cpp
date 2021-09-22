@@ -82,9 +82,6 @@ static const AVRational aspect_ratios[6] =
 cVideo::cVideo(int, void *, void *, unsigned int)
 {
 	hal_debug("%s\n", __func__);
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
-	av_register_all();
-#endif
 
 	if (!HAL_nodec)
 		dmxbuf = (uint8_t *)malloc(DMX_BUF_SZ);
