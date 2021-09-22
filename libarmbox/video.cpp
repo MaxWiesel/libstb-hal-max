@@ -262,8 +262,8 @@ void write_frame(AVFrame *in_frame, int fd)
 
 			if (avcodec_open2(codec_context, codec, 0) != -1)
 			{
-				AVPacket pkt;
-				av_init_packet(&pkt);
+				AVPacket *pkt;
+				pkt = av_packet_alloc();
 				/* encode the image */
 				int ret = avcodec_send_frame(codec_context, in_frame);
 
@@ -278,21 +278,21 @@ void write_frame(AVFrame *in_frame, int fd)
 					int i = 1;
 					/* get the delayed frames */
 					in_frame->pts = i;
-					ret = avcodec_receive_packet(codec_context, &pkt);
+					ret = avcodec_receive_packet(codec_context, pkt);
 
 					if (!ret)
 					{
-						if ((pkt.data[3] >> 4) != 0xE)
+						if ((pkt->data[3] >> 4) != 0xE)
 						{
 							write_all(fd, pes_header, sizeof(pes_header));
 						}
 						else
 						{
-							pkt.data[4] = pkt.data[5] = 0x00;
+							pkt->data[4] = pkt->data[5] = 0x00;
 						}
 
-						write_all(fd, pkt.data, pkt.size);
-						av_packet_unref(&pkt);
+						write_all(fd, pkt->data, pkt->size);
+						av_packet_unref(pkt);
 					}
 				}
 			}
@@ -303,14 +303,14 @@ void write_frame(AVFrame *in_frame, int fd)
 	}
 }
 
-int decode_frame(AVCodecContext *codecContext, AVPacket &packet, int fd)
+int decode_frame(AVCodecContext *codecContext,AVPacket *packet, int fd)
 {
 	AVFrame *frame = av_frame_alloc();
 
 	if (frame)
 	{
 		int ret;
-		ret = avcodec_send_packet(codecContext, &packet);
+		ret = avcodec_send_packet(codecContext, packet);
 
 		// In particular, we don't expect AVERROR(EAGAIN), because we read all
 		// decoded frames with avcodec_receive_frame() until done.
@@ -403,10 +403,10 @@ int image_to_mpeg2(const char *image_name, int fd)
 
 		if (codecContext)
 		{
-			AVPacket packet;
-			av_init_packet(&packet);
+			AVPacket *packet;
+			packet = av_packet_alloc();
 
-			if ((ret = av_read_frame(formatContext, &packet)) != -1)
+			if ((ret = av_read_frame(formatContext, packet)) != -1)
 			{
 				if ((ret = decode_frame(codecContext, packet, fd)) != 1)
 				{
@@ -415,7 +415,7 @@ int image_to_mpeg2(const char *image_name, int fd)
 					write_all(fd, endcode, sizeof(endcode));
 				}
 
-				av_packet_unref(&packet);
+				av_packet_unref(packet);
 			}
 
 			avcodec_close(codecContext);

@@ -293,7 +293,7 @@ bool cVideo::ShowPicture(const char *fname)
 	const AVCodec *codec;
 #endif
 	AVFrame *frame, *rgbframe;
-	AVPacket avpkt;
+	AVPacket *avpkt;
 
 	if (avformat_open_input(&avfc, fname, NULL, NULL) < 0)
 	{
@@ -338,20 +338,20 @@ bool cVideo::ShowPicture(const char *fname)
 		goto out_free;
 	}
 
-	av_init_packet(&avpkt);
+	avpkt = av_packet_alloc();
 
-	if (av_read_frame(avfc, &avpkt) < 0)
+	if (av_read_frame(avfc, avpkt) < 0)
 	{
 		hal_info("%s: av_read_frame < 0\n", __func__);
 		goto out_free;
 	}
 
-	av_ret = avcodec_send_packet(c, &avpkt);
+	av_ret = avcodec_send_packet(c, avpkt);
 
 	if (av_ret != 0 && av_ret != AVERROR(EAGAIN))
 	{
 		hal_info("%s: avcodec_send_packet %d\n", __func__, av_ret);
-		av_packet_unref(&avpkt);
+		av_packet_unref(avpkt);
 		goto out_free;
 	}
 
@@ -406,7 +406,7 @@ bool cVideo::ShowPicture(const char *fname)
 		}
 	}
 
-	av_packet_unref(&avpkt);
+	av_packet_unref(avpkt);
 out_free:
 	avcodec_close(c);
 	av_free(c);
@@ -560,7 +560,7 @@ void cVideo::run(void)
 	AVFormatContext *avfc = NULL;
 	AVFrame *frame, *rgbframe;
 	uint8_t *inbuf = (uint8_t *)av_malloc(INBUF_SIZE);
-	AVPacket avpkt;
+	AVPacket *avpkt;
 	struct SwsContext *convert = NULL;
 
 	time_t warn_r = 0; /* last read error */
@@ -573,7 +573,7 @@ void cVideo::run(void)
 	buf_out = 0;
 	dec_r = 0;
 
-	av_init_packet(&avpkt);
+	avpkt = av_packet_alloc();
 	inp = av_find_input_format("mpegts");
 	AVIOContext *pIOCtx = avio_alloc_context(inbuf, INBUF_SIZE, // internal Buffer and its size
 			0,		// bWriteable (1=true,0=false)
@@ -598,10 +598,10 @@ void cVideo::run(void)
 	{
 		hal_info("%s: nb_streams %d, should be 1 => retry\n", __func__, avfc->nb_streams);
 
-		if (av_read_frame(avfc, &avpkt) < 0)
+		if (av_read_frame(avfc, avpkt) < 0)
 			hal_info("%s: av_read_frame < 0\n", __func__);
 
-		av_packet_unref(&avpkt);
+		av_packet_unref(avpkt);
 
 		if (! thread_running)
 			goto out;
@@ -641,7 +641,7 @@ void cVideo::run(void)
 
 	while (thread_running)
 	{
-		if (av_read_frame(avfc, &avpkt) < 0)
+		if (av_read_frame(avfc, avpkt) < 0)
 		{
 			if (warn_r - time(NULL) > 4)
 			{
@@ -654,7 +654,7 @@ void cVideo::run(void)
 		}
 
 		int got_frame = 0;
-		av_ret = avcodec_send_packet(c, &avpkt);
+		av_ret = avcodec_send_packet(c, avpkt);
 
 		if (av_ret != 0 && av_ret != AVERROR(EAGAIN))
 		{
@@ -664,7 +664,7 @@ void cVideo::run(void)
 				warn_d = time(NULL);
 			}
 
-			av_packet_unref(&avpkt);
+			av_packet_unref(avpkt);
 			continue;
 		}
 
@@ -758,7 +758,7 @@ void cVideo::run(void)
 			hal_debug("%s: got_frame: %d stillpicture: %d\n", __func__, got_frame, stillpicture);
 
 		still_m.unlock();
-		av_packet_unref(&avpkt);
+		av_packet_unref(avpkt);
 	}
 
 	sws_freeContext(convert);

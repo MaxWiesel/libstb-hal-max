@@ -400,7 +400,8 @@ void cAudio::run()
 	AVFormatContext *avfc = NULL;
 	AVFrame *frame;
 	uint8_t *inbuf = (uint8_t *)av_malloc(INBUF_SIZE);
-	AVPacket avpkt;
+	AVPacket *avpkt;
+	avpkt = av_packet_alloc();
 	int ret, driver;
 	int av_ret = 0;
 	/* libao */
@@ -417,7 +418,6 @@ void cAudio::run()
 	char tmp[64] = "unknown";
 
 	curr_pts = 0;
-	av_init_packet(&avpkt);
 	inp = av_find_input_format("mpegts");
 	AVIOContext *pIOCtx = avio_alloc_context(inbuf, INBUF_SIZE, // internal Buffer and its size
 			0,		// bWriteable (1=true,0=false)
@@ -541,10 +541,10 @@ void cAudio::run()
 	{
 		int gotframe = 0;
 
-		if (av_read_frame(avfc, &avpkt) < 0)
+		if (av_read_frame(avfc, avpkt) < 0)
 			break;
 
-		av_ret = avcodec_send_packet(c, &avpkt);
+		av_ret = avcodec_send_packet(c, avpkt);
 
 		if (av_ret != 0 && av_ret != AVERROR(EAGAIN))
 		{
@@ -578,7 +578,7 @@ void cAudio::run()
 						frame->nb_samples, AV_SAMPLE_FMT_S16, 1) < 0)
 				{
 					hal_info("av_samples_alloc failed\n");
-					av_packet_unref(&avpkt);
+					av_packet_unref(avpkt);
 					break; /* while (thread_started) */
 				}
 
@@ -599,7 +599,7 @@ void cAudio::run()
 				ao_play(adevice, (char *)obuf, o_buf_sz);
 		}
 
-		av_packet_unref(&avpkt);
+		av_packet_unref(avpkt);
 	}
 
 	// ao_close(adevice); /* can take long :-( */
