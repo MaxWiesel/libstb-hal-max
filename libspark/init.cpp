@@ -69,11 +69,13 @@ static void do_mknod(int i, char *d_name)
 	char name[255];
 	int dev = -1;
 	// I've no idea how the event device number is actually calculated. Just loop.  --martii
+
 	for (int j = 0; j < 99 && dev < 0; j++)
 	{
 		snprintf(name, sizeof(name), VIRTUALINPUT "/%s/event%d/dev", d_name, j);
 		dev = open(name, O_RDONLY);
 	}
+
 	if (dev > -1)
 	{
 		char buf[255];
@@ -114,6 +116,7 @@ static void create_input_devices(void)
 					do
 						buf[l--] = 0;
 					while (l > 1 && buf[l] == '\n');
+
 					for (unsigned int i = 0; i < number_of_input_devices; i++)
 						if (input_device[i].desc && !strcmp(buf, input_device[i].desc))
 						{
@@ -215,6 +218,7 @@ static void poll_input_devices(void)
 			inputs[nfds] = &input_device[i];
 			nfds++;
 		}
+
 	if (nfds == 0)
 	{
 		// Only a single input device, which happens to be our master. poll() to avoid looping too fast.
@@ -224,6 +228,7 @@ static void poll_input_devices(void)
 		poll(fds, 1, 60000 /* ms */);
 		return;
 	}
+
 	int r = poll(fds, nfds, 60000 /* ms */);
 	if (r < 0)
 	{
@@ -260,12 +265,14 @@ static void *inmux_thread(void *)
 	strncpy(threadname, __func__, sizeof(threadname));
 	threadname[16] = 0;
 	prctl(PR_SET_NAME, (unsigned long)&threadname);
+
 	inmux_thread_running = 1;
 	while (inmux_thread_running)
 	{
 		open_input_devices();
 		poll_input_devices();
 	}
+
 	return NULL;
 }
 
@@ -304,6 +311,7 @@ void hal_api_init()
 		f.SetCpuFreq(0);	/* CPUFREQ == 0 is the trigger for leaving standby */
 		create_input_devices();
 		start_inmux_thread();
+
 		/* this is a strange hack: the drivers seem to only work correctly after
 		 * demux0 has been used once. After that, we can use demux1,2,... */
 		struct dmx_pes_filter_params p;
