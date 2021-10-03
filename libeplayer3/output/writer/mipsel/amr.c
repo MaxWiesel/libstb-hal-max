@@ -88,7 +88,6 @@ static int writeData(WriterAVCallData_t *call)
 	}
 
 	amr_printf(10, "AudioPts %lld\n", call->Pts);
-
 	size_t payload_len = call->len;
 	bool hasCodecData = true;
 
@@ -102,11 +101,9 @@ static int writeData(WriterAVCallData_t *call)
 	{
 		payload_len += 9;
 	}
-
 	payload_len += 4;
 
 	uint32_t headerSize = InsertPesHeader(PesHeader, payload_len, MPEG_AUDIO_PES_START_CODE, call->Pts, 0);
-
 	PesHeader[headerSize++] = (payload_len >> 24) & 0xff;
 	PesHeader[headerSize++] = (payload_len >> 16) & 0xff;
 	PesHeader[headerSize++] = (payload_len >> 8)  & 0xff;
@@ -118,19 +115,14 @@ static int writeData(WriterAVCallData_t *call)
 	}
 
 	struct iovec iov[2];
-
 	iov[0].iov_base = PesHeader;
-
 	iov[0].iov_len = headerSize;
-
 	iov[1].iov_base = call->data;
-
 	iov[1].iov_len = call->len;
 
 	int len = call->WriteV(call->fd, iov, 2);
 
 	amr_printf(10, "amr_Write-< len=%d\n", len);
-
 	return len;
 }
 

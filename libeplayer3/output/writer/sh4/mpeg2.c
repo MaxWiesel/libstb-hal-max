@@ -119,13 +119,11 @@ static int writeData(void *_call)
 		iov[1].iov_len = PacketLength;
 
 		ssize_t l = call->WriteV(call->fd, iov, 2);
-
 		if (l < 0)
 		{
 			len = l;
 			break;
 		}
-
 		len += l;
 
 		Position += PacketLength;

@@ -53,13 +53,11 @@ static inline char *getExtension(char *name)
 	if (name)
 	{
 		char *ext = strrchr(name, '.');
-
 		if (ext)
 		{
 			return ext + 1;
 		}
 	}
-
 	return NULL;
 }
 

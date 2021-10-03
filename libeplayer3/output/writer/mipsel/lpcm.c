@@ -138,7 +138,6 @@ static int writeData(WriterAVCallData_t *call)
 	int32_t i_channels = (int32_t)pcmPrivateData->channels;
 	int32_t i_nb_samples = call->len / (i_channels * 2);
 	int32_t i_ret_size = 0;
-
 	if (i_channels > 8)
 	{
 		lpcm_err("Error DVD LPCM supports a maximum of eight channels i_channels[%d]\n", i_channels);
@@ -149,25 +148,20 @@ static int writeData(WriterAVCallData_t *call)
 	{
 		lpcm_printf(1, "i_rate: [%d]\n", i_rate);
 		lpcm_printf(1, "i_channels: [%d]\n", i_channels);
-
 		switch (i_rate)
 		{
 			case 48000:
 				i_freq_code = 0;
 				break;
-
 			case 96000:
 				i_freq_code = 1;
 				break;
-
 			case 44100:
 				i_freq_code = 2;
 				break;
-
 			case 32000:
 				i_freq_code = 3;
 				break;
-
 			default:
 				lpcm_err("Error DVD LPCM sample_rate not supported [%d]\n", i_rate);
 				return 0;
@@ -176,19 +170,16 @@ static int writeData(WriterAVCallData_t *call)
 		/* In DVD LCPM, a frame is always 150 PTS ticks. */
 		i_frame_samples = i_rate * 150 / 90000;
 		i_frame_size = i_frame_samples * i_channels * 2 + LLPCM_VOB_HEADER_LEN;
-
 		if (NULL != p_buffer)
 		{
 			free(p_buffer);
 		}
-
 		p_buffer = malloc(i_frame_samples * i_channels * 16);
 
 		if (NULL != p_frame_buffer)
 		{
 			free(p_frame_buffer);
 		}
-
 		p_frame_buffer = malloc(i_frame_size);
 		i_buffer_used = 0;
 		i_frame_num = 0;
@@ -201,7 +192,6 @@ static int writeData(WriterAVCallData_t *call)
 
 	int32_t i_bytes_consumed = 0;
 	int32_t i = 0;
-
 	for (i = 0; i < i_num_frames; ++i)
 	{
 		uint8_t *frame = (uint8_t *)p_frame_buffer;

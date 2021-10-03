@@ -64,21 +64,17 @@ unsigned long cCpuFreqManager::GetDelta(void)
 unsigned long cCpuFreqManager::GetCpuFreq(void)
 {
 	int freq = 0;
-
 	if (FILE *pll0 = fopen("/proc/cpu_frequ/pll0_ndiv_mdiv", "r"))
 	{
 		char buffer[120];
-
 		while (fgets(buffer, sizeof(buffer), pll0))
 		{
 			if (1 == sscanf(buffer, "SH4 = %d MHZ", &freq))
 				break;
 		}
-
 		fclose(pll0);
 		return 1000 * 1000 * (unsigned long) freq;
 	}
-
 	return 0;
 }
 #else
@@ -93,11 +89,9 @@ bool cCpuFreqManager::SetCpuFreq(unsigned long f)
 {
 	hal_info("%s(%lu) => set standby = %s\n", __func__, f, f ? "true" : "false");
 #if HAVE_SPARK_HARDWARE || HAVE_DUCKBOX_HARDWARE
-
 	if (f)
 	{
 		FILE *pll0 = fopen("/proc/cpu_frequ/pll0_ndiv_mdiv", "w");
-
 		if (pll0)
 		{
 			f /= 1000000;
@@ -106,7 +100,6 @@ bool cCpuFreqManager::SetCpuFreq(unsigned long f)
 			return false;
 		}
 	}
-
 #endif
 	return true;
 }

@@ -91,7 +91,6 @@ static bool IsRegular(const char *pPath)
 	{
 		return true;
 	}
-
 	return false;
 }
 
@@ -101,7 +100,6 @@ static void RemoveAllRegularFiles(const char *mainDir, const char *filePattern)
 		return;
 
 	DIR *dirp = opendir(mainDir);
-
 	if (0 == dirp)
 		return;
 
@@ -113,7 +111,6 @@ static void RemoveAllRegularFiles(const char *mainDir, const char *filePattern)
 		while (1)
 		{
 			pDir = readdir(dirp);
-
 			if (0 == pDir)
 				break;
 
@@ -121,7 +118,6 @@ static void RemoveAllRegularFiles(const char *mainDir, const char *filePattern)
 				continue;
 
 			snprintf(fullpath, PATH_MAX, "%s/%s", mainDir, pDir->d_name);
-
 			if (pDir->d_type == DT_UNKNOWN && !IsRegular(fullpath))
 				continue;
 
@@ -129,7 +125,6 @@ static void RemoveAllRegularFiles(const char *mainDir, const char *filePattern)
 				remove(fullpath);
 		}
 	}
-
 	free(fullpath);
 	closedir(dirp);
 }
@@ -142,9 +137,7 @@ static int32_t Reset()
 {
 	if (g_sys)
 		avcodec_flush_buffers(g_sys->p_context);
-
 	RemoveAllRegularFiles(GetGraphicSubPath(), "[0-9]*_[0-9]*_[0-9]*.png");
-
 	return 0;
 }
 
@@ -153,7 +146,6 @@ static int32_t Open(SubtitleCodecId_t codecId, uint8_t *extradata, int extradata
 	enum AVCodecID avCodecId = AV_CODEC_ID_NONE;
 	const AVCodec *codec;
 	bool b_need_ephemer = false;
-
 	/* */
 	switch (codecId)
 	{
@@ -161,16 +153,13 @@ static int32_t Open(SubtitleCodecId_t codecId, uint8_t *extradata, int extradata
 			avCodecId = AV_CODEC_ID_HDMV_PGS_SUBTITLE;
 			b_need_ephemer = true;
 			break;
-
 		case SUBTITLE_CODEC_ID_DVB:
 			avCodecId = AV_CODEC_ID_DVB_SUBTITLE;
 			b_need_ephemer = true;
 			break;
-
 		case SUBTITLE_CODEC_ID_XSUB:
 			avCodecId = AV_CODEC_ID_XSUB;
 			break;
-
 		default:
 			subtitle_err("unsupported subtitle codecId: %d\n", (int)codecId);
 			return -1;
@@ -178,7 +167,6 @@ static int32_t Open(SubtitleCodecId_t codecId, uint8_t *extradata, int extradata
 
 	codec = avcodec_find_decoder(avCodecId);
 	AVCodecContext *context = avcodec_alloc_context3(codec);
-
 	Reset();
 
 	if (context == NULL)
@@ -194,19 +182,14 @@ static int32_t Open(SubtitleCodecId_t codecId, uint8_t *extradata, int extradata
 
 	g_sys->p_context = context;
 	g_sys->p_codec = codec;
-
 	/* this mean that new subtitles atom overwrite the previous one */
 	g_sys->b_need_ephemer = b_need_ephemer;
-
 	g_sys->p_swctx = NULL;
-
 	/* */
 	context->extradata = extradata;
 	context->extradata_size = extradata_size;
-
 	//av_codec_set_pkt_timebase(context, AV_TIME_BASE_Q);
 	context->pkt_timebase = AV_TIME_BASE_Q;
-
 	int ret = avcodec_open2(context, codec, NULL);
 
 	if (ret < 0)
@@ -218,13 +201,11 @@ static int32_t Open(SubtitleCodecId_t codecId, uint8_t *extradata, int extradata
 
 	/* Lazy PNG plugin init */
 	ret = PNGPlugin_init();
-
 	if (0 != ret)
 	{
 		/* Report plugin error */
 		E2iSendMsg("{\"e_plugin\":[\"png\",\"init\",%d]}\n", ret);
 	}
-
 	return 0;
 }
 
@@ -233,21 +214,17 @@ static int32_t Close()
 	if (g_sys)
 	{
 		AVCodecContext *ctx = g_sys->p_context;
-
 		if (ctx)
 		{
 			/* extradata is not allocated by us */
 			ctx->extradata = NULL;
 			ctx->extradata_size = 0;
-
 			avcodec_free_context(&ctx);
 		}
-
 		sws_freeContext(g_sys->p_swctx);
 		free(g_sys);
 		g_sys = NULL;
 	}
-
 	Reset();
 	return 0;
 }
@@ -260,16 +237,13 @@ static int32_t Write(WriterSubCallData_t *subPacket)
 	if (!g_sys)
 		if (Open(subPacket->codecId, subPacket->private_data, subPacket->private_size))
 			return -1;
-
 	AVSubtitle subtitle;
 	memset(&subtitle, 0, sizeof(subtitle));
-
 	AVPacket *pkt;
 	pkt = av_packet_alloc();
 	pkt->data = subPacket->data;
 	pkt->size = subPacket->len;
 	pkt->pts  = subPacket->pts;
-
 	int has_subtitle = 0;
 	//int used = avcodec_decode_subtitle2(g_sys->p_context, &subtitle, &has_subtitle, &pkt);
 	uint32_t width = g_sys->p_context->width > 0 ? g_sys->p_context->width : subPacket->width;
@@ -279,21 +253,17 @@ static int32_t Write(WriterSubCallData_t *subPacket)
 	{
 		uint32_t i = 0;
 		uint32_t j = 0;
-
 		uint64_t startTimestamp = subPacket->pts / 90  + subtitle.start_display_time;
 		uint64_t endTimestamp = subPacket->pts / 90  + subtitle.end_display_time;
 		rec_desc_t desc_tab[MAX_RECT_DESC];
-
 		for (; i < subtitle.num_rects && j < MAX_RECT_DESC; i++)
 		{
 			AVSubtitleRect *rec = subtitle.rects[i];
-
 			switch (subtitle.format)
 			{
 				case 0: /* 0 = graphics */
 				{
 					snprintf(desc_tab[j].filename, sizeof(desc_tab[j].filename), "%u_%"PRId64"_%u.png", subPacket->trackId, startTimestamp, i);
-
 					ssize_t bufsz = snprintf(NULL, 0, "%s/%s", GetGraphicSubPath(), desc_tab[j].filename);
 					char *filepath = malloc(bufsz + 1);
 
@@ -304,18 +274,14 @@ static int32_t Write(WriterSubCallData_t *subPacket)
 					}
 
 					snprintf(filepath, bufsz + 1, "%s/%s", GetGraphicSubPath(), desc_tab[j].filename);
-
 					desc_tab[j].x = av_rescale(rec->x, GetGraphicWindowWidth(), width);
 					desc_tab[j].y = av_rescale(rec->y, GetGraphicWindowHeight(), height);
 					desc_tab[j].w = av_rescale(rec->w, GetGraphicWindowWidth(), width);
 					desc_tab[j].h = av_rescale(rec->h, GetGraphicWindowHeight(), height);
-
 					subtitle_printf(50, "SUB_REC: src  x[%d], y[%d], %dx%d\n", rec->x, rec->y, rec->w, rec->h);
 					subtitle_printf(50, "SUB_REC: dest x[%d], y[%d], %dx%d\n", desc_tab[j].x, desc_tab[j].y, desc_tab[j].w, desc_tab[j].h);
-
 					uint8_t *data[AV_NUM_DATA_POINTERS] = {NULL};
 					int linesize[AV_NUM_DATA_POINTERS] = {0};
-
 					data[0] = av_malloc(desc_tab[j].w * desc_tab[j].h * 4);
 					linesize[0] = desc_tab[j].w * 4;
 
@@ -333,19 +299,15 @@ static int32_t Write(WriterSubCallData_t *subPacket)
 					{
 						j += 1;
 					}
-
 					av_freep(&data[0]);
-
 					free(filepath);
 					break;
 				}
-
 				default:
 					subtitle_err("unsupported subtitle type\n");
 					break;
 			}
 		}
-
 		char sep[2] = {'\0'};
 		E2iStartMsg();
 		E2iSendMsg("{\"s_a\":{\"id\":%d,\"s\":%"PRId64, subPacket->trackId, startTimestamp);
@@ -360,13 +322,11 @@ static int32_t Write(WriterSubCallData_t *subPacket)
 			E2iSendMsg("%s{\"x\":%d,\"y\":%d,\"w\":%d,\"h\":%d,\"f\":\"%s\"}", sep, desc_tab[i].x, desc_tab[i].y, desc_tab[i].w, desc_tab[i].h, desc_tab[i].filename);
 			sep[0] = ',';
 		}
-
 		E2iSendMsg("]}}\n");
 		E2iEndMsg();
 	}
 
 	avsubtitle_free(&subtitle);
-
 	return 0;
 }
 

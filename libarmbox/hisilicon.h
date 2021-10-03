@@ -239,9 +239,9 @@ typedef struct hiFORMAT_SUB_INFO_S
 	HI_S32  s32StreamIndex;                            /**< Stream index. The invalid value is ::HI_FORMAT_INVALID_STREAM_ID. */
 	HI_U32  u32Format;                                 /**< Subtitle format, For details about the value definition, see::HI_FORMAT_SUBTITLE_TYPE_E */
 	HI_U32  u32CharSet;                                /**< Encoding type of the subtitle, the value range is as follows:
-								1. The default value is 0.
-								2. The value of the u32CharSet is the identified byte encoding value if the IdentStream byte encoding function (for details about the definition, see hi_charset_common.h) is set.
-								3. If the ConvStream function (for details about the definition, see hi_charset_common.h) is set and the invoke interface is called to set the encoding type to be converted by implementing HI_FORMAT_INVOKE_SET_SOURCE_CODETYPE, the value of the u32CharSet is the configured encoding type */
+                                                            1. The default value is 0.
+                                                            2. The value of the u32CharSet is the identified byte encoding value if the IdentStream byte encoding function (for details about the definition, see hi_charset_common.h) is set.
+                                                            3. If the ConvStream function (for details about the definition, see hi_charset_common.h) is set and the invoke interface is called to set the encoding type to be converted by implementing HI_FORMAT_INVOKE_SET_SOURCE_CODETYPE, the value of the u32CharSet is the configured encoding type */
 	HI_BOOL bExtSub;                                  /**< Whether subtitles are external subtitles. When bExtSub is HI_TRUE, the subtitles are external. When bExtSub is HI_FALSE, the subtitles are internal. */
 	HI_U32  u32StreamNum;                             /**< contains stream number */
 	HI_CHAR paszLanguage[HI_FORMAT_MAX_LANGUAGE_NUM][HI_FORMAT_LANG_LEN]; /**< Subtitle language */

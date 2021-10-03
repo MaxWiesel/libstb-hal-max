@@ -74,7 +74,6 @@ static void printOutputCapabilities()
 		{
 			output_printf(10, "%s ", AvailableOutput[i]->Capabilities[j]);
 		}
-
 		output_printf(10, "\n");
 	}
 }
@@ -149,12 +148,10 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 				{
 					ret |= context->output->video->Command(context, OUTPUT_OPEN, "video");
 				}
-
 				if (context->playback->isAudio)
 				{
 					ret |= context->output->audio->Command(context, OUTPUT_OPEN, "audio");
 				}
-
 				if (context->playback->isSubtitle)
 				{
 					ret |= context->output->subtitle->Command(context, OUTPUT_OPEN, "subtitle");
@@ -164,10 +161,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_CLOSE:
 		{
 			if (context && context->playback)
@@ -191,28 +186,23 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_ADD:
 		{
 			OutputAdd(context, (char *) argument);
 			break;
 		}
-
 		case OUTPUT_DEL:
 		{
 			OutputDel(context, (char *) argument);
 			break;
 		}
-
 		case OUTPUT_CAPABILITIES:
 		{
 			printOutputCapabilities();
 			break;
 		}
-
 		case OUTPUT_PLAY:
 		{
 			// 4
@@ -243,10 +233,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_STOP:
 		{
 			if (context && context->playback)
@@ -270,10 +258,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_FLUSH:
 		{
 			if (context && context->playback)
@@ -297,10 +283,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_PAUSE:
 		{
 			if (context && context->playback)
@@ -324,10 +308,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_FASTFORWARD:
 		{
 			if (context && context->playback)
@@ -346,10 +328,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_REVERSE:
 		{
 			if (context && context->playback)
@@ -368,10 +348,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_CONTINUE:
 		{
 			if (context && context->playback)
@@ -395,10 +373,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_AVSYNC:
 		{
 			if (context && context->playback)
@@ -412,10 +388,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_CLEAR:
 		{
 			if (context && context->playback)
@@ -439,10 +413,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_PTS:
 		{
 			if (context && context->playback)
@@ -461,10 +433,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_SWITCH:
 		{
 			if (context && context->playback)
@@ -488,10 +458,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_SLOWMOTION:
 		{
 			if (context && context->playback)
@@ -510,10 +478,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_AUDIOMUTE:
 		{
 			if (context && context->playback)
@@ -527,10 +493,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_DISCONTINUITY_REVERSE:
 		{
 			if (context && context->playback)
@@ -544,10 +508,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_GET_FRAME_COUNT:
 		{
 			if (context && context->playback)
@@ -566,10 +528,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_GET_PROGRESSIVE:
 		{
 			if (context && context->playback)
@@ -583,10 +543,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_SET_BUFFER_SIZE:
 		{
 			if (context && context->playback)
@@ -604,10 +562,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		case OUTPUT_GET_BUFFER_SIZE:
 		{
 			if (context && context->playback)
@@ -625,10 +581,8 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument)
 			{
 				ret = cERR_OUTPUT_INTERNAL_ERROR;
 			}
-
 			break;
 		}
-
 		default:
 			output_err("%s::%s OutputCmd %d not supported!\n", __FILE__, __FUNCTION__, command);
 			ret = cERR_OUTPUT_INTERNAL_ERROR;

@@ -74,8 +74,8 @@ class cPlayback
 		void SetTitle(int title);
 
 #if 0
-		void FindAllSubs(uint16_t *pids, unsigned short *supported, uint16_t *numpida, std::string *language);
-		bool SelectSubtitles(int pid);
+		void FindAllSubs(short unsigned int *pids, short unsigned int *supported, short unsigned int *numpida, std::string *language);
+		bool SelectSubtitles(int pid, std::string charset = "");
 
 		// Functions that are not used by movieplayer.cpp:
 		bool GetOffset(off64_t &offset);

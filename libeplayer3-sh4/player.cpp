@@ -127,13 +127,11 @@ bool Player::Play()
 			isPlaying = true;
 			isPaused = false;
 			isForwarding = false;
-
 			if (isBackWard)
 			{
 				isBackWard = false;
 				output.Mute(false);
 			}
-
 			isSlowMotion = false;
 			Speed = 1;
 
@@ -153,14 +151,12 @@ bool Player::Play()
 				}
 			}
 		}
-
 	}
 	else
 	{
 		fprintf(stderr, "playback already running\n");
 		ret = false;
 	}
-
 	return ret;
 }
 
@@ -170,7 +166,6 @@ bool Player::Pause()
 
 	if (isPlaying && !isPaused)
 	{
-
 		if (isSlowMotion)
 			output.Clear();
 
@@ -179,13 +174,11 @@ bool Player::Pause()
 		isPaused = true;
 		//isPlaying  = 1;
 		isForwarding = false;
-
 		if (isBackWard)
 		{
 			isBackWard = false;
 			output.Mute(false);
 		}
-
 		isSlowMotion = false;
 		Speed = 1;
 	}
@@ -194,7 +187,6 @@ bool Player::Pause()
 		fprintf(stderr, "playback not playing or already in pause mode\n");
 		ret = false;
 	}
-
 	return ret;
 }
 
@@ -204,7 +196,6 @@ bool Player::Continue()
 
 	if (isPlaying && (isPaused || isForwarding || isBackWard || isSlowMotion))
 	{
-
 		if (isSlowMotion)
 			output.Clear();
 
@@ -213,13 +204,11 @@ bool Player::Continue()
 		isPaused = false;
 		//isPlaying  = 1;
 		isForwarding = false;
-
 		if (isBackWard)
 		{
 			isBackWard = false;
 			output.Mute(false);
 		}
-
 		isSlowMotion = false;
 		Speed = 1;
 	}
@@ -241,19 +230,16 @@ bool Player::Stop()
 		isPaused = false;
 		isPlaying = false;
 		isForwarding = false;
-
 		if (isBackWard)
 		{
 			isBackWard = false;
 			output.Mute(false);
 		}
-
 		isSlowMotion = false;
 		Speed = 0;
 
 		output.Stop();
 		input.Stop();
-
 	}
 	else
 	{
@@ -274,7 +260,6 @@ bool Player::FastForward(int speed)
 	/* Audio only forwarding not supported */
 	if (input.videoTrack && !isHttp && !isBackWard && (!isPaused ||  isPlaying))
 	{
-
 		if ((speed <= 0) || (speed > cMaxSpeed_ff))
 		{
 			fprintf(stderr, "speed %d out of range (1 - %d) \n", speed, cMaxSpeed_ff);
@@ -301,7 +286,6 @@ bool Player::FastBackward(int speed)
 	/* Audio only reverse play not supported */
 	if (input.videoTrack && !isForwarding && (!isPaused || isPlaying))
 	{
-
 		if ((speed > 0) || (speed < cMaxSpeed_fr))
 		{
 			fprintf(stderr, "speed %d out of range (0 - %d) \n", speed, cMaxSpeed_fr);
@@ -321,7 +305,6 @@ bool Player::FastBackward(int speed)
 
 		output.Clear();
 #if 0
-
 		if (output->Command(player, OUTPUT_REVERSE, NULL) < 0)
 		{
 			fprintf(stderr, "OUTPUT_REVERSE failed\n");
@@ -329,7 +312,6 @@ bool Player::FastBackward(int speed)
 			Speed = 1;
 			ret = false;
 		}
-
 #endif
 	}
 	else
@@ -358,7 +340,6 @@ bool Player::SlowMotion(int repeats)
 			case 8:
 				isSlowMotion = true;
 				break;
-
 			default:
 				repeats = 0;
 		}
@@ -366,7 +347,6 @@ bool Player::SlowMotion(int repeats)
 		output.SlowMotion(repeats);
 		return true;
 	}
-
 	fprintf(stderr, "slowmotion not possible\n");
 	return false;
 }
@@ -376,7 +356,6 @@ bool Player::Seek(int64_t pos, bool absolute)
 	if (GetVideoPid())
 		/* Don't Clear if no video track */
 		output.Clear();
-
 	return input.Seek(pos, absolute);
 }
 
@@ -432,13 +411,11 @@ bool Player::GetChapters(std::vector<int> &positions, std::vector<std::string> &
 	titles.clear();
 	input.UpdateTracks();
 	OpenThreads::ScopedLock<OpenThreads::Mutex> m_lock(chapterMutex);
-
 	for (std::vector<Chapter>::iterator it = chapters.begin(); it != chapters.end(); ++it)
 	{
 		positions.push_back(it->start / 1000);
 		titles.push_back(it->title);
 	}
-
 	return true;
 }
 

@@ -25,12 +25,9 @@ hw_caps_t *get_hwcaps(void)
 {
 	if (initialized)
 		return &caps;
-
 	memset(&caps, 0, sizeof(hw_caps_t));
-
 	if (access("/dev/dvb/adapter0/video1", F_OK) != -1)
 		caps.can_pip = 1;
-
 #if BOXMODEL_VUDUO
 	caps.has_CI = 2;
 	caps.can_cec = 1;
@@ -52,7 +49,6 @@ hw_caps_t *get_hwcaps(void)
 	strcpy(caps.boxname, "DUO");
 	strcpy(caps.boxarch, "BCM7335");
 #endif
-
 	initialized = 1;
 	return &caps;
 }

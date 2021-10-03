@@ -128,44 +128,36 @@ static int writeData(WriterAVCallData_t *call)
 
 		//uint8_t dataPrecision = 0;
 		uint8_t LE = 0;
-
 		switch (codecID)
 		{
 			case AV_CODEC_ID_PCM_S8:
 			case AV_CODEC_ID_PCM_U8:
 				width = depth = 8;
 				break;
-
 			case AV_CODEC_ID_PCM_S16LE:
 			case AV_CODEC_ID_PCM_U16LE:
 				LE = 1;
-
 			// fall through
 			case AV_CODEC_ID_PCM_S16BE:
 			case AV_CODEC_ID_PCM_U16BE:
 				width = depth = 16;
 				break;
-
 			case AV_CODEC_ID_PCM_S24LE:
 			case AV_CODEC_ID_PCM_U24LE:
 				LE = 1;
-
 			// fall through
 			case AV_CODEC_ID_PCM_S24BE:
 			case AV_CODEC_ID_PCM_U24BE:
 				width = depth = 24;
 				break;
-
 			case AV_CODEC_ID_PCM_S32LE:
 			case AV_CODEC_ID_PCM_U32LE:
 				LE = 1;
-
 			// fall through
 			case AV_CODEC_ID_PCM_S32BE:
 			case AV_CODEC_ID_PCM_U32BE:
 				width = depth = 32;
 				break;
-
 			default:
 				break;
 		}
@@ -207,27 +199,21 @@ static int writeData(WriterAVCallData_t *call)
 		if (fixed_buffersize != nfixed_buffersize || NULL == fixed_buffer)
 		{
 			fixed_buffersize = nfixed_buffersize;
-
 			if (NULL != fixed_buffer)
 			{
 				free(fixed_buffer);
 			}
-
 			fixed_buffer = malloc(fixed_buffersize);
 		}
-
 		fixed_bufferfilled = 0;
-
 		/* avoid compiler warning */
 		if (LE) {}
-
 		pcm_printf(40, "PCM fixed_buffersize [%u] [%s]\n", fixed_buffersize, LE ? "LE" : "BE");
 	}
 
 	while (size > 0)
 	{
 		uint32_t cpSize = (fixed_buffersize - fixed_bufferfilled);
-
 		if (cpSize > size)
 		{
 			memcpy(fixed_buffer + fixed_bufferfilled, buffer, size);
@@ -241,14 +227,11 @@ static int writeData(WriterAVCallData_t *call)
 		size -= cpSize;
 
 		uint32_t addHeaderSize = 0;
-
 		if (STB_DREAMBOX == GetSTBType())
 		{
 			addHeaderSize = 4;
 		}
-
 		uint32_t headerSize = InsertPesHeader(PesHeader, fixed_buffersize + 4 + addHeaderSize + sizeof(codec_data), MPEG_AUDIO_PES_START_CODE, fixed_buffertimestamp, 0);
-
 		if (STB_DREAMBOX == GetSTBType())
 		{
 			PesHeader[headerSize++] = 0x42; // B

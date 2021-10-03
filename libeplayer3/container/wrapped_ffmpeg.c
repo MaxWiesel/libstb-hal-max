@@ -74,12 +74,10 @@ static AVCodecContext *get_codecpar(AVStream *stream)
 static AVRational get_frame_rate(AVStream *stream)
 {
 	AVRational rateRational = stream->avg_frame_rate;
-
 	if (0 == rateRational.den)
 	{
 		rateRational = stream->r_frame_rate;
 	}
-
 	return rateRational;
 }
 
@@ -97,17 +95,14 @@ static CodecCtxStoreItem_t *g_codecCtxStoreListHead = NULL;
 AVCodecContext *restore_avcodec_context(uint32_t cAVIdx, int32_t id)
 {
 	CodecCtxStoreItem_t *ptr = g_codecCtxStoreListHead;
-
 	while (ptr != NULL)
 	{
 		if (ptr->cAVIdx == cAVIdx && ptr->id == id)
 		{
 			return ptr->avCodecCtx;
 		}
-
 		ptr = ptr->next;
 	}
-
 	return NULL;
 }
 
@@ -124,7 +119,6 @@ void free_all_stored_avcodec_context()
 int store_avcodec_context(AVCodecContext *avCodecCtx __attribute__((unused)), uint32_t cAVIdx __attribute__((unused)), int id __attribute__((unused)))
 {
 	CodecCtxStoreItem_t *ptr = malloc(sizeof(CodecCtxStoreItem_t));
-
 	if (!ptr)
 	{
 		return -1;
@@ -146,11 +140,9 @@ static AVCodecContext *wrapped_avcodec_get_context(uint32_t cAVIdx, AVStream *st
 {
 #if (LIBAVFORMAT_VERSION_MAJOR > 57) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR > 32))
 	AVCodecContext *avCodecCtx = restore_avcodec_context(cAVIdx, stream->id);
-
 	if (!avCodecCtx)
 	{
 		avCodecCtx = avcodec_alloc_context3(NULL);
-
 		if (!avCodecCtx)
 		{
 			ffmpeg_err("context3 alloc for stream %d failed\n", (int)stream->id);
@@ -163,7 +155,6 @@ static AVCodecContext *wrapped_avcodec_get_context(uint32_t cAVIdx, AVStream *st
 			avcodec_free_context(&avCodecCtx);
 			return NULL;
 		}
-
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
 		av_codec_set_pkt_timebase(avCodecCtx, stream->time_base);
 #else
@@ -182,20 +173,16 @@ static void wrapped_avcodec_flush_buffers(uint32_t cAVIdx)
 {
 #if (LIBAVFORMAT_VERSION_MAJOR > 57) || ((LIBAVFORMAT_VERSION_MAJOR == 57) && (LIBAVFORMAT_VERSION_MINOR > 32))
 	CodecCtxStoreItem_t *ptr = g_codecCtxStoreListHead;
-
 	while (ptr != NULL)
 	{
 		if (ptr->cAVIdx == cAVIdx && ptr->avCodecCtx && ptr->avCodecCtx->codec)
 		{
 			avcodec_flush_buffers(ptr->avCodecCtx);
 		}
-
 		ptr = ptr->next;
 	}
-
 #else
 	uint32_t j;
-
 	for (j = 0; j < avContextTab[cAVIdx]->nb_streams; j++)
 	{
 		if (avContextTab[cAVIdx]->streams[j]->codec && avContextTab[cAVIdx]->streams[j]->codec->codec)
@@ -203,7 +190,6 @@ static void wrapped_avcodec_flush_buffers(uint32_t cAVIdx)
 			avcodec_flush_buffers(avContextTab[cAVIdx]->streams[j]->codec);
 		}
 	}
-
 #endif
 }
 

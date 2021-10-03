@@ -45,13 +45,10 @@ int PNGPlugin_init(void)
 	else
 	{
 		handle = dlopen("exteplayer3png.so", RTLD_LAZY);
-
 		if (handle)
 		{
 			char *error = NULL;
-
 			dlerror();    /* Clear any existing error */
-
 			*(void **)(&SaveRGBAImage_handle) = dlsym(handle, "SaveRGBAImage");
 
 			if ((error = dlerror()) != NULL)
@@ -63,7 +60,6 @@ int PNGPlugin_init(void)
 
 			return 0;
 		}
-
 		plugin_err("%s\n", dlerror());
 	}
 

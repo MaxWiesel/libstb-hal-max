@@ -104,22 +104,17 @@ static char *ass_get_text(char *str)
 	// 91,0,Default,,0,0,0,,maar hij smaakt vast tof.
 	int i = 0;
 	char *p_str = str;
-
 	while (i < 8 && *p_str != '\0')
 	{
 		if (*p_str == ',')
 			i++;
-
 		p_str++;
 	}
-
 	// standardize hard break: '\N' -> '\n'
 	// http://docs.aegisub.org/3.2/ASS_Tags/
 	char *p_newline = NULL;
-
 	while ((p_newline = strstr(p_str, "\\N")) != NULL)
 		* (p_newline + 1) = 'n';
-
 	return p_str;
 }
 
@@ -128,7 +123,6 @@ static char *json_string_escape(char *str)
 	static char tmp[2048];
 	char *ptr1 = tmp;
 	char *ptr2 = str;
-
 	while (*ptr2 != '\0')
 	{
 		switch (*ptr2)
@@ -137,45 +131,36 @@ static char *json_string_escape(char *str)
 				*ptr1++ = '\\';
 				*ptr1++ = '\"';
 				break;
-
 			case '\\':
 				*ptr1++ = '\\';
 				*ptr1++ = '\\';
 				break;
-
 			case '\b':
 				*ptr1++ = '\\';
 				*ptr1++ = 'b';
 				break;
-
 			case '\f':
 				*ptr1++ = '\\';
 				*ptr1++ = 'f';
 				break;
-
 			case '\n':
 				*ptr1++ = '\\';
 				*ptr1++ = 'n';
 				break;
-
 			case '\r':
 				*ptr1++ = '\\';
 				*ptr1++ = 'r';
 				break;
-
 			case '\t':
 				*ptr1++ = '\\';
 				*ptr1++ = 't';
 				break;
-
 			default:
 				*ptr1++ = *ptr2;
 				break;
 		}
-
 		++ptr2;
 	}
-
 	*ptr1 = '\0';
 	return tmp;
 }
@@ -206,7 +191,6 @@ static int Write(Context_t *context, void *data)
 	out = (SubtitleOut_t *) data;
 
 	context->manager->subtitle->Command(context, MANAGER_GET, &curtrackid);
-
 	if (curtrackid != (int32_t)out->trackId)
 	{
 		if (g_subWriter)
@@ -214,10 +198,8 @@ static int Write(Context_t *context, void *data)
 			g_subWriter = NULL;
 			g_subWriter->close();
 		}
-
 		Flush();
 	}
-
 	context->manager->subtitle->Command(context, MANAGER_GETENCODING, &Encoding);
 
 	if (Encoding == NULL)
@@ -227,7 +209,6 @@ static int Write(Context_t *context, void *data)
 	}
 
 	subtitle_printf(20, "Encoding:%s Text:%s Len:%d\n", Encoding, (const char *) out->data, out->len);
-
 	SubtitleCodecId_t subCodecId = SUBTITLE_CODEC_ID_UNKNOWN;
 
 	if (!strncmp("S_TEXT/SUBRIP", Encoding, 13))
@@ -249,11 +230,9 @@ static int Write(Context_t *context, void *data)
 		case SUBTITLE_CODEC_ID_WEBVTT:
 			E2iSendMsg("{\"s_a\":{\"id\":%d,\"s\":%"PRId64",\"e\":%"PRId64",\"t\":\"%s\"}}\n", out->trackId, out->pts / 90, out->pts / 90 + out->durationMS, json_string_escape((char *)out->data));
 			break;
-
 		case SUBTITLE_CODEC_ID_ASS:
 			E2iSendMsg("{\"s_a\":{\"id\":%d,\"s\":%"PRId64",\"e\":%"PRId64",\"t\":\"%s\"}}\n", out->trackId, out->pts / 90, out->pts / 90 + out->durationMS, ass_get_text((char *)out->data));
 			break;
-
 		case SUBTITLE_CODEC_ID_PGS:
 		case SUBTITLE_CODEC_ID_DVB:
 		case SUBTITLE_CODEC_ID_XSUB:
@@ -275,18 +254,15 @@ static int Write(Context_t *context, void *data)
 			subPacket.private_data = out->extradata;
 			subPacket.private_size = out->extralen;
 			subPacket.durationMS   = out->durationMS;
-
 			subPacket.width        = out->width;
 			subPacket.height       = out->height;
 			g_subWriter->write(&subPacket);
 		}
 		break;
-
 		default:
 			subtitle_err("unknown encoding %s\n", Encoding);
 			return  cERR_SUBTITLE_ERROR;
 	}
-
 	subtitle_printf(10, "<\n");
 	return cERR_SUBTITLE_NO_ERROR;
 }
@@ -326,7 +302,6 @@ static int32_t subtitle_Close(Context_t *context __attribute__((unused)))
 	}
 
 	isSubtitleOpened = 0;
-
 	releaseMutex(__LINE__);
 
 	subtitle_printf(10, "<\n");
@@ -347,55 +322,46 @@ static int Command(Context_t *context, OutputCmd_t command, void *argument __att
 			ret = subtitle_Open(context);
 			break;
 		}
-
 		case OUTPUT_CLOSE:
 		{
 			ret = subtitle_Close(context);
 			break;
 		}
-
 		case OUTPUT_PLAY:
 		{
 			break;
 		}
-
 		case OUTPUT_STOP:
 		{
 			break;
 		}
-
 		case OUTPUT_SWITCH:
 		{
 			ret = Flush();
 			break;
 		}
-
 		case OUTPUT_FLUSH:
 		{
 			ret = Flush();
 			break;
 		}
-
 		case OUTPUT_CLEAR:
 		{
 			ret = Flush();
 			break;
 		}
-
 		case OUTPUT_PAUSE:
 		{
 			subtitle_err("Subtitle Pause not implemented\n");
 			ret = cERR_SUBTITLE_ERROR;
 			break;
 		}
-
 		case OUTPUT_CONTINUE:
 		{
 			subtitle_err("Subtitle Continue not implemented\n");
 			ret = cERR_SUBTITLE_ERROR;
 			break;
 		}
-
 		default:
 			subtitle_err("OutputCmd %d not supported!\n", command);
 			ret = cERR_SUBTITLE_ERROR;

@@ -141,7 +141,6 @@ static int writeData(void *_call)
 	private_data.framerate = call->FrameRate;
 
 #define PES_MIN_HEADER_SIZE 9
-
 	if (initialHeader)
 	{
 		unsigned char               PesPacket[PES_MIN_HEADER_SIZE + 128];
@@ -194,7 +193,6 @@ static int writeData(void *_call)
 	{
 		unsigned int Position = 0;
 		unsigned char insertSampleHeader = 1;
-
 		while (Position < call->len)
 		{
 			int PacketLength = (call->len - Position) <= MAX_PES_PACKET_SIZE ?

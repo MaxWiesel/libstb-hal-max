@@ -175,7 +175,6 @@ static const VLCtab vlc_table_mv[] = //mv_vlc: table_size=538 table_allocated=10
 static inline int decode_DC(BR *p)
 {
 	int level = get_bits(p, 8);
-
 	if ((level & 0x7f) == 0)
 	{
 		printf("illigal dc\n");
@@ -196,7 +195,6 @@ static inline int decode_AC(BR *p, BLOCK *block, int escape_type, int i)
 	while (1)
 	{
 		code = get_vlc(p, vlc_table_rl_inter, 9, 2);
-
 		if (code < 0)
 		{
 			printf("invalid Huffman code in getblock()\n");
@@ -212,7 +210,6 @@ static inline int decode_AC(BR *p, BLOCK *block, int escape_type, int i)
 
 				last = get_bits(p, 1);
 				run = get_bits(p, 6);
-
 				if (is11bit)
 				{
 					level = get_sbits(p, 11);
@@ -246,18 +243,15 @@ static inline int decode_AC(BR *p, BLOCK *block, int escape_type, int i)
 		}
 
 		i += run;
-
 		if (i >= 64)
 		{
 			printf("run overflow..\n");
 			return -1;
 		}
-
 		block->block[zig_zag_scan[i]] = level;
 
 		if (last)
 			break;
-
 		i++;
 	}
 
@@ -268,7 +262,6 @@ static inline int decode_AC(BR *p, BLOCK *block, int escape_type, int i)
 static inline int decode_intra_block(BR *p, BLOCK *block, int escape_type, int coded)
 {
 	int level = decode_DC(p);
-
 	if (level < 0)
 	{
 		printf("dc error.\n");
@@ -307,32 +300,26 @@ static inline int decode_inter_block(BR *p, BLOCK *block, int escape_type, int c
 static inline int get_intra_MCBPC(BR *br)
 {
 	int cbpc;
-
 	do
 	{
 		cbpc = get_vlc(br, vlc_table_intra_MCBPC, 6, 2);
-
 		if (cbpc < 0)
 			return -1;
 	}
 	while (cbpc == 8);
-
 	return cbpc;
 }
 
 static inline int get_inter_MCBPC(BR *br)
 {
 	int cbpc;
-
 	do
 	{
 		if (get_bits(br, 1))
 		{
 			return -2;
 		}
-
 		cbpc = get_vlc(br, vlc_table_inter_MCBPC, 7, 2);
-
 		if (cbpc < 0)
 			return -1;
 	}
@@ -361,7 +348,6 @@ static inline int decode_motion(BR *br, VLCDEC *vlcdec)
 
 	if (code == 0)
 		return 0;
-
 	if (code < 0)
 		return -1;
 
@@ -385,7 +371,6 @@ static inline int decode_intra_mb_internal(BR *p, MICROBLOCK *mb, int escape_typ
 	int i;
 
 	cbpy = get_cbpy(p);
-
 	if (cbpy < 0)
 	{
 		printf("cbpy error\n");
@@ -404,7 +389,6 @@ static inline int decode_intra_mb_internal(BR *p, MICROBLOCK *mb, int escape_typ
 	{
 		if (decode_intra_block(p, &mb->block[i], escape_type, cbp & 32) != 0)
 			return -1;
-
 		cbp += cbp;
 	}
 
@@ -417,7 +401,6 @@ static inline int decode_inter_mb_internal(BR *p, MICROBLOCK *mb, int escape_typ
 	int i;
 
 	cbpy = get_cbpy(p);
-
 	if (cbpy < 0)
 	{
 		printf("cbpy error\n");
@@ -448,7 +431,6 @@ static inline int decode_inter_mb_internal(BR *p, MICROBLOCK *mb, int escape_typ
 			decode_motion(p, &mb->mv_x[i]);
 			decode_motion(p, &mb->mv_y[i]);
 		}
-
 		mb->mv_type = MV_TYPE_8X8;
 	}
 
@@ -456,7 +438,6 @@ static inline int decode_inter_mb_internal(BR *p, MICROBLOCK *mb, int escape_typ
 	{
 		if (decode_inter_block(p, &mb->block[i], escape_type, cbp & 32) != 0)
 			return -1;
-
 		cbp += cbp;
 	}
 
@@ -468,7 +449,6 @@ int decode_I_mb(BR *p, MICROBLOCK *mb, int escape_type, int qscale)
 {
 	int dquant;
 	int cbpc = get_intra_MCBPC(p);
-
 	if (cbpc < 0)
 	{
 		printf("intra_MCBPC error\n");
@@ -495,7 +475,6 @@ int decode_P_mb(BR *p, MICROBLOCK *mb, int escape_type, int qscale)
 		printf("inter_MCBPC error\n");
 		return -1;
 	}
-
 	if (cbpc == -2)
 	{
 		mb->skip = 1;
@@ -535,7 +514,6 @@ int decode_picture_header(BR *p, PICTURE *picture)
 	}
 
 	tmp = get_bits(p, 5);
-
 	if (tmp != 0 && tmp != 1)
 	{
 		return -1;
@@ -545,39 +523,31 @@ int decode_picture_header(BR *p, PICTURE *picture)
 	picture->frame_number = get_bits(p, 8);
 
 	tmp = get_bits(p, 3);
-
 	switch (tmp)
 	{
 		case 0:
 			width = get_bits(p, 8);
 			height = get_bits(p, 8);
 			break;
-
 		case 1:
 			width = get_bits(p, 16);
 			height = get_bits(p, 16);
 			break;
-
 		case 2:
 			width = 352, height = 288;
 			break;
-
 		case 3:
 			width = 176, height = 144;
 			break;
-
 		case 4:
 			width = 128, height = 96;
 			break;
-
 		case 5:
 			width = 320, height = 240;
 			break;
-
 		case 6:
 			width = 160, height = 120;
 			break;
-
 		default:
 			return -1;
 	}

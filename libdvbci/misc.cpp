@@ -7,7 +7,6 @@ void hexdump(const uint8_t *data, unsigned int len)
 {
 	while (len--)
 		printf("%02x ", *data++);
-
 	printf("\n");
 }
 
@@ -17,7 +16,6 @@ int get_random(unsigned char *dest, int len)
 	const char *urnd = "/dev/urandom";
 
 	fd = open(urnd, O_RDONLY);
-
 	if (fd <= 0)
 	{
 		printf("cannot open %s\n", urnd);
@@ -41,19 +39,16 @@ int parseLengthField(const unsigned char *pkt, int *len)
 	int i;
 
 	*len = 0;
-
 	if (!(*pkt & 0x80))
 	{
 		*len = *pkt;
 		return 1;
 	}
-
 	for (i = 0; i < (pkt[0] & 0x7F); ++i)
 	{
 		*len <<= 8;
 		*len |= pkt[i + 1];
 	}
-
 	return (pkt[0] & 0x7F) + 1;
 }
 

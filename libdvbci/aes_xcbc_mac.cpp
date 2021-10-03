@@ -15,7 +15,6 @@ int aes_xcbc_mac_init(struct aes_xcbc_mac_ctx *ctx, const uint8_t *key)
 	{
 		for (x = 0; x < 16; x++)
 			ctx->K[y][x] = y + 1;
-
 		AES_ecb_encrypt(ctx->K[y], ctx->K[y], &aes_key, 1);
 	}
 
@@ -37,7 +36,6 @@ int aes_xcbc_mac_process(struct aes_xcbc_mac_ctx *ctx, const uint8_t *in, unsign
 			AES_ecb_encrypt(ctx->IV, ctx->IV, &ctx->key, 1);
 			ctx->buflen = 0;
 		}
-
 		ctx->IV[ctx->buflen++] ^= *in++;
 		--len;
 	}
@@ -58,7 +56,6 @@ int aes_xcbc_mac_done(struct aes_xcbc_mac_ctx *ctx, uint8_t *out)
 	else
 	{
 		ctx->IV[ctx->buflen] ^= 0x80;
-
 		/* K3 */
 		for (i = 0; i < 16; i++)
 			ctx->IV[i] ^= ctx->K[2][i];

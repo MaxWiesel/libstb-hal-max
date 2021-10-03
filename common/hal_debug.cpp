@@ -53,7 +53,6 @@ void hal_debug_init(void)
 {
 	int i = 0;
 	char *tmp = getenv("HAL_DEBUG");
-
 	if (! tmp)
 		debuglevel = 0;
 	else
@@ -63,27 +62,22 @@ void hal_debug_init(void)
 	{
 		fprintf(stderr, "[\033[36mHAL:\033[0m hal_debug] libstb-hal debug options can be set by exporting HAL_DEBUG.\n");
 		fprintf(stderr, "The following values (or bitwise OR combinations) are valid:\n");
-
 		while (hal_facility[i])
 		{
 			fprintf(stderr, "\tcomponent: %s  0x%02x\n", hal_facility[i], 1 << i);
 			i++;
 		}
-
 		fprintf(stderr, "\tall components:    0x%02x\n", (1 << i) - 1);
 	}
 	else
 	{
 		fprintf(stderr, "\033[36mHAL:\033[0m hal_debug] libstb-hal debug is active for the following components:\n");
-
 		while (hal_facility[i])
 		{
 			if (debuglevel & (1 << i))
 				fprintf(stderr, "%s ", hal_facility[i]);
-
 			i++;
 		}
-
 		fprintf(stderr, "\n");
 	}
 }

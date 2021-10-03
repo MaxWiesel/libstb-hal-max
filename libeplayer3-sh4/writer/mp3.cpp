@@ -56,14 +56,11 @@ bool WriterMP3::Write(AVPacket *packet, int64_t pts)
 		iov[1].iov_len = PacketLength;
 
 		ssize_t l = writev(fd, iov, 2);
-
 		if (l < 0)
 			return false;
-
 		pos += PacketLength;
 		pts = INVALID_PTS_VALUE;
 	}
-
 	return true;
 }
 

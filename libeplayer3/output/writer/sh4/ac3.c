@@ -104,11 +104,8 @@ static int writeData(void *_call)
 	struct iovec iov[2];
 
 	iov[0].iov_base = PesHeader;
-
 	iov[0].iov_len = InsertPesHeader(PesHeader, call->len, PRIVATE_STREAM_1_PES_START_CODE, call->Pts, 0);
-
 	iov[1].iov_base = call->data;
-
 	iov[1].iov_len = call->len;
 
 	return call->WriteV(call->fd, iov, 2);

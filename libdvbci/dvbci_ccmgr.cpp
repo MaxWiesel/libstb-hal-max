@@ -65,7 +65,6 @@ static bool get_authdata(uint8_t *host_id, uint8_t *dhsk, uint8_t *akh, unsigned
 	get_authdata_filename(filename, sizeof(filename), slot);
 
 	fd = open(filename, O_RDONLY);
-
 	if (fd <= 0)
 	{
 		fprintf(stderr, "cannot open %s\n", filename);
@@ -109,7 +108,6 @@ static bool write_authdata(unsigned int slot, const uint8_t *host_id, const uint
 	for (entries = 0; entries < 5; entries++)
 	{
 		int offset = (8 + 256 + 32) * entries;
-
 		if (!get_authdata(&buf[offset], &buf[offset + 8], &buf[offset + 8 + 256], slot, entries))
 			break;
 
@@ -126,7 +124,6 @@ static bool write_authdata(unsigned int slot, const uint8_t *host_id, const uint
 	get_authdata_filename(filename, sizeof(filename), slot);
 
 	fd = open(filename, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
-
 	if (fd <= 0)
 	{
 		printf("cannot open %s for writing - authdata not stored\n", filename);
@@ -159,7 +156,6 @@ static bool write_authdata(unsigned int slot, const uint8_t *host_id, const uint
 	for (i = 0; i < entries; i++)
 	{
 		int offset = (8 + 256 + 32) * i;
-
 		if (write(fd, &buf[offset], (8 + 256 + 32)) != (8 + 256 + 32))
 		{
 			fprintf(stderr, "error in write\n");
@@ -195,17 +191,14 @@ static int verify_cb(int /*ok*/, X509_STORE_CTX *ctx)
 	{
 		time_t now = time(NULL);
 		struct tm *t = localtime(&now);
-
 		if (t->tm_year < 2015)
 			//printf("seems our rtc is wrong - ignore!\n");
 			return 1;
-
 		//printf("wrong date!\n");
 	}
 
 	if (X509_STORE_CTX_get_error(ctx) == X509_V_ERR_CERT_HAS_EXPIRED)
 		return 1;
-
 	return 0;
 }
 
@@ -215,7 +208,6 @@ static RSA *rsa_privatekey_open(const char *filename)
 	RSA *r = NULL;
 
 	fp = fopen(filename, "r");
-
 	if (!fp)
 	{
 		fprintf(stderr, "cannot open %s\n", filename);
@@ -223,7 +215,6 @@ static RSA *rsa_privatekey_open(const char *filename)
 	}
 
 	PEM_read_RSAPrivateKey(fp, &r, NULL, NULL);
-
 	if (!r)
 		fprintf(stderr, "read error\n");
 
@@ -238,7 +229,6 @@ static X509 *certificate_open(const char *filename)
 	X509 *cert;
 
 	fp = fopen(filename, "r");
-
 	if (!fp)
 	{
 		fprintf(stderr, "cannot open %s\n", filename);
@@ -246,7 +236,6 @@ static X509 *certificate_open(const char *filename)
 	}
 
 	cert = PEM_read_X509(fp, NULL, NULL, NULL);
-
 	if (!cert)
 		fprintf(stderr, "cannot read cert\n");
 
@@ -271,7 +260,6 @@ static bool certificate_validate(struct cert_ctx *ctx, X509 *cert)
 	if (ret != 1)
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 		fprintf(stderr, "%s\n", X509_verify_cert_error_string(store_ctx->error));
-
 #else
 		fprintf(stderr, "%s\n", X509_verify_cert_error_string(ret));
 #endif
@@ -289,7 +277,6 @@ static X509 *certificate_load_and_check(struct cert_ctx *ctx, const char *filena
 	{
 		/* we assume this is the first certificate added - so its root-ca */
 		ctx->store = X509_STORE_new();
-
 		if (!ctx->store)
 		{
 			fprintf(stderr, "cannot create cert_store\n");
@@ -306,7 +293,6 @@ static X509 *certificate_load_and_check(struct cert_ctx *ctx, const char *filena
 	}
 
 	cert = certificate_open(filename);
-
 	if (!cert)
 	{
 		fprintf(stderr, "cannot open certificate %s\n", filename);
@@ -336,7 +322,6 @@ static X509 *certificate_import_and_check(struct cert_ctx *ctx, const uint8_t *d
 	X509 *cert;
 
 	cert = d2i_X509(NULL, &data, len);
-
 	if (!cert)
 	{
 		fprintf(stderr, "cannot read certificate\n");
@@ -425,7 +410,6 @@ static void element_invalidate(struct cc_ctrl_data *cc_data, unsigned int id)
 	struct element *e;
 
 	e = element_get(cc_data, id);
-
 	if (e)
 	{
 		free(e->data);
@@ -446,7 +430,6 @@ static bool element_set(struct cc_ctrl_data *cc_data, unsigned int id, const uin
 	struct element *e;
 
 	e = element_get(cc_data, id);
-
 	if (e == NULL)
 		return false;
 
@@ -474,7 +457,6 @@ static bool element_set_certificate(struct cc_ctrl_data *cc_data, unsigned int i
 	int cert_len;
 
 	cert_len = i2d_X509(cert, &cert_der);
-
 	if (cert_len <= 0)
 	{
 		printf("cannot get data in DER format\n");
@@ -537,7 +519,6 @@ static unsigned int element_get_buf(struct cc_ctrl_data *cc_data, uint8_t *dest,
 	struct element *e;
 
 	e = element_get(cc_data, id);
-
 	if (e == NULL)
 		return 0;
 
@@ -581,7 +562,6 @@ static uint8_t *element_get_ptr(struct cc_ctrl_data *cc_data, unsigned int id)
 	struct element *e;
 
 	e = element_get(cc_data, id);
-
 	if (e == NULL)
 		return NULL;
 
@@ -599,6 +579,7 @@ static uint8_t *element_get_ptr(struct cc_ctrl_data *cc_data, unsigned int id)
 
 	return e->data;
 }
+
 
 /* content_control commands */
 
@@ -691,7 +672,6 @@ static int sac_crypt(uint8_t *dst, const uint8_t *src, unsigned int len, const u
 #if x_debug
 	printf("%s -> %s\n", FILENAME, __FUNCTION__);
 #endif
-
 	if (encrypt)
 		AES_set_encrypt_key(key_data, 128, &key);
 	else
@@ -714,7 +694,6 @@ static X509 *import_ci_certificates(struct cc_ctrl_data *cc_data, unsigned int i
 	len = element_get_buf(cc_data, buf, id);
 
 	cert = certificate_import_and_check(ctx, buf, len);
-
 	if (!cert)
 	{
 		printf("cannot read/verify DER cert\n");
@@ -867,7 +846,6 @@ static int restart_dh_challenge(struct cc_ctrl_data *cc_data)
 		fprintf(stderr, "cannot set hostid in elements\n");
 
 	cc_data->rsa_device_key = rsa_privatekey_open(DEVICE_CERT);
-
 	if (!cc_data->rsa_device_key)
 	{
 		fprintf(stderr, "cannot read private key\n");
@@ -933,7 +911,6 @@ static void check_new_key(struct cc_ctrl_data *cc_data)
 #if x_debug
 	printf("%s -> %s\n", FILENAME, __FUNCTION__);
 #endif
-
 	/* check for keyprecursor */
 	if (!element_valid(cc_data, 12))
 		return;
@@ -946,7 +923,6 @@ static void check_new_key(struct cc_ctrl_data *cc_data)
 	element_get_buf(cc_data, &slot, 28);
 
 	AES_set_encrypt_key(s_key, 128, &aes_ctx);
-
 	for (i = 0; i < 32; i += 16)
 		AES_ecb_encrypt(&kp[i], &dec[i], &aes_ctx, 1);
 
@@ -955,7 +931,6 @@ static void check_new_key(struct cc_ctrl_data *cc_data)
 		dec[i] ^= kp[i];
 		cc_data->slot->lastKey[i] = dec[i];
 	}
-
 	cc_data->slot->lastParity = slot;
 
 	if (cc_data->slot->scrambled)
@@ -981,42 +956,33 @@ static int data_get_handle_new(struct cc_ctrl_data *cc_data, unsigned int id)
 		case 14:        /* DHPM */
 		case 16:        /* CICAM_DevCert */
 		case 18:        /* Signature_B */
-
 			/* this results in CICAM_ID when cert-chain is verified and ok */
 			if (check_ci_certificates(cc_data))
 				break;
-
 			/* generate DHSK & AKH */
 			check_dh_challenge(cc_data);
 			break;
-
 		case 19:        /* auth_nonce - triggers new dh keychallenge - invalidates DHSK & AKH */
 			/* generate DHPH & Signature_A */
 			restart_dh_challenge(cc_data);
 			break;
-
 		case 21:        /* Ns_module - triggers SAC key calculation */
 			generate_ns_host(cc_data);
 			generate_key_seed(cc_data);
 			generate_SAK_SEK(cc_data->sak, cc_data->sek, cc_data->ks_host);
 			break;
-
 		/* SAC data messages */
-
 		case 6:                 //CICAM_id
 		case 12:                //keyprecursor
 			check_new_key(cc_data);
 			break;
-
 		case 26:                //programm number
 		case 25:                //uri_message
 			generate_uri_confirm(cc_data, cc_data->sak);
 			break;
-
 		case 28:                //key register
 			check_new_key(cc_data);
 			break;
-
 		default:
 			printf("%s -> %s unhandled ID (%d)\n", FILENAME, __FUNCTION__, id);
 			break;
@@ -1030,27 +996,22 @@ static int data_req_handle_new(struct cc_ctrl_data *cc_data, unsigned int id)
 #if x_debug
 	printf("%s -> %s ID = (%d)\n", FILENAME, __FUNCTION__, id);
 #endif
-
 	switch (id)
 	{
 		case 22:                /* AKH */
 		{
 			uint8_t akh[32], host_id[8];
 			memset(akh, 0, sizeof(akh));
-
 			if (cc_data->akh_index != 5)
 			{
 				if (!get_authdata(host_id, cc_data->dhsk, akh, cc_data->slot->slot, cc_data->akh_index++))
 					cc_data->akh_index = 5;
-
 				if (!element_set(cc_data, 22, akh, 32))
 					printf("cannot set AKH in elements\n");
-
 				if (!element_set(cc_data, 5, host_id, 8))
 					printf("cannot set host_id in elements\n");
 			}
 		}
-
 		default:
 			break;
 	}
@@ -1066,7 +1027,6 @@ static int data_get_loop(struct cc_ctrl_data *cc_data, const unsigned char *data
 #if x_debug
 	printf("%s -> %s\n", FILENAME, __FUNCTION__);
 #endif
-
 	for (i = 0; i < items; i++)
 	{
 		if (pos + 3 > datalen)
@@ -1078,7 +1038,6 @@ static int data_get_loop(struct cc_ctrl_data *cc_data, const unsigned char *data
 
 		if (pos + dt_len > datalen)
 			return 0;
-
 #if x_debug
 		printf("set element (%d) ", dt_id);
 #if y_debug
@@ -1106,7 +1065,6 @@ static int data_req_loop(struct cc_ctrl_data *cc_data, unsigned char *dest, cons
 #if x_debug
 	printf("%s -> %s\n", FILENAME, __FUNCTION__);
 #endif
-
 	if (items > datalen)
 		return -1;
 
@@ -1118,20 +1076,16 @@ static int data_req_loop(struct cc_ctrl_data *cc_data, unsigned char *dest, cons
 #endif
 		data_req_handle_new(cc_data, dt_id);    /* check if there is any action needed before we answer */
 		len = element_get_req(cc_data, dest, dt_id);
-
 		if (len == 0)
 		{
 			printf("cannot get element %d\n", dt_id);
 			return -1;
 		}
-
 #if x_debug
 		printf("element (%d) > ", dt_id);
 #if y_debug
-
 		for (int ic = 0; ic < len; ic++)
 			printf("%02x ", dest[ic]);
-
 #endif
 		printf("\n");
 #endif
@@ -1157,7 +1111,6 @@ bool eDVBCIContentControlManagerSession::data_initialize(eDVBCISlot *tslot)
 	}
 
 	data = (struct cc_ctrl_data *)calloc(1, sizeof(struct cc_ctrl_data));
-
 	if (!data)
 	{
 		fprintf(stderr, "out of memory\n");
@@ -1172,20 +1125,17 @@ bool eDVBCIContentControlManagerSession::data_initialize(eDVBCISlot *tslot)
 
 	/* set status field - OK */
 	memset(buf, 0, 1);
-
 	if (!element_set(data, 30, buf, 1))
 		fprintf(stderr, "cannot set status in elements\n");
 
 	/* set uri_versions */
 	memset(buf, 0, 32);
 	buf[31] = 1;
-
 	if (!element_set(data, 29, buf, 32))
 		fprintf(stderr, "cannot set uri_versions in elements\n");
 
 	/* load first AKH */
 	data->akh_index = 0;
-
 	if (!get_authdata(host_id, data->dhsk, buf, tslot->slot, data->akh_index))
 	{
 		/* no AKH available */
@@ -1246,7 +1196,6 @@ bool eDVBCIContentControlManagerSession::ci_ccmgr_cc_data_req(eDVBCISlot *tslot,
 	dest[1] = dt_nr;
 
 	answ_len = data_req_loop(cc_data, &dest[2], &data[rp], len - rp, dt_nr);
-
 	if (answ_len <= 0)
 	{
 		fprintf(stderr, "cannot req data\n");
@@ -1310,10 +1259,8 @@ bool eDVBCIContentControlManagerSession::ci_ccmgr_cc_sac_send(eDVBCISlot *tslot,
 	pos += sac_gen_auth(&data[pos], data, pos, cc_data->sak);
 #if y_debug
 	printf("Data for encrypt > ");
-
 	for (unsigned int i = 0; i < pos; i++)
 		printf("%02x ", data[i]);
-
 	printf("\n");
 #endif
 	sac_crypt(&data[8], &data[8], pos - 8, cc_data->sek, AES_ENCRYPT);
@@ -1343,13 +1290,10 @@ bool eDVBCIContentControlManagerSession::ci_ccmgr_cc_sac_data_req(eDVBCISlot *ts
 	data = tmp;
 #if y_debug
 	printf("decryted > ");
-
 	for (unsigned int i = 0; i < len; i++)
 		printf("%02x ", data[i]);
-
 	printf("\n");
 #endif
-
 	if (!sac_check_auth(data, len, cc_data->sak))
 	{
 		fprintf(stderr, "check_auth of message failed\n");
@@ -1380,13 +1324,11 @@ bool eDVBCIContentControlManagerSession::ci_ccmgr_cc_sac_data_req(eDVBCISlot *ts
 	dest[pos++] = dt_nr;    /* dt_nbr */
 
 	answ_len = data_req_loop(cc_data, &dest[pos], &data[rp], len - rp, dt_nr);
-
 	if (answ_len <= 0)
 	{
 		fprintf(stderr, "cannot req data\n");
 		return false;
 	}
-
 	pos += answ_len;
 
 	return ci_ccmgr_cc_sac_send(tslot, data_cnf_tag, dest, pos);
@@ -1422,10 +1364,8 @@ int eDVBCIContentControlManagerSession::receivedAPDU(const unsigned char *tag, c
 {
 	printf("SESSION(%d)/CC %02x %02x %02x: ", session_nb, tag[0], tag[1], tag[2]);
 #if y_debug
-
 	for (int i = 0; i < len; i++)
 		printf("%02x ", ((const unsigned char *)data)[i]);
-
 #endif
 	printf("\n");
 
@@ -1436,23 +1376,18 @@ int eDVBCIContentControlManagerSession::receivedAPDU(const unsigned char *tag, c
 			case 0x01:
 				ci_ccmgr_cc_open_cnf(slot);
 				break;
-
 			case 0x03:
 				ci_ccmgr_cc_data_req(slot, (const uint8_t *)data, len);
 				break;
-
 			case 0x05:
 				ci_ccmgr_cc_sync_req();
 				break;
-
 			case 0x07:
 				ci_ccmgr_cc_sac_data_req(slot, (const uint8_t *)data, len);
 				break;
-
 			case 0x09:
 				ci_ccmgr_cc_sac_sync_req(slot, (const uint8_t *)data, len);
 				break;
-
 			default:
 				fprintf(stderr, "unknown apdu tag %02x\n", tag[2]);
 				break;
@@ -1464,9 +1399,7 @@ int eDVBCIContentControlManagerSession::receivedAPDU(const unsigned char *tag, c
 
 int eDVBCIContentControlManagerSession::doAction()
 {
-
 	printf("%s > %s\n", FILENAME, __FUNCTION__);
-
 	switch (state)
 	{
 		case stateStarted:
@@ -1474,10 +1407,8 @@ int eDVBCIContentControlManagerSession::doAction()
 			state = stateFinal;
 			return 0;
 		}
-
 		case stateFinal:
 			printf("stateFinal und action! kann doch garnicht sein ;)\n");
-
 		// fall through
 		default:
 			return 0;
@@ -1494,7 +1425,6 @@ void eDVBCIContentControlManagerSession::resendKey(eDVBCISlot *tslot)
 	if (!tslot->SidBlackListed && (tslot->recordUse[0] || tslot->liveUse[0]))
 	{
 #if HAVE_ARM_HARDWARE || HAVE_MIPS_HARDWARE
-
 		if (slot->newPids)
 		{
 			if (slot->pids.size())
@@ -1505,13 +1435,10 @@ void eDVBCIContentControlManagerSession::resendKey(eDVBCISlot *tslot)
 						descrambler_set_pid((int)tslot->slot, 1, (int) slot->pids[i]);
 				}
 			}
-
 			slot->newPids = false;
 		}
-
 		descrambler_set_key((int)tslot->slot, tslot->lastParity, tslot->lastKey);
 #else
-
 		if (slot->newPids)
 		{
 			if (slot->pids.size())
@@ -1522,10 +1449,8 @@ void eDVBCIContentControlManagerSession::resendKey(eDVBCISlot *tslot)
 						descrambler_set_pid((int)tslot->slot, 1, (int) slot->pids[i]);
 				}
 			}
-
 			slot->newPids = false;
 		}
-
 		descrambler_set_key((int)tslot->source, tslot->lastParity, tslot->lastKey);
 #endif
 	}

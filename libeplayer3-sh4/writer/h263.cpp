@@ -40,7 +40,6 @@ bool WriterH263::Write(AVPacket *packet, int64_t pts)
 {
 	if (!packet || !packet->data)
 		return false;
-
 	uint8_t PesHeader[PES_MAX_HEADER_SIZE];
 
 	int HeaderLength = InsertPesHeader(PesHeader, packet->size, H263_VIDEO_PES_START_CODE, pts, 0);

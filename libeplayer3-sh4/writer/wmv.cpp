@@ -129,7 +129,6 @@ bool WriterWMV::Write(AVPacket *packet, int64_t pts)
 
 		while (Position < packet->size)
 		{
-
 			int PacketLength = std::min(packet->size - Position, MAX_PES_PACKET_SIZE);
 
 			uint8_t PesHeader[PES_MAX_HEADER_SIZE] = { 0 };
@@ -155,7 +154,6 @@ bool WriterWMV::Write(AVPacket *packet, int64_t pts)
 			uint8_t PacketStart[packet->size + HeaderLength];
 			memcpy(PacketStart, PesHeader, HeaderLength);
 			memcpy(PacketStart + HeaderLength, packet->data + Position, PacketLength);
-
 			if (write(fd, PacketStart, PacketLength + HeaderLength) < 0)
 				return false;
 

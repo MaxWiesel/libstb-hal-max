@@ -112,12 +112,9 @@ void Input::run()
 	unlink("/tmp/neutrino.input");
 	mkfifo("/tmp/neutrino.input", 0600);
 	out_fd = open("/tmp/neutrino.input", O_RDWR | O_CLOEXEC | O_NONBLOCK);
-
 	if (out_fd < 0)
 		hal_info("could not create /tmp/neutrino.input. good luck. error: %m\n");
-
 	n = scandir("/dev/input", &namelist, dirfilter, NULL);
-
 	if (n < 0)
 		hal_info("no input devices /dev/input/eventX??\n");
 	else
@@ -127,62 +124,47 @@ void Input::run()
 			strcpy(inputstr + strlen("/dev/input/"), namelist[n]->d_name);
 			free(namelist[n]);
 			int fd = open(inputstr, O_RDWR | O_CLOEXEC | O_NONBLOCK);
-
 			if (fd < 0)
 			{
 				hal_info("could not open %s:%m\n", inputstr);
 				continue;
 			}
-
 			ioctl(fd, EVIOCGBIT(0, EV_MAX), &bit);
-
 			if ((bit & (1 << EV_KEY)) == 0)
 			{
 				close(fd);
 				continue;
 			}
-
 			hal_info("input dev: %s bit: 0x%08lx fd: %d\n", inputstr, bit, fd);
 			in_fds.insert(fd);
-
 			if (fd > fd_max)
 				fd_max = fd;
 		}
-
 		free(namelist);
 	}
-
 	fd_max++;
 	running = true;
-
 	while (running)
 	{
 		FD_ZERO(&rfds);
-
 		for (std::set<int>::iterator i = in_fds.begin(); i != in_fds.end(); ++i)
 			FD_SET((*i), &rfds);
-
 		/* timeout should not be necessary, but somehow cancel / cleanup did not
 		 * work correctly with OpenThreads::Thread :-( */
 		struct timeval timeout = { 0, 100000 }; /* 100ms */
 		int ret = select(fd_max, &rfds, NULL, NULL, &timeout);
-
 		if (ret == 0) /* timed out */
 			continue;
-
 		if (ret < 0)
 		{
 			hal_info("input: select returned %d (%m)\n", ret);
 			continue;
 		}
-
 		for (std::set<int>::iterator i = in_fds.begin(); i != in_fds.end(); ++i)
 		{
 			if (!FD_ISSET((*i), &rfds))
 				continue;
-
 			ret = read(*i, &in, sizeof(in));
-
 			if (ret != sizeof(in))
 			{
 				if (errno == ENODEV)
@@ -191,26 +173,19 @@ void Input::run()
 					hal_info("input fd %d vanished?\n", *i);
 					in_fds.erase(i);
 				}
-
 				continue;
 			}
-
 			if (in.type != EV_KEY)
 				continue;
-
 			keymap_t::const_iterator j = kmap.find(in.code);
-
 			if (j != kmap.end())
 				in.code = j->second;
-
 			hal_debug("GLFB::%s:(fd %d) pushing 0x%x, value %d\n", __func__, *i, in.code, in.value);
 			write(out_fd, &in, sizeof(in));
 		}
 	}
-
 	for (std::set<int>::iterator i = in_fds.begin(); i != in_fds.end(); ++i)
 		close(*i);
-
 	in_fds.clear();
 }
 
@@ -220,9 +195,7 @@ void hal_api_init()
 {
 	if (!initialized)
 		hal_debug_init();
-
 	hal_info("%s begin, initialized=%d, debug=0x%02x\n", __func__, (int)initialized, debuglevel);
-
 	if (! glfb)
 	{
 		int x = 1280, y = 720; /* default OSD FB resolution */
@@ -232,39 +205,29 @@ void hal_api_init()
 		 */
 		const char *tmp = getenv("GLFB_RESOLUTION");
 		const char *p = NULL;
-
 		if (tmp)
 			p = strchr(tmp, ',');
-
 		if (p)
 		{
 			x = atoi(tmp);
 			y = atoi(p + 1);
 		}
-
 		hal_info("%s: setting Framebuffer size to %dx%d\n", __func__, x, y);
-
 		if (!p)
 			hal_info("%s: export GLFB_RESOLUTION=\"<w>,<h>\" to set another resolution\n", __func__);
-
 		glfb = new GLFramebuffer(x, y); /* hard coded to PAL resolution for now */
 	}
-
 	if (! thread)
 		thread = new Input();
-
 	initialized = true;
 }
 
 void hal_api_exit()
 {
 	hal_info("%s, initialized = %d\n", __func__, (int)initialized);
-
 	if (glfb)
 		delete glfb;
-
 	if (thread)
 		delete thread;
-
 	initialized = false;
 }

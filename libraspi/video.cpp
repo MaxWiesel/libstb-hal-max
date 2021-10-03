@@ -83,14 +83,12 @@ int cVideo::setBlank(int)
 int cVideo::SetVideoSystem(int system, bool)
 {
 	int h;
-
 	switch (system)
 	{
 		case VIDEO_STD_NTSC:
 		case VIDEO_STD_480P:
 			h = 480;
 			break;
-
 		case VIDEO_STD_1080I60:
 		case VIDEO_STD_1080I50:
 		case VIDEO_STD_1080P30:
@@ -99,27 +97,22 @@ int cVideo::SetVideoSystem(int system, bool)
 		case VIDEO_STD_1080P50:
 			h = 1080;
 			break;
-
 		case VIDEO_STD_720P50:
 		case VIDEO_STD_720P60:
 			h = 720;
 			break;
-
 		case VIDEO_STD_AUTO:
 			hal_info("%s: VIDEO_STD_AUTO not implemented\n", __func__);
-
 		// fallthrough
 		case VIDEO_STD_SECAM:
 		case VIDEO_STD_PAL:
 		case VIDEO_STD_576P:
 			h = 576;
 			break;
-
 		default:
 			hal_info("%s: unhandled value %d\n", __func__, system);
 			return 0;
 	}
-
 	v_std = (VIDEO_STD) system;
 	output_h = h;
 	return 0;
@@ -137,7 +130,6 @@ void cVideo::SetVideoMode(analog_mode_t)
 bool cVideo::ShowPicture(const char *fname)
 {
 	hal_info("%s(%s)\n", __func__, fname);
-
 	if (access(fname, R_OK))
 		return true;
 }

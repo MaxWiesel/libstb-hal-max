@@ -69,7 +69,6 @@ bool WriterH264::Write(AVPacket *packet, int64_t pts)
 {
 	if (!packet || !packet->data)
 		return false;
-
 	uint8_t PesHeader[PES_MAX_HEADER_SIZE];
 	struct iovec iov[512];
 
@@ -84,7 +83,6 @@ bool WriterH264::Write(AVPacket *packet, int64_t pts)
 		int ic = 0;
 		iov[ic++].iov_base = PesHeader;
 		unsigned int len = 0;
-
 		if (initialHeader)
 		{
 			initialHeader = false;
@@ -92,7 +90,6 @@ bool WriterH264::Write(AVPacket *packet, int64_t pts)
 			iov[ic++].iov_len = get_codecpar(stream)->extradata_size;
 			len += get_codecpar(stream)->extradata_size;
 		}
-
 		iov[ic].iov_base = packet->data;
 		iov[ic++].iov_len = packet->size;
 		len += packet->size;
@@ -138,36 +135,28 @@ bool WriterH264::Write(AVPacket *packet, int64_t pts)
 		// Container message version - changes when/if we vary the format of the message
 		Header[len++] = CONTAINER_PARAMETERS_VERSION;
 		Header[len++] = 0xff;	// marker bits
-
 #if 0
-
 		if (FrameRate == 0xffffffff)
 			FrameRate = (TimeScale > 1000) ? 1001 : 1;
-
 #endif
-
 		Header[len++] = (TimeScale >> 24) & 0xff;	// Output the timescale
 		Header[len++] = (TimeScale >> 16) & 0xff;
 		Header[len++] = 0xff;	// marker bits
 		Header[len++] = (TimeScale >>  8) & 0xff;
 		Header[len++] = (TimeScale) & 0xff;
 		Header[len++] = 0xff;	// marker bits
-
 		Header[len++] = (FrameRate >> 24) & 0xff;	// Output frame period (should be: time delta)
 		Header[len++] = (FrameRate >> 16) & 0xff;
 		Header[len++] = 0xff;	// marker bits
 		Header[len++] = (FrameRate >>  8) & 0xff;
 		Header[len++] = (FrameRate) & 0xff;
 		Header[len++] = 0xff;	// marker bits
-
 		Header[len++] = 0x80;	// Rsbp trailing bits
-
 		int ic = 0;
 		iov[ic].iov_base = PesHeader;
 		iov[ic++].iov_len = InsertPesHeader(PesHeader, len, MPEG_VIDEO_PES_START_CODE, INVALID_PTS_VALUE, 0);
 		iov[ic].iov_base = Header;
 		iov[ic++].iov_len = len;
-
 		if (writev(fd, iov, ic) < 0)
 			return false;
 
@@ -180,7 +169,6 @@ bool WriterH264::Write(AVPacket *packet, int64_t pts)
 
 		// sequence parameter set
 		unsigned int ParamSets = avcCHeader->NumParamSets & 0x1f;
-
 		for (unsigned int i = 0; i < ParamSets; i++)
 		{
 			unsigned int PsLength = (avcCHeader->Params[ParamOffset] << 8) | avcCHeader->Params[ParamOffset + 1];
@@ -212,7 +200,6 @@ bool WriterH264::Write(AVPacket *packet, int64_t pts)
 
 		iov[0].iov_len = InsertPesHeader(PesHeader, len, MPEG_VIDEO_PES_START_CODE, INVALID_PTS_VALUE, 0);
 		ssize_t l = writev(fd, iov, ic);
-
 		if (l < 0)
 			return false;
 
@@ -220,27 +207,22 @@ bool WriterH264::Write(AVPacket *packet, int64_t pts)
 	}
 
 	uint8_t *de = d + packet->size;
-
 	do
 	{
 		unsigned int len = 0;
-
 		switch (NalLengthBytes)
 		{
 			case 4:
 				len = *d;
 				d++;
-
 			case 3:
 				len <<= 8;
 				len |= *d;
 				d++;
-
 			case 2:
 				len <<= 8;
 				len |= *d;
 				d++;
-
 			default:
 				len <<= 8;
 				len |= *d;
@@ -262,7 +244,6 @@ bool WriterH264::Write(AVPacket *packet, int64_t pts)
 		iov[ic++].iov_len = len;
 		iov[0].iov_len = InsertPesHeader(PesHeader, len + 3, MPEG_VIDEO_PES_START_CODE, pts, 0);
 		ssize_t l = writev(fd, iov, ic);
-
 		if (l < 0)
 			return false;
 

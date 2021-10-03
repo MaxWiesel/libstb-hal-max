@@ -41,17 +41,13 @@
 static inline void Hexdump(unsigned char *Data, int length)
 {
 	int k;
-
 	for (k = 0; k < length; k++)
 	{
 		printf("%02x ", Data[k]);
-
 		if (((k + 1) & 31) == 0)
 			printf("\n");
 	}
-
 	printf("\n");
-
 }
 #endif
 
@@ -116,14 +112,12 @@ void WriterAAC::Init(int _fd, AVStream *_stream, Player *_player)
 	unsigned int object_type = 2;	// LC
 	unsigned int sample_index = aac_get_sample_rate_index(stream->codec->sample_rate);
 	unsigned int chan_config = stream->codec->channels;
-
 	if (stream->codec->extradata_size >= 2)
 	{
 		object_type = stream->codec->extradata[0] >> 3;
 		sample_index = ((stream->codec->extradata[0] & 0x7) << 1) + (stream->codec->extradata[1] >> 7);
 		chan_config = (stream->codec->extradata[1] >> 3) && 0xf;
 	}
-
 #if AAC_DEBUG
 	printf("aac object_type %d\n", object_type);
 	printf("aac sample_index %d\n", sample_index);
@@ -175,14 +169,11 @@ bool WriterAAC::Write(AVPacket *packet, int64_t pts)
 #if AAC_DEBUG
 //		printf("Packet Size + AAC_HEADER_LENGTH= %d Packet Size= %d Written= %d\n", PacketLength, packet->size, l);
 #endif
-
 		if (l < 0)
 			return false;
-
 		pos += PacketLength;
 		pts = INVALID_PTS_VALUE;
 	}
-
 	return true;
 }
 

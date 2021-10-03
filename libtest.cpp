@@ -25,7 +25,6 @@ int main(int argc __attribute__((unused)), char **argv __attribute__((unused)))
 
 	int x = 0;
 #endif
-
 	while (1)
 	{
 #if HAVE_GENERIC_HARDWARE
@@ -37,19 +36,15 @@ int main(int argc __attribute__((unused)), char **argv __attribute__((unused)))
 
 		for (int i = 0; i < available / 4; i++)
 			*(lfb + i) = c;
-
 		glfb->blit();
 #endif
 		sleep(1);
-
 		if (! access("/tmp/endtest", R_OK))
 		{
 			unlink("/tmp/endtest");
 			break;
 		}
 	};
-
 	hal_api_exit();
-
 	return 0;
 }

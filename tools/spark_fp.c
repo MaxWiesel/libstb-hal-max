@@ -110,19 +110,15 @@ int set_aotom_time(int fd, time_t t)
 
 	tmp = localtime(&t);
 	t += tmp->tm_gmtoff;
-
 	if (ioctl(fd, VFDSETTIME2, &t) >= 0)
 		return 0;
-
 	fprintf(stderr, "warning: VFDSETTIME2 failed (%m), falling back to VFDSETTIME\n");
 	time_to_aotom(t, aotom.u.time.time);
-
 	if (ioctl(fd, VFDSETTIME, &aotom) < 0)
 	{
 		perror("ioctl VFDSETTIME");
 		return -1;
 	}
-
 	return 0;
 }
 
@@ -137,7 +133,6 @@ int main(int argc, char **argv)
 	int period = LOG_ON;
 
 	int fd = open(FP_DEV, O_RDWR);
-
 	if (fd < 0)
 	{
 		fprintf(stderr, "error: cannot open %s: %m\n", FP_DEV);
@@ -151,14 +146,12 @@ int main(int argc, char **argv)
 	}
 
 	ret = 0;
-
 	while ((c = getopt(argc, argv, "gs:tw:Tl:L:P:S:B:i:I:p:")) != -1)
 	{
 		switch (c)
 		{
 			case 'g':
 				ret = ioctl(fd, VFDGETSTARTUPSTATE, &val);
-
 				if (ret < 0)
 					perror("ioctl VFDGETSTARTUPSTATE");
 				else
@@ -166,21 +159,15 @@ int main(int argc, char **argv)
 					printf("%s\n", wakeupreason[val & 0x03]);
 					ret = val;
 				}
-
 				break;
-
 			case 's':
 				t = atol(optarg);
-
 				if (t == 0)
 					t = time(NULL),
 					ret = set_aotom_time(fd, t);
-
 				break;
-
 			case 't':
 				ret = ioctl(fd, VFDGETTIME, &t);
-
 				if (ret < 0)
 					perror("ioctl VFDGETTIME");
 				else
@@ -189,28 +176,21 @@ int main(int argc, char **argv)
 					t -= tmp->tm_gmtoff;
 					printf("%ld\n", t);
 				}
-
 				break;
-
 			case 'w':
 				t = atol(optarg);
-
 				if (t == 0)
 				{
 					fprintf(stderr, "invalid time?\n");
 					ret = 1;
 					break;
 				}
-
 				/* set AOTOM time to current time... */
 				t2 = time(NULL);
 				ret = set_aotom_time(fd, t2);
-
 				if (ret < 0)
 					break;
-
 				diff = t - t2;
-
 				if (t == 1)
 					t = 0; /* t = 1 is magic for "no time" -> clear... */
 				else
@@ -220,19 +200,15 @@ int main(int argc, char **argv)
 					aotom.u.led.led_nr = 1;
 					ioctl(fd, VFDSETLED, &aotom);
 					ret = ioctl(fd, VFDGETTIME, &t);
-
 					if (ret < 0)
 					{
 						perror("ioctl VFDGETTIME");
 						break;
 					}
-
 					if (t < t2 + 20)
 						diff = 20;
-
 					t += diff;
 				}
-
 				tmp = gmtime(&t2);
 				fprintf(stderr, "current time: %04d-%02d-%02d %02d:%02d:%02d\n", tmp->tm_year + 1900,
 					tmp->tm_mon + 1, tmp->tm_mday, tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
@@ -241,42 +217,34 @@ int main(int argc, char **argv)
 					tmp->tm_mon + 1, tmp->tm_mday, tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 				ret = ioctl(fd, VFDSETPOWERONTIME, &t);
 				break;
-
 			case 'P':
 				ret = ioctl(fd, VFDPOWEROFF);
 				break;
-
 			case 'p':
 				period = atoi(optarg) / 10;
 				break;
-
 			case 'l': /* LED on */
 				aotom.u.led.on = period;
 				aotom.u.led.led_nr = atoi(optarg);
 				ioctl(fd, VFDSETLED, &aotom);
 				break;
-
 			case 'L': /* LED off */
 				aotom.u.led.on = LOG_OFF;
 				aotom.u.led.led_nr = atoi(optarg);
 				ioctl(fd, VFDSETLED, &aotom);
 				break;
-
 			case 'i': /* icon on */
 				aotom.u.icon.on = 1;
 				aotom.u.icon.icon_nr = atoi(optarg);
 				ioctl(fd, VFDICONDISPLAYONOFF, &aotom);
 				break;
-
 			case 'I': /* icon off */
 				aotom.u.icon.on = 0;
 				aotom.u.icon.icon_nr = atoi(optarg);
 				ioctl(fd, VFDICONDISPLAYONOFF, &aotom);
 				break;
-
 			case 'T':
 				ret = ioctl(fd, VFDGETVERSION, &val);
-
 				if (ret < 0)
 					perror("ioctl VFDGETVERSION");
 				else
@@ -284,21 +252,16 @@ int main(int argc, char **argv)
 					printf("%d\n", val);
 					ret = val;
 				}
-
 				break;
-
 // Reminder to myself, here's a semi-sane default for Pingulux boxes:
 // spark_fp -S 0:9966da25 -S 1:11eeda25 -S 2:cc33ba45 -S 3:dd227887 -S 4:aa557887 -B 0:996640bf -B 1:11ee40bf -B 2:cc33b847 -B 3:dd2228d7 -B 4:aa5528d7
 // Not sure whether these are the original settings. --martii
-
 			case 'S':
 				if (2 == sscanf(optarg, "%d:%lx", &aotom.u.key.key_nr, (long unsigned int *) &aotom.u.key.key))
 					ioctl(fd, VFDSETSTBYKEY, &aotom);
-
 				if (1 == sscanf(optarg, "%d", &aotom.u.key.key_nr))
 				{
 					ret = ioctl(fd, VFDGETSTBYKEY, &aotom);
-
 					if (ret)
 						perror("ioctl VFDGETSTBYKEY");
 					else
@@ -307,30 +270,23 @@ int main(int argc, char **argv)
 				else
 				{
 					aotom.u.key.key_nr = 0;
-
 					while (aotom.u.key.key_nr < 5)
 					{
 						ret = ioctl(fd, VFDGETSTBYKEY, &aotom);
-
 						if (ret)
 							perror("ioctl VFDGETSTBYKEY");
 						else
 							fprintf(stderr, "stby key %d = %.8x\n", aotom.u.key.key_nr, aotom.u.key.key);
-
 						aotom.u.key.key_nr++;
 					}
 				}
-
 				break;
-
 			case 'B':
 				if (2 == sscanf(optarg, "%d:%lx", &aotom.u.key.key_nr, (long unsigned int *) &aotom.u.key.key))
 					ioctl(fd, VFDSETBLUEKEY, &aotom);
-
 				if (1 == sscanf(optarg, "%d", &aotom.u.key.key_nr))
 				{
 					ret = ioctl(fd, VFDGETBLUEKEY, &aotom);
-
 					if (ret)
 						perror("ioctl VFDGETBLUEKEY");
 					else
@@ -339,28 +295,22 @@ int main(int argc, char **argv)
 				else
 				{
 					aotom.u.key.key_nr = 0;
-
 					while (aotom.u.key.key_nr < 5)
 					{
 						ret = ioctl(fd, VFDGETBLUEKEY, &aotom);
-
 						if (ret)
 							perror("ioctl VFDGETBLUEKEY");
 						else
 							fprintf(stderr, "blue key %d = %.8x\n", aotom.u.key.key_nr, aotom.u.key.key);
-
 						aotom.u.key.key_nr++;
 					}
 				}
-
 				break;
-
 			default:
 				usage();
 				return 0;
 		}
 	}
-
 	close(fd);
 	return ret;
 }

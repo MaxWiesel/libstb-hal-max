@@ -21,7 +21,6 @@ static int pkcs_1_mgf1(const uint8_t *seed, unsigned long seedlen, uint8_t *mask
 
 	/* allocate memory */
 	buf = (uint8_t *)malloc(hLen);
-
 	if (buf == NULL)
 	{
 		printf("error mem\n");
@@ -105,7 +104,6 @@ static int pkcs_1_pss_encode(const uint8_t *msghash, unsigned int msghashlen,
 	x += saltlen;
 
 	err = pkcs_1_mgf1(hash, hLen, mask, modulus_len - hLen - 1);
-
 	if (err)
 		goto LBL_ERR;
 
@@ -176,7 +174,6 @@ int dh_gen_exp(uint8_t *dest, int dest_len, uint8_t *dh_g, int dh_g_len, uint8_t
 	DH_get0_key(dh, &pub_key, &priv_key);
 	len = BN_num_bytes(priv_key);
 #endif
-
 	if (len > dest_len)
 	{
 		printf("len > dest_len\n");
@@ -215,7 +212,6 @@ int dh_mod_exp(uint8_t *dest, int dest_len, uint8_t *base, int base_len, uint8_t
 	BN_CTX_free(ctx);
 
 	len = BN_num_bytes(bn_dest);
-
 	if (len > dest_len)
 	{
 		printf("len > dest_len\n");

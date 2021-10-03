@@ -33,10 +33,8 @@ eDVBCIMMISession::~eDVBCIMMISession()
 int eDVBCIMMISession::receivedAPDU(const unsigned char *tag, const void *data, int len)
 {
 	printf("[CI MMI] SESSION(%d)/MMI %02x %02x %02x: ", session_nb, tag[0], tag[1], tag[2]);
-
 	for (int i = 0; i < len; i++)
 		printf("%02x ", ((const unsigned char *)data)[i]);
-
 	printf("\n");
 
 	if ((tag[0] == 0x9f) && (tag[1] == 0x88))
@@ -57,12 +55,10 @@ int eDVBCIMMISession::receivedAPDU(const unsigned char *tag, const void *data, i
 				cCA::GetInstance()->SendMessage(pMsg);
 			}
 			break;
-
 			case 0x01: /* display control */
 				state = stateDisplayReply;
 				return 1;
 				break;
-
 			case 0x07: /* menu enq */
 			{
 				MMI_ENQUIRY_INFO *enquiry = (MMI_ENQUIRY_INFO *) malloc(sizeof(MMI_ENQUIRY_INFO));
@@ -71,14 +67,12 @@ int eDVBCIMMISession::receivedAPDU(const unsigned char *tag, const void *data, i
 				unsigned char *max = ((unsigned char *)d) + len;
 
 				int textlen = len - 2;
-
 				if ((d + 2) > max)
 					break;
 
 				int blind = *d++ & 1;
 				int alen = *d++;
 				printf("%d bytes text\n", textlen);
-
 				if ((d + textlen) > max)
 					break;
 
@@ -105,7 +99,6 @@ int eDVBCIMMISession::receivedAPDU(const unsigned char *tag, const void *data, i
 				slot->mmiOpened = true;
 			}
 			break;
-
 			case 0x09: /* menu last */
 			case 0x0c: /* list last */
 			{
@@ -137,7 +130,6 @@ int eDVBCIMMISession::receivedAPDU(const unsigned char *tag, const void *data, i
 				for (int i = 0; i < (n + 3); ++i)
 				{
 					int textlen;
-
 					if ((d + 3) > max)
 						break;
 
@@ -146,7 +138,6 @@ int eDVBCIMMISession::receivedAPDU(const unsigned char *tag, const void *data, i
 					d += eDVBCISession::parseLengthField(d, textlen);
 
 					printf("%d bytes text > ", textlen);
-
 					if ((d + textlen) > max)
 						break;
 
@@ -169,10 +160,8 @@ int eDVBCIMMISession::receivedAPDU(const unsigned char *tag, const void *data, i
 						printf("%d. ", listInfo->choice_nb);
 						//printf("%s\n", listInfo->choice_item[listInfo->choice_nb - 1]);
 					}
-
 					while (textlen--)
 						printf("%c", *d++);
-
 					printf("\n");
 				}
 
@@ -204,12 +193,10 @@ int eDVBCIMMISession::receivedAPDU(const unsigned char *tag, const void *data, i
 				}
 			}
 			break;
-
 			default:
 				break;
 		}
 	}
-
 	return 0;
 }
 
@@ -220,7 +207,6 @@ int eDVBCIMMISession::doAction()
 		case stateStarted:
 			state = stateIdle;
 			break;
-
 		case stateDisplayReply:
 		{
 			unsigned char tag[] = {0x9f, 0x88, 0x02};
@@ -229,7 +215,6 @@ int eDVBCIMMISession::doAction()
 			state = stateIdle;
 			break;
 		}
-
 		case stateFakeOK:
 		{
 			unsigned char tag[] = {0x9f, 0x88, 0x0b};
@@ -238,14 +223,11 @@ int eDVBCIMMISession::doAction()
 			state = stateIdle;
 			break;
 		}
-
 		case stateIdle:
 			break;
-
 		default:
 			break;
 	}
-
 	return 0;
 }
 

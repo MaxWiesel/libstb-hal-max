@@ -62,7 +62,6 @@ GLFramebuffer::GLFramebuffer(int x, int y)
 	glfb_priv = new GLFbPC(x, y, osd_buf);
 	si = glfb_priv->getScreenInfo();
 	start();
-
 	while (!glfb_priv->mInitDone)
 		usleep(1);
 }
@@ -120,20 +119,16 @@ GLFbPC::GLFbPC(int x, int y, std::vector<unsigned char> &buf): mReInit(true), mS
 	unlink("/tmp/neutrino.input");
 	mkfifo("/tmp/neutrino.input", 0600);
 	input_fd = open("/tmp/neutrino.input", O_RDWR | O_CLOEXEC | O_NONBLOCK);
-
 	if (input_fd < 0)
 		hal_info("%s: could not open /tmp/neutrino.input FIFO: %m\n", __func__);
-
 	initKeys();
 }
 
 GLFbPC::~GLFbPC()
 {
 	mShutDown = true;
-
 	if (input_fd >= 0)
 		close(input_fd);
-
 	osd_buf->clear();
 }
 
@@ -225,7 +220,6 @@ void GLFramebuffer::run()
 
 	/* init the good stuff */
 	GLenum err = glewInit();
-
 	if (err == GLEW_OK)
 	{
 		if ((!GLEW_VERSION_1_5) || (!GLEW_EXT_pixel_buffer_object) || (!GLEW_ARB_texture_non_power_of_two))
@@ -250,7 +244,6 @@ void GLFramebuffer::run()
 	}
 	else
 		hal_info("GLFB: error initializing glew: %d\n", err);
-
 	hal_info("GLFB: GL thread stopping\n");
 }
 
@@ -327,7 +320,6 @@ void GLFbPC::releaseGLObjects()
 {
 	hal_debug_c("GLFB::%s: 0x%x\n", __func__, key);
 	struct input_event ev;
-
 	if (key == 'f')
 	{
 		hal_info_c("GLFB::%s: toggle fullscreen %s\n", __func__, glfb_priv->mFullscreen ? "off" : "on");
@@ -335,12 +327,9 @@ void GLFbPC::releaseGLObjects()
 		glfb_priv->mReInit = true;
 		return;
 	}
-
 	std::map<unsigned char, int>::const_iterator i = glfb_priv->mKeyMap.find(key);
-
 	if (i == glfb_priv->mKeyMap.end())
 		return;
-
 	ev.code  = i->second;
 	ev.value = 1; /* key own */
 	ev.type  = EV_KEY;
@@ -356,10 +345,8 @@ void GLFbPC::releaseGLObjects()
 	hal_debug_c("GLFB::%s: 0x%x\n", __func__, key);
 	struct input_event ev;
 	std::map<int, int>::const_iterator i = glfb_priv->mSpecialMap.find(key);
-
 	if (i == glfb_priv->mSpecialMap.end())
 		return;
-
 	ev.code  = i->second;
 	ev.value = 1;
 	ev.type  = EV_KEY;
@@ -378,7 +365,6 @@ void GLFbPC::render()
 		glutLeaveMainLoop();
 
 	mReInitLock.lock();
-
 	if (mReInit)
 	{
 		int xoff = 0;
@@ -387,7 +373,6 @@ void GLFbPC::render()
 		mReInit = false;
 		mX = &_mX[mFullscreen];
 		mY = &_mY[mFullscreen];
-
 		if (mFullscreen)
 		{
 			int x = glutGet(GLUT_SCREEN_WIDTH);
@@ -395,19 +380,16 @@ void GLFbPC::render()
 			*mX = x;
 			*mY = y;
 			AVRational a = { x, y };
-
 			if (av_cmp_q(a, mOA) < 0)
 				*mY = x * mOA.den / mOA.num;
 			else if (av_cmp_q(a, mOA) > 0)
 				*mX = y * mOA.num / mOA.den;
-
 			xoff = (x - *mX) / 2;
 			yoff = (y - *mY) / 2;
 			glutFullScreen();
 		}
 		else
 			*mX = *mY * mOA.num / mOA.den;
-
 		hal_info("%s: reinit mX:%d mY:%d xoff:%d yoff:%d fs %d\n",
 			__func__, *mX, *mY, xoff, yoff, mFullscreen);
 		glViewport(xoff, yoff, *mX, *mY);
@@ -426,14 +408,11 @@ void GLFbPC::render()
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
-
 	mReInitLock.unlock();
-
 	if (!mFullscreen && (*mX != glutGet(GLUT_WINDOW_WIDTH) || *mY != glutGet(GLUT_WINDOW_HEIGHT)))
 		glutReshapeWindow(*mX, *mY);
 
 	bltDisplayBuffer(); /* decoded video stream */
-
 	if (mState.blit)
 	{
 		/* only blit manually after fb->blit(), this helps to find missed blit() calls */
@@ -452,7 +431,6 @@ void GLFbPC::render()
 		xscale = 1.0;
 		int cmp = (mCrop == DISPLAY_AR_MODE_NONE) ? 0 : av_cmp_q(mVA, mOA);
 		const AVRational a149 = { 14, 9 };
-
 		switch (cmp)
 		{
 			default:
@@ -460,59 +438,47 @@ void GLFbPC::render()
 			case 0:		/* identical */
 				hal_debug("%s: mVA == mOA (or fullscreen mode :-)\n", __func__);
 				break;
-
 			case 1:		/* mVA > mOA -- video is wider than display */
 				hal_debug("%s: mVA > mOA\n", __func__);
 				xscale = av_q2d(mVA) / av_q2d(mOA);
-
 				switch (mCrop)
 				{
 					case DISPLAY_AR_MODE_PANSCAN:
 						break;
-
 					case DISPLAY_AR_MODE_LETTERBOX:
 						zoom = av_q2d(mOA) / av_q2d(mVA);
 						break;
-
 					case DISPLAY_AR_MODE_PANSCAN2:
 						zoom = av_q2d(mOA) / av_q2d(a149);
 						break;
-
 					default:
 						break;
 				}
-
 				break;
-
 			case -1:	/* mVA < mOA -- video is taller than display */
 				hal_debug("%s: mVA < mOA\n", __func__);
 				xscale = av_q2d(mVA) / av_q2d(mOA);
-
 				switch (mCrop)
 				{
 					case DISPLAY_AR_MODE_LETTERBOX:
 						break;
-
 					case DISPLAY_AR_MODE_PANSCAN2:
 						if (av_cmp_q(a149, mOA) < 0)
 						{
 							zoom = av_q2d(mVA) * av_q2d(a149) / av_q2d(mOA);
 							break;
 						}
-					[[fallthrough]];
+						[[fallthrough]];
 					/* fallthrough for output format 14:9 */
 					case DISPLAY_AR_MODE_PANSCAN:
 						zoom = av_q2d(mOA) / av_q2d(mVA);
 						break;
-
 					default:
 						break;
 				}
-
 				break;
 		}
 	}
-
 	glBindTexture(GL_TEXTURE_2D, mState.displaytex);
 	drawSquare(zoom, xscale);
 	glBindTexture(GL_TEXTURE_2D, mState.osdtex);
@@ -522,13 +488,10 @@ void GLFbPC::render()
 	glutSwapBuffers();
 
 	GLuint err = glGetError();
-
 	if (err != 0)
 		hal_info("GLFB::%s: GLError:%d 0x%04x\n", __func__, err, err);
-
 	if (sleep_us > 0)
 		usleep(sleep_us);
-
 	glutPostRedisplay();
 }
 
@@ -542,7 +505,6 @@ void GLFbPC::checkReinit(int x, int y)
 	static int last_x = 0, last_y = 0;
 
 	mReInitLock.lock();
-
 	if (!mFullscreen && !mReInit && (x != *mX || y != *mY))
 	{
 		if (x != *mX && abs(x - last_x) > 2)
@@ -555,10 +517,8 @@ void GLFbPC::checkReinit(int x, int y)
 			*mY = y;
 			*mX = *mY * mOA.num / mOA.den;
 		}
-
 		mReInit = true;
 	}
-
 	mReInitLock.unlock();
 	last_x = x;
 	last_y = y;
@@ -583,7 +543,6 @@ void GLFbPC::drawSquare(float size, float x_factor)
 		0.0, 1.0,
 		1.0, 1.0,
 	};
-
 	if (x_factor > -99.0)   /* x_factor == -100 => OSD */
 	{
 		if (videoDecoder &&
@@ -641,27 +600,21 @@ void GLFbPC::bltDisplayBuffer()
 {
 	if (!videoDecoder) /* cannot start yet */
 		return;
-
 	static bool warn = true;
 	cVideo::SWFramebuffer *buf = videoDecoder->getDecBuf();
-
 	if (!buf)
 	{
 		if (warn)
 			hal_info("GLFB::%s did not get a buffer...\n", __func__);
-
 		warn = false;
 		return;
 	}
-
 	warn = true;
 	int w = buf->width(), h = buf->height();
-
 	if (w == 0 || h == 0)
 		return;
 
 	AVRational a = buf->AR();
-
 	if (a.den != 0 && a.num != 0 && av_cmp_q(a, _mVA))
 	{
 		_mVA = a;
@@ -684,33 +637,26 @@ void GLFbPC::bltDisplayBuffer()
 	int64_t apts = 0;
 	/* 18000 is the magic value for A/V sync in my libao->pulseaudio->intel_hda setup */
 	int64_t vpts = buf->pts() + 18000;
-
 	if (audioDecoder)
 		apts = audioDecoder->getPts();
-
 	if (apts != last_apts)
 	{
 		int rate, dummy1, dummy2;
-
 		if (apts < vpts)
 			sleep_us = (sleep_us * 2 + (vpts - apts) * 10 / 9) / 3;
 		else if (sleep_us > 1000)
 			sleep_us -= 1000;
-
 		last_apts = apts;
 		videoDecoder->getPictureInfo(dummy1, dummy2, rate);
-
 		if (rate > 0)
 			rate = 2000000 / rate; /* limit to half the frame rate */
 		else
 			rate = 50000; /* minimum 20 fps */
-
 		if (sleep_us > rate)
 			sleep_us = rate;
 		else if (sleep_us < 1)
 			sleep_us = 1;
 	}
-
 	hal_debug("vpts: 0x%" PRIx64 " apts: 0x%" PRIx64 " diff: %6.3f sleep_us %d buf %d\n",
 		buf->pts(), apts, (buf->pts() - apts) / 90000.0, sleep_us, videoDecoder->buf_num);
 }

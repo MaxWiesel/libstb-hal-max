@@ -61,7 +61,6 @@ void cAudio::openDevice(void)
 	{
 		if ((fd = open(AUDIO_DEVICE, O_RDWR)) < 0)
 			hal_info("openDevice: open failed (%m)\n");
-
 		fcntl(fd, F_SETFD, FD_CLOEXEC);
 		//do_mute(true, false);
 	}
@@ -76,13 +75,11 @@ void cAudio::closeDevice(void)
 		close(fd);
 		fd = -1;
 	}
-
 	if (clipfd > -1)
 	{
 		close(clipfd);
 		clipfd = -1;
 	}
-
 	if (mixer_fd > -1)
 	{
 		close(mixer_fd);
@@ -114,7 +111,6 @@ void cAudio::close_AVInput_Device(void)
 	{
 		fop(ioctl, AUDIO_STOP);
 	}
-
 	fdd = false;
 }
 
@@ -162,7 +158,6 @@ int cAudio::do_mute(bool enable, bool remember)
 int map_volume(const int volume)
 {
 	unsigned char vol = volume;
-
 	if (vol > 100)
 		vol = 100;
 
@@ -171,10 +166,8 @@ int map_volume(const int volume)
 	// now range is 63..0, where 0 is loudest
 
 #if BOXMODEL_VUPLUS_ALL
-
 	if (vol == 63)
 		vol = 255;
-
 #endif
 
 	return vol;
@@ -259,16 +252,13 @@ int cAudio::PrepareClipPlay(int ch, int srate, int bits, int little_endian)
 	const char *dsp_dev = getenv("DSP_DEVICE");
 	const char *mix_dev = getenv("MIX_DEVICE");
 	hal_info("cAudio::%s ch %d srate %d bits %d le %d\n", __FUNCTION__, ch, srate, bits, little_endian);
-
 	if (clipfd > -1)
 	{
 		hal_info("%s: clipfd already opened (%d)\n", __func__, clipfd);
 		return -1;
 	}
-
 	mixer_num = -1;
 	mixer_fd = -1;
-
 	/* a different DSP device can be given with DSP_DEVICE and MIX_DEVICE
 	 * if this device cannot be opened, we fall back to the internal OSS device
 	 * Example:
@@ -282,79 +272,61 @@ int cAudio::PrepareClipPlay(int ch, int srate, int bits, int little_endian)
 		if (dsp_dev)
 			hal_info("%s: DSP_DEVICE is set (%s) but cannot be opened,"
 				" fall back to /dev/dsp\n", __func__, dsp_dev);
-
 		dsp_dev = "/dev/dsp";
 	}
-
 	if ((!mix_dev) || (access(mix_dev, W_OK)))
 	{
 		if (mix_dev)
 			hal_info("%s: MIX_DEVICE is set (%s) but cannot be opened,"
 				" fall back to /dev/mixer\n", __func__, dsp_dev);
-
 		mix_dev = "/dev/mixer";
 	}
-
 	hal_info("cAudio::%s: dsp_dev %s mix_dev %s\n", __func__, dsp_dev, mix_dev); /* NULL mix_dev is ok */
 	/* the tdoss dsp driver seems to work only on the second open(). really. */
 	clipfd = open(dsp_dev, O_WRONLY);
-
 	if (clipfd < 0)
 	{
 		hal_info("%s open %s: %m\n", dsp_dev, __FUNCTION__);
 		return -1;
 	}
-
 	fcntl(clipfd, F_SETFD, FD_CLOEXEC);
-
 	/* no idea if we ever get little_endian == 0 */
 	if (little_endian)
 		fmt = AFMT_S16_BE;
 	else
 		fmt = AFMT_S16_LE;
-
 	if (ioctl(clipfd, SNDCTL_DSP_SETFMT, &fmt))
 		perror("SNDCTL_DSP_SETFMT");
-
 	if (ioctl(clipfd, SNDCTL_DSP_CHANNELS, &ch))
 		perror("SNDCTL_DSP_CHANNELS");
-
 	if (ioctl(clipfd, SNDCTL_DSP_SPEED, &srate))
 		perror("SNDCTL_DSP_SPEED");
-
 #if !BOXMODEL_HD51 && !BOXMODEL_BRE2ZE4K && !BOXMODEL_H7
-
 	if (ioctl(clipfd, SNDCTL_DSP_RESET))
 		perror("SNDCTL_DSP_RESET");
-
 #endif
 
 	if (!mix_dev)
 		return 0;
 
 	mixer_fd = open(mix_dev, O_RDWR);
-
 	if (mixer_fd < 0)
 	{
 		hal_info("%s: open mixer %s failed (%m)\n", __func__, mix_dev);
 		/* not a real error */
 		return 0;
 	}
-
 	if (ioctl(mixer_fd, SOUND_MIXER_READ_DEVMASK, &devmask) == -1)
 	{
 		hal_info("%s: SOUND_MIXER_READ_DEVMASK %m\n", __func__);
 		devmask = 0;
 	}
-
 	if (ioctl(mixer_fd, SOUND_MIXER_READ_STEREODEVS, &stereo) == -1)
 	{
 		hal_info("%s: SOUND_MIXER_READ_STEREODEVS %m\n", __func__);
 		stereo = 0;
 	}
-
 	usable = devmask & stereo;
-
 	if (usable == 0)
 	{
 		hal_info("%s: devmask: %08x stereo: %08x, no usable dev :-(\n",
@@ -363,7 +335,6 @@ int cAudio::PrepareClipPlay(int ch, int srate, int bits, int little_endian)
 		mixer_fd = -1;
 		return 0; /* TODO: should we treat this as error? */
 	}
-
 	/* __builtin_popcount needs GCC, it counts the set bits... */
 	if (__builtin_popcount(usable) != 1)
 	{
@@ -372,10 +343,8 @@ int cAudio::PrepareClipPlay(int ch, int srate, int bits, int little_endian)
 			"%s: querying MIX_NUMBER environment variable...\n",
 			__func__, devmask, stereo, __func__);
 		const char *tmp = getenv("MIX_NUMBER");
-
 		if (tmp)
 			mixer_num = atoi(tmp);
-
 		hal_info("%s: mixer_num is %d -> device %08x\n",
 			__func__, mixer_num, (mixer_num >= 0) ? (1 << mixer_num) : 0);
 		/* no error checking, you'd better know what you are doing... */
@@ -383,14 +352,12 @@ int cAudio::PrepareClipPlay(int ch, int srate, int bits, int little_endian)
 	else
 	{
 		mixer_num = 0;
-
 		while (!(usable & 0x01))
 		{
 			mixer_num++;
 			usable >>= 1;
 		}
 	}
-
 	setVolume(volume, volume);
 
 	return 0;
@@ -399,40 +366,31 @@ int cAudio::PrepareClipPlay(int ch, int srate, int bits, int little_endian)
 int cAudio::WriteClip(unsigned char *buffer, int size)
 {
 	int ret, __attribute__((unused)) count = 1;
-
 	// hal_debug("cAudio::%s\n", __FUNCTION__);
 	if (clipfd < 0)
 	{
 		hal_info("%s: clipfd not yet opened\n", __FUNCTION__);
 		return -1;
 	}
-
 #if BOXMODEL_HD51 || BOXMODEL_BRE2ZE4K || BOXMODEL_H7
 again:
 #endif
 	ret = write(clipfd, buffer, size);
-
 	if (ret < 0)
 	{
 		hal_info("%s: write error (%m)\n", __FUNCTION__);
 		return ret;
 	}
-
 #if BOXMODEL_HD51 || BOXMODEL_BRE2ZE4K || BOXMODEL_H7
-
 	if (ret != size)
 	{
 		hal_info("cAudio::%s: difference > to write (%d) != written (%d) try (%d) > reset dsp and restart write\n", __FUNCTION__, size, ret, count);
-
 		if (ioctl(clipfd, SNDCTL_DSP_RESET))
 			perror("SNDCTL_DSP_RESET");
-
 		count++;
-
 		if (count < 3)
 			goto again;
 	}
-
 #endif
 	return ret;
 }
@@ -446,19 +404,16 @@ int cAudio::StopClip()
 		hal_info("%s: clipfd not yet opened\n", __FUNCTION__);
 		return -1;
 	}
-
 #if BOXMODEL_VUPLUS_ARM
 	ioctl(clipfd, SNDCTL_DSP_RESET);
 #endif
 	close(clipfd);
 	clipfd = -1;
-
 	if (mixer_fd > -1)
 	{
 		close(mixer_fd);
 		mixer_fd = -1;
 	}
-
 	setVolume(volume, volume);
 	return 0;
 }
@@ -476,10 +431,8 @@ void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &m
 	static const int freq_mpg[] = {44100, 48000, 32000, 0};
 	static const int freq_ac3[] = {48000, 44100, 32000, 0};
 	scratchl2 i;
-
 	if (ioctl(fd, MPEG_AUD_GET_DECTYP, &atype) < 0)
 		perror("cAudio::getAudioInfo MPEG_AUD_GET_DECTYP");
-
 	if (ioctl(fd, MPEG_AUD_GET_STATUS, &i) < 0)
 		perror("cAudio::getAudioInfo MPEG_AUD_GET_STATUS");
 
@@ -491,31 +444,25 @@ void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &m
 	layer   = A.audio_mpeg_layer;
 	mode    = A.audio_mpeg_mode;
 	bitrate = A.audio_mpeg_bitrate;
-
 	switch (A.audio_mpeg_frequency)
 #endif
 		/* layer and bitrate are not used anyway... */
 		layer   = 0; //(i.word00 >> 17) & 3;
-
 	bitrate = 0; //(i.word00 >> 12) & 3;
-
 	switch (type)
 	{
 		case 0:	/* MPEG */
 			mode = (i.word00 >> 6) & 3;
 			freq = freq_mpg[(i.word00 >> 10) & 3];
 			break;
-
 		case 1:	/* AC3 */
 			mode = (i.word00 >> 28) & 7;
 			freq = freq_ac3[(i.word00 >> 16) & 3];
 			break;
-
 		default:
 			mode = 0;
 			freq = 0;
 	}
-
 	//fprintf(stderr, "type: %d layer: %d freq: %d bitrate: %d mode: %d\n", type, layer, freq, bitrate, mode);
 #endif
 }
@@ -555,7 +502,6 @@ void cAudio::EnableAnalogOut(bool enable)
 void cAudio::setBypassMode(bool disable)
 {
 	int mode = disable ? AUDIO_BYPASS_OFF : AUDIO_BYPASS_ON;
-
 	if (ioctl(fd, AUDIO_SET_BYPASS_MODE, mode) < 0)
 		hal_info("%s AUDIO_SET_BYPASS_MODE %d: %m\n", __func__, mode);
 }

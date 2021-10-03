@@ -48,43 +48,43 @@
 
 /**
  * struct cec_msg - CEC message structure.
- * @tx_ts:	Timestamp in nanoseconds using CLOCK_MONOTONIC. Set by the
- *		driver when the message transmission has finished.
- * @rx_ts:	Timestamp in nanoseconds using CLOCK_MONOTONIC. Set by the
- *		driver when the message was received.
- * @len:	Length in bytes of the message.
- * @timeout:	The timeout (in ms) that is used to timeout CEC_RECEIVE.
- *		Set to 0 if you want to wait forever. This timeout can also be
- *		used with CEC_TRANSMIT as the timeout for waiting for a reply.
- *		If 0, then it will use a 1 second timeout instead of waiting
- *		forever as is done with CEC_RECEIVE.
- * @sequence:	The framework assigns a sequence number to messages that are
- *		sent. This can be used to track replies to previously sent
- *		messages.
- * @flags:	Set to 0.
- * @msg:	The message payload.
- * @reply:	This field is ignored with CEC_RECEIVE and is only used by
- *		CEC_TRANSMIT. If non-zero, then wait for a reply with this
- *		opcode. Set to CEC_MSG_FEATURE_ABORT if you want to wait for
- *		a possible ABORT reply. If there was an error when sending the
- *		msg or FeatureAbort was returned, then reply is set to 0.
- *		If reply is non-zero upon return, then len/msg are set to
- *		the received message.
- *		If reply is zero upon return and status has the
- *		CEC_TX_STATUS_FEATURE_ABORT bit set, then len/msg are set to
- *		the received feature abort message.
- *		If reply is zero upon return and status has the
- *		CEC_TX_STATUS_MAX_RETRIES bit set, then no reply was seen at
- *		all. If reply is non-zero for CEC_TRANSMIT and the message is a
- *		broadcast, then -EINVAL is returned.
- *		if reply is non-zero, then timeout is set to 1000 (the required
- *		maximum response time).
- * @rx_status:	The message receive status bits. Set by the driver.
- * @tx_status:	The message transmit status bits. Set by the driver.
+ * @tx_ts:  Timestamp in nanoseconds using CLOCK_MONOTONIC. Set by the
+ *      driver when the message transmission has finished.
+ * @rx_ts:  Timestamp in nanoseconds using CLOCK_MONOTONIC. Set by the
+ *      driver when the message was received.
+ * @len:    Length in bytes of the message.
+ * @timeout:    The timeout (in ms) that is used to timeout CEC_RECEIVE.
+ *      Set to 0 if you want to wait forever. This timeout can also be
+ *      used with CEC_TRANSMIT as the timeout for waiting for a reply.
+ *      If 0, then it will use a 1 second timeout instead of waiting
+ *      forever as is done with CEC_RECEIVE.
+ * @sequence:   The framework assigns a sequence number to messages that are
+ *      sent. This can be used to track replies to previously sent
+ *      messages.
+ * @flags:  Set to 0.
+ * @msg:    The message payload.
+ * @reply:  This field is ignored with CEC_RECEIVE and is only used by
+ *      CEC_TRANSMIT. If non-zero, then wait for a reply with this
+ *      opcode. Set to CEC_MSG_FEATURE_ABORT if you want to wait for
+ *      a possible ABORT reply. If there was an error when sending the
+ *      msg or FeatureAbort was returned, then reply is set to 0.
+ *      If reply is non-zero upon return, then len/msg are set to
+ *      the received message.
+ *      If reply is zero upon return and status has the
+ *      CEC_TX_STATUS_FEATURE_ABORT bit set, then len/msg are set to
+ *      the received feature abort message.
+ *      If reply is zero upon return and status has the
+ *      CEC_TX_STATUS_MAX_RETRIES bit set, then no reply was seen at
+ *      all. If reply is non-zero for CEC_TRANSMIT and the message is a
+ *      broadcast, then -EINVAL is returned.
+ *      if reply is non-zero, then timeout is set to 1000 (the required
+ *      maximum response time).
+ * @rx_status:  The message receive status bits. Set by the driver.
+ * @tx_status:  The message transmit status bits. Set by the driver.
  * @tx_arb_lost_cnt: The number of 'Arbitration Lost' events. Set by the driver.
  * @tx_nack_cnt: The number of 'Not Acknowledged' events. Set by the driver.
  * @tx_low_drive_cnt: The number of 'Low Drive Detected' events. Set by the
- *		driver.
+ *      driver.
  * @tx_error_cnt: The number of 'Error' events. Set by the driver.
  */
 struct cec_msg
@@ -192,13 +192,10 @@ static inline bool cec_msg_status_is_ok(const struct cec_msg *msg)
 {
 	if (msg->tx_status && !(msg->tx_status & CEC_TX_STATUS_OK))
 		return false;
-
 	if (msg->rx_status && !(msg->rx_status & CEC_RX_STATUS_OK))
 		return false;
-
 	if (!msg->tx_status && !msg->rx_status)
 		return false;
-
 	return !(msg->rx_status & CEC_RX_STATUS_FEATURE_ABORT);
 }
 

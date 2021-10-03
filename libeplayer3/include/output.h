@@ -73,6 +73,9 @@ typedef struct
 	char            *type;
 } SubtitleOut_t;
 
+struct Context_s;
+typedef struct Context_s Context_t;
+
 typedef struct Output_s
 {
 	char *Name;
@@ -93,8 +96,5 @@ typedef struct OutputHandler_s
 	Output_t *subtitle;
 	int32_t (* Command)(Context_t *, OutputCmd_t, void *);
 } OutputHandler_t;
-
-struct Context_s;
-typedef struct Context_s Context_t;
 
 #endif

@@ -27,7 +27,6 @@ void Manager::addTrack(std::map<int, Track *> &tracks, Track &track)
 {
 	OpenThreads::ScopedLock<OpenThreads::Mutex> m_lock(mutex);
 	std::map<int, Track *>::iterator it = tracks.find(track.pid);
-
 	if (it == tracks.end())
 	{
 		Track *t = new Track;
@@ -63,11 +62,9 @@ std::vector<Track> Manager::getTracks(std::map<int, Track *> &tracks)
 	player->input.UpdateTracks();
 	std::vector<Track> res;
 	OpenThreads::ScopedLock<OpenThreads::Mutex> m_lock(mutex);
-
 	for (std::map<int, Track *>::iterator it = tracks.begin(); it != tracks.end(); ++it)
 		if (!it->second->inactive && !it->second->hidden)
 			res.push_back(*it->second);
-
 	return res;
 }
 
@@ -95,10 +92,8 @@ Track *Manager::getTrack(std::map<int, Track *> &tracks, int pid)
 {
 	OpenThreads::ScopedLock<OpenThreads::Mutex> m_lock(mutex);
 	std::map<int, Track *>::iterator it = tracks.find(pid);
-
 	if (it != tracks.end() && !it->second->inactive)
 		return it->second;
-
 	return NULL;
 }
 Track *Manager::getVideoTrack(int pid)
@@ -149,10 +144,8 @@ std::vector<Program> Manager::getPrograms(void)
 {
 	OpenThreads::ScopedLock<OpenThreads::Mutex> m_lock(mutex);
 	std::vector<Program> res;
-
 	for (std::map<int, Program>::iterator it = Programs.begin(); it != Programs.end(); ++it)
 		res.push_back(it->second);
-
 	return res;
 }
 
@@ -160,10 +153,8 @@ bool Manager::selectProgram(const int id)
 {
 	OpenThreads::ScopedLock<OpenThreads::Mutex> m_lock(mutex);
 	std::map<int, Program>::iterator i = Programs.find(id);
-
 	if (i != Programs.end())
 	{
-
 		// mark all tracks as hidden
 		for (std::map<int, Track *>::iterator it = audioTracks.begin(); it != audioTracks.end(); ++it)
 			it->second->hidden = true;
@@ -182,7 +173,6 @@ bool Manager::selectProgram(const int id)
 		{
 			AVStream *stream = i->second.streams[j];
 			bool h = true;
-
 			for (std::map<int, Track *>::iterator it = audioTracks.begin(); h && (it != audioTracks.end()); ++it)
 				if (stream == it->second->stream)
 					h = it->second->hidden = false;
@@ -256,7 +246,6 @@ bool Manager::selectProgram(const int id)
 
 		return true;
 	}
-
 	return false;
 }
 
@@ -266,22 +255,18 @@ void Manager::clearTracks()
 
 	for (std::map<int, Track *>::iterator it = audioTracks.begin(); it != audioTracks.end(); ++it)
 		delete it->second;
-
 	audioTracks.clear();
 
 	for (std::map<int, Track *>::iterator it = videoTracks.begin(); it != videoTracks.end(); ++it)
 		delete it->second;
-
 	videoTracks.clear();
 
 	for (std::map<int, Track *>::iterator it = subtitleTracks.begin(); it != subtitleTracks.end(); ++it)
 		delete it->second;
-
 	subtitleTracks.clear();
 
 	for (std::map<int, Track *>::iterator it = teletextTracks.begin(); it != teletextTracks.end(); ++it)
 		delete it->second;
-
 	teletextTracks.clear();
 
 	Programs.clear();

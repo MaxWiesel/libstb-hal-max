@@ -156,36 +156,29 @@ static int hdmi_out(bool enable)
 	int ret = -1;
 	hal_info_c("%s(%d)\n", __func__, enable);
 	int fb = open("/dev/fb0", O_RDWR);
-
 	if (fb < 0)
 	{
 		hal_debug_c("%s: can't open /dev/fb0 (%m)\n", __func__);
 		return -1;
 	}
-
 	out.outputid = STMFBIO_OUTPUTID_MAIN;
-
 	if (ioctl(fb, STMFBIO_GET_OUTPUT_CONFIG, &out) < 0)
 	{
 		hal_debug_c("%s: STMFBIO_GET_OUTPUT_CONFIG (%m)\n", __func__);
 		goto out;
 	}
-
 	hdmi_enabled = enable;
 	out.caps = STMFBIO_OUTPUT_CAPS_HDMI_CONFIG;
 	out.activate = STMFBIO_ACTIVATE_IMMEDIATE;
 	out.analogue_config = 0;
-
 	if (enable)
 		out.hdmi_config &= ~STMFBIO_OUTPUT_HDMI_DISABLED;
 	else
 		out.hdmi_config |= STMFBIO_OUTPUT_HDMI_DISABLED;
 
 	ret = ioctl(fb, STMFBIO_SET_OUTPUT_CONFIG, &out);
-
 	if (ret < 0)
 		_hal_debug(HAL_DEBUG_VIDEO, NULL, "%s: STMFBIO_SET_OUTPUT_CONFIG (%m)\n", __func__);
-
 out:
 	close(fb);
 	return ret;
@@ -209,17 +202,13 @@ void write_frame(AVFrame *in_frame, FILE *fp)
 {
 	if (in_frame == NULL || fp == NULL)
 		return;
-
 	AVCodec *codec = avcodec_find_encoder(AV_CODEC_ID_MPEG2VIDEO);
-
 	if (codec)
 	{
 		AVCodecContext *codec_context = avcodec_alloc_context3(codec);
-
 		if (codec_context)
 		{
 			init_parameters(in_frame, codec_context);
-
 			if (avcodec_open2(codec_context, codec, 0) != -1)
 			{
 				AVPacket pkt;
@@ -228,7 +217,6 @@ void write_frame(AVFrame *in_frame, FILE *fp)
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57,37,100)
 				int got_output = 0;
 				int ret = avcodec_encode_video2(codec_context, &pkt, in_frame, &got_output);
-
 				if (ret != -1)
 				{
 					if (got_output)
@@ -236,15 +224,12 @@ void write_frame(AVFrame *in_frame, FILE *fp)
 						fwrite(pkt.data, 1, pkt.size, fp);
 						av_packet_unref(&pkt);
 					}
-
 					int i = 1;
-
 					for (got_output = 1; got_output; i++)
 					{
 						/* get the delayed frames */
 						in_frame->pts = i;
 						ret = avcodec_encode_video2(codec_context, &pkt, 0, &got_output);
-
 						if (ret != -1 && got_output)
 						{
 							fwrite(pkt.data, 1, pkt.size, fp);
@@ -252,33 +237,27 @@ void write_frame(AVFrame *in_frame, FILE *fp)
 						}
 					}
 				}
-
 #else
 				int ret = avcodec_send_frame(codec_context, in_frame);
-
 				if (!ret)
 				{
 					/* signalling end of stream */
 					ret = avcodec_send_frame(codec_context, NULL);
 				}
-
 				if (!ret)
 				{
 					int i = 1;
 					/* get the delayed frames */
 					in_frame->pts = i;
 					ret = avcodec_receive_packet(codec_context, &pkt);
-
 					if (!ret)
 					{
 						fwrite(pkt.data, 1, pkt.size, fp);
 						av_packet_unref(&pkt);
 					}
 				}
-
 #endif
 			}
-
 			avcodec_close(codec_context);
 			av_free(codec_context);
 		}
@@ -288,22 +267,18 @@ void write_frame(AVFrame *in_frame, FILE *fp)
 int decode_frame(AVCodecContext *codecContext, AVPacket &packet, FILE *fp)
 {
 	AVFrame *frame = av_frame_alloc();
-
 	if (frame)
 	{
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57,37,100)
 		int decode_ok = 0;
-
 		if ((avcodec_decode_video2(codecContext, frame, &decode_ok, &packet)) < 0 || !decode_ok)
 		{
 			av_frame_free(&frame);
 			return -1;
 		}
-
 #else
 		int ret;
 		ret = avcodec_send_packet(codecContext, &packet);
-
 		// In particular, we don't expect AVERROR(EAGAIN), because we read all
 		// decoded frames with avcodec_receive_frame() until done.
 		if (ret < 0)
@@ -311,18 +286,14 @@ int decode_frame(AVCodecContext *codecContext, AVPacket &packet, FILE *fp)
 			av_frame_free(&frame);
 			return -1;
 		}
-
 		ret = avcodec_receive_frame(codecContext, frame);
-
 		if (ret < 0)
 		{
 			av_frame_free(&frame);
 			return -1;
 		}
-
 #endif
 		AVFrame *dest_frame = av_frame_alloc();
-
 		if (dest_frame)
 		{
 			dest_frame->height = (frame->height / 2) * 2;
@@ -331,22 +302,17 @@ int decode_frame(AVCodecContext *codecContext, AVPacket &packet, FILE *fp)
 			av_frame_get_buffer(dest_frame, 32);
 			struct SwsContext *convert = NULL;
 			convert = sws_getContext(frame->width, frame->height, (AVPixelFormat)frame->format, dest_frame->width, dest_frame->height, AV_PIX_FMT_YUVJ420P, SWS_FAST_BILINEAR, NULL, NULL, NULL);
-
 			if (convert)
 			{
 				sws_scale(convert, frame->data, frame->linesize, 0, frame->height, dest_frame->data, dest_frame->linesize);
 				sws_freeContext(convert);
 			}
-
 			write_frame(dest_frame, fp);
 			av_frame_free(&dest_frame);
 		}
-
 		av_frame_free(&frame);
 	}
-
 	return 0;
-
 }
 
 AVCodecContext *open_codec(AVMediaType mediaType, AVFormatContext *formatContext)
@@ -356,15 +322,12 @@ AVCodecContext *open_codec(AVMediaType mediaType, AVFormatContext *formatContext
 	int stream_index;
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(57,25,101)
 	stream_index = av_find_best_stream(formatContext, mediaType, -1, -1, NULL, 0);
-
 	if (stream_index >= 0)
 	{
 		codecContext = formatContext->streams[stream_index]->codec;
-
 		if (codecContext)
 		{
 			codec = avcodec_find_decoder(codecContext->codec_id);
-
 			if (codec)
 			{
 				if ((avcodec_open2(codecContext, codec, NULL)) != 0)
@@ -372,35 +335,28 @@ AVCodecContext *open_codec(AVMediaType mediaType, AVFormatContext *formatContext
 					return NULL;
 				}
 			}
-
 			return codecContext;
 		}
 	}
-
 	return NULL;
 #else
 	stream_index = av_find_best_stream(formatContext, mediaType, -1, -1, &codec, 0);
-
 	if (stream_index >= 0)
 	{
 		codec = avcodec_find_decoder(formatContext->streams[stream_index]->codecpar->codec_id);
-
 		if (codec)
 		{
 			codecContext = avcodec_alloc_context3(codec);
 		}
-
 		if (codecContext)
 		{
 			if ((avcodec_open2(codecContext, codec, NULL)) != 0)
 			{
 				return NULL;
 			}
-
 			return codecContext;
 		}
 	}
-
 	return NULL;
 #endif
 }
@@ -414,20 +370,16 @@ int image_to_mpeg2(const char *image_name, const char *encode_name)
 #endif
 
 	AVFormatContext *formatContext = avformat_alloc_context();
-
 	if (formatContext && (ret = avformat_open_input(&formatContext, image_name, NULL, NULL)) == 0)
 	{
 		AVCodecContext *codecContext = open_codec(AVMEDIA_TYPE_VIDEO, formatContext);
-
 		if (codecContext)
 		{
 			AVPacket packet;
 			av_init_packet(&packet);
-
 			if ((ret = av_read_frame(formatContext, &packet)) != -1)
 			{
 				FILE *fp = fopen(encode_name, "wb");
-
 				if (fp)
 				{
 					if (decode_frame(codecContext, packet, fp) != 1)
@@ -436,22 +388,17 @@ int image_to_mpeg2(const char *image_name, const char *encode_name)
 						uint8_t endcode[] = { 0, 0, 1, 0xb7 };
 						fwrite(endcode, 1, sizeof(endcode), fp);
 					}
-
 					fclose(fp);
 				}
-
 				av_packet_unref(&packet);
 			}
-
 			avcodec_close(codecContext);
 #if LIBAVFORMAT_VERSION_INT > AV_VERSION_INT(57,25,100)
 			avcodec_free_context(&codecContext);
 #endif
 		}
-
 		avformat_close_input(&formatContext);
 	}
-
 	av_free(formatContext);
 	return 0;
 }
@@ -461,14 +408,12 @@ void cVideo::setAVInput(int val)
 	hal_info("%s not implemented yet - switching to: %s\n", __func__, val == AUX ? "SCART" : "ENCODER");
 #if 0 // not working
 	int input_fd = open("/proc/stb/avs/0/input", O_WRONLY);
-
 	if (input_fd)
 	{
 		const char *input[] = {"encoder", "scart"};
 		write(input_fd, input[val], strlen(input[val]));
 		close(input_fd);
 	}
-
 #endif
 }
 
@@ -483,7 +428,6 @@ cVideo::cVideo(int, void *, void *, unsigned int unit)
 
 	scartvoltage = -1;
 	video_standby = 0;
-
 	if (unit > 1)
 	{
 		hal_info("%s: unit %d out of range, setting to 0\n", __func__, unit);
@@ -491,7 +435,6 @@ cVideo::cVideo(int, void *, void *, unsigned int unit)
 	}
 	else
 		devnum = unit;
-
 	fd = -1;
 	openDevice();
 }
@@ -505,27 +448,21 @@ void cVideo::openDevice(void)
 {
 	int n = 0;
 	hal_debug("#%d: %s\n", devnum, __func__);
-
 	/* todo: this fd checking is racy, should be protected by a lock */
 	if (fd != -1) /* already open */
 		return;
-
 retry:
-
 	if ((fd = open(VDEV[devnum], O_RDWR | O_CLOEXEC)) < 0)
 	{
 		if (errno == EBUSY)
 		{
 			/* sometimes we get busy quickly after close() */
 			usleep(50000);
-
 			if (++n < 10)
 				goto retry;
 		}
-
 		hal_info("#%d: %s cannot open %s: %m, retries %d\n", devnum, __func__, VDEV[devnum], n);
 	}
-
 	playstate = VIDEO_STOPPED;
 }
 
@@ -534,10 +471,8 @@ void cVideo::closeDevice(void)
 	hal_debug("%s\n", __func__);
 	/* looks like sometimes close is unhappy about non-empty buffers */
 	Start();
-
 	if (fd >= 0)
 		close(fd);
-
 	fd = -1;
 	playstate = VIDEO_STOPPED;
 }
@@ -557,7 +492,6 @@ int cVideo::setAspectRatio(int aspect, int mode)
 	{
 		hal_debug("%s: /proc/stb/video/aspect -> %s\n", __func__, a[aspect]);
 		n = proc_put("/proc/stb/video/aspect", a[aspect], strlen(a[aspect]));
-
 		if (n < 0)
 			hal_info("%s: proc_put /proc/stb/video/aspect (%m)\n", __func__);
 	}
@@ -567,30 +501,25 @@ int cVideo::setAspectRatio(int aspect, int mode)
 
 	hal_debug("%s: /proc/stb/video/policy -> %s\n", __func__, m[mo]);
 	n = proc_put("/proc/stb/video/policy", m[mo], strlen(m[mo]));
-
 	if (n < 0)
 		return 1;
-
 	return 0;
 }
 
 int cVideo::getAspectRatio(void)
 {
 	video_size_t s;
-
 	if (fd == -1)
 	{
 		/* in movieplayer mode, fd is not opened -> fall back to procfs */
 		int n = proc_get_hex(VMPEG_aspect[devnum]);
 		return n * 2 + 1;
 	}
-
 	if (fop(ioctl, VIDEO_GET_SIZE, &s) < 0)
 	{
 		hal_info("%s: VIDEO_GET_SIZE %m\n", __func__);
 		return -1;
 	}
-
 	hal_debug("#%d: %s: %d\n", devnum, __func__, s.aspect_ratio);
 	return s.aspect_ratio * 2 + 1;
 }
@@ -602,12 +531,10 @@ int cVideo::setCroppingMode(int /*vidDispMode_t format*/)
 	croppingMode = format;
 	const char *format_string[] = { "norm", "letterbox", "unknown", "mode_1_2", "mode_1_4", "mode_2x", "scale", "disexp" };
 	const char *f;
-
 	if (format >= VID_DISPMODE_NORM && format <= VID_DISPMODE_DISEXP)
 		f = format_string[format];
 	else
 		f = "ILLEGAL format!";
-
 	hal_debug("%s(%d) => %s\n", __FUNCTION__, format, f);
 	return fop(ioctl, MPEG_VID_SET_DISPMODE, format);
 #endif
@@ -617,15 +544,11 @@ int cVideo::Start(void * /*PcrChannel*/, unsigned short /*PcrPid*/, unsigned sho
 {
 	hal_debug("#%d: %s playstate=%d\n", devnum, __func__, playstate);
 #if 0
-
 	if (playstate == VIDEO_PLAYING)
 		return 0;
-
 	if (playstate == VIDEO_FREEZED)  /* in theory better, but not in practice :-) */
 		fop(ioctl, MPEG_VID_CONTINUE);
-
 #endif
-
 	/* implicitly do StopPicture() on video->Start() */
 	if (stillpicture)
 	{
@@ -633,48 +556,40 @@ int cVideo::Start(void * /*PcrChannel*/, unsigned short /*PcrPid*/, unsigned sho
 		stillpicture = false;
 		Stop(1);
 	}
-
 	playstate = VIDEO_PLAYING;
 	fop(ioctl, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX);
 	int res = fop(ioctl, VIDEO_PLAY);
-
 	if (brightness > -1)
 	{
 		SetControl(VIDEO_CONTROL_BRIGHTNESS, brightness);
 		brightness = -1;
 	}
-
 	if (contrast > -1)
 	{
 		SetControl(VIDEO_CONTROL_CONTRAST, contrast);
 		contrast = -1;
 	}
-
 	if (saturation > -1)
 	{
 		SetControl(VIDEO_CONTROL_SATURATION, saturation);
 		saturation = -1;
 	}
-
 	if (hue > -1)
 	{
 		SetControl(VIDEO_CONTROL_HUE, hue);
 		hue = -1;
 	}
-
 	return res;
 }
 
 int cVideo::Stop(bool blank)
 {
 	hal_debug("#%d: %s(%d)\n", devnum, __func__, blank);
-
 	if (stillpicture)
 	{
 		hal_debug("%s: stillpicture == true\n", __func__);
 		return -1;
 	}
-
 	playstate = blank ? VIDEO_STOPPED : VIDEO_FREEZED;
 	return fop(ioctl, VIDEO_STOP, blank ? 1 : 0);
 }
@@ -698,29 +613,23 @@ int cVideo::SetVideoSystem(int video_system, bool remember)
 		hal_info("%s: video_system (%d) > VIDEO_STD_MAX (%d)\n", __func__, video_system, VIDEO_STD_MAX);
 		return -1;
 	}
-
 	int ret = proc_get("/proc/stb/video/videomode", current, 32);
-
 	if (strcmp(current, vid_modes[video_system]) == 0)
 	{
 		hal_info("%s: video_system %d (%s) already set, skipping\n", __func__, video_system, current);
 		return 0;
 	}
-
 	hal_info("%s: old: '%s' new: '%s'\n", __func__, current, vid_modes[video_system]);
 	bool stopped = false;
-
 	if (playstate == VIDEO_PLAYING)
 	{
 		hal_info("%s: playstate == VIDEO_PLAYING, stopping video\n", __func__);
 		Stop();
 		stopped = true;
 	}
-
 	hdmi_out(false);
 	ret = proc_put("/proc/stb/video/videomode", vid_modes[video_system], strlen(vid_modes[video_system]));
 	hdmi_out(true);
-
 	if (stopped)
 		Start();
 
@@ -731,13 +640,11 @@ int cVideo::GetVideoSystem(void)
 {
 	char current[32];
 	proc_get("/proc/stb/video/videomode", current, 32);
-
 	for (int i = 2; vid_modes[i]; i++) /* 0,1,2 are all "pal" */
 	{
 		if (strcmp(current, vid_modes[i]) == 0)
 			return i;
 	}
-
 	hal_info("%s: could not find '%s' mode, returning VIDEO_STD_720P50\n", __func__, current);
 	return VIDEO_STD_720P50;
 }
@@ -746,7 +653,6 @@ void cVideo::GetVideoSystemFormatName(cs_vs_format_t *format, int system)
 {
 	if (system == -1)
 		system = GetVideoSystem();
-
 	if (system < 0 || system > VIDEO_STD_1080P50)
 	{
 		hal_info("%s: invalid system %d\n", __func__, system);
@@ -764,31 +670,25 @@ int cVideo::getPlayState(void)
 void cVideo::SetVideoMode(analog_mode_t mode)
 {
 	hal_debug("#%d: %s(%d)\n", devnum, __func__, mode);
-
 	if (!(mode & ANALOG_SCART_MASK))
 	{
 		hal_debug("%s: non-SCART mode ignored\n", __func__);
 		return;
 	}
-
 	const char *m;
-
 	switch (mode)
 	{
 		case ANALOG_SD_YPRPB_SCART:
 			m = "yuv";
 			break;
-
 		case ANALOG_SD_RGB_SCART:
 			m = "rgb";
 			break;
-
 		default:
 			hal_info("%s unknown mode %d\n", __func__, mode);
 			m = "rgb";
 			break; /* default to rgb */
 	}
-
 	proc_put("/proc/stb/avs/0/colorformat", m, strlen(m));
 }
 
@@ -803,14 +703,12 @@ bool cVideo::ShowPicture(const char *fname, const char *_destname)
 	char *p;
 	int mfd;
 	struct stat st, st2;
-
 	if (video_standby)
 	{
 		/* does not work and the driver does not seem to like it */
 		hal_info("%s: video_standby == true\n", __func__);
 		return ret;
 	}
-
 	if (fd == -1)
 	{
 		/* in movieplayer mode, fd is not opened */
@@ -819,7 +717,6 @@ bool cVideo::ShowPicture(const char *fname, const char *_destname)
 	}
 
 	const char *lastDot = strrchr(fname, '.');
-
 	if (lastDot && !strcasecmp(lastDot + 1, "m2v"))
 		strncpy(destname, fname, sizeof(destname));
 	else
@@ -829,13 +726,11 @@ bool cVideo::ShowPicture(const char *fname, const char *_destname)
 		else
 		{
 			strcpy(destname, "/tmp/cache");
-
 			if (stat(fname, &st2))
 			{
 				hal_info("%s: could not stat %s (%m)\n", __func__, fname);
 				return ret;
 			}
-
 			mkdir(destname, 0755);
 			/* the cache filename is (example for /share/tuxbox/neutrino/icons/radiomode.jpg):
 			   /var/cache/share.tuxbox.neutrino.icons.radiomode.jpg.m2v
@@ -843,13 +738,10 @@ bool cVideo::ShowPicture(const char *fname, const char *_destname)
 			   TODO: this could cause name clashes, use a hashing function instead... */
 			strcat(destname, fname);
 			p = &destname[strlen("/tmp/cache/")];
-
 			while ((p = strchr(p, '/')) != NULL)
 				* p = '.';
-
 			strcat(destname, ".m2v");
 		}
-
 		/* ...then check if it exists already... */
 		if (stat(destname, &st) || (st.st_mtime != st2.st_mtime) || (st.st_size == 0))
 		{
@@ -861,15 +753,12 @@ bool cVideo::ShowPicture(const char *fname, const char *_destname)
 			utime(destname, &u);
 		}
 	}
-
 	mfd = open(destname, O_RDONLY);
-
 	if (mfd < 0)
 	{
 		hal_info("%s cannot open %s: %m\n", __func__, destname);
 		goto out;
 	}
-
 	fstat(mfd, &st);
 
 	closeDevice();
@@ -881,41 +770,33 @@ bool cVideo::ShowPicture(const char *fname, const char *_destname)
 
 		if (ioctl(fd, VIDEO_SET_FORMAT, VIDEO_FORMAT_16_9) < 0)
 			hal_info("%s: VIDEO_SET_FORMAT failed (%m)\n", __func__);
-
 		bool seq_end_avail = false;
 		off_t pos = 0;
 		unsigned char *iframe = (unsigned char *)malloc((st.st_size < 8192) ? 8192 : st.st_size);
-
 		if (! iframe)
 		{
 			hal_info("%s: malloc failed (%m)\n", __func__);
 			goto out;
 		}
-
 		read(mfd, iframe, st.st_size);
 		ioctl(fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY);
 		ioctl(fd, VIDEO_PLAY);
 		ioctl(fd, VIDEO_CONTINUE);
 		ioctl(fd, VIDEO_CLEAR_BUFFER);
-
 		while (pos <= (st.st_size - 4) && !(seq_end_avail = (!iframe[pos] && !iframe[pos + 1] && iframe[pos + 2] == 1 && iframe[pos + 3] == 0xB7)))
 			++pos;
 
 		if ((iframe[3] >> 4) != 0xE) // no pes header
 			write(fd, pes_header, sizeof(pes_header));
-
 		write(fd, iframe, st.st_size);
-
 		if (!seq_end_avail)
 			write(fd, seq_end, sizeof(seq_end));
-
 		memset(iframe, 0, 8192);
 		write(fd, iframe, 8192);
 		ioctl(fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX);
 		free(iframe);
 		ret = true;
 	}
-
 out:
 	close(mfd);
 	return ret;
@@ -931,7 +812,6 @@ void cVideo::StopPicture()
 void cVideo::Standby(unsigned int bOn)
 {
 	hal_debug("%s(%d)\n", __func__, bOn);
-
 	if (bOn)
 	{
 		closeDevice();
@@ -949,10 +829,8 @@ void cVideo::Standby(unsigned int bOn)
 			 * again - lame, but makes it work... */
 			sleep(1);
 		}
-
 		openDevice();
 	}
-
 	video_standby = bOn;
 }
 
@@ -966,24 +844,19 @@ int cVideo::getBlank(void)
 	/* hack: the "mailbox" irq is not increasing if
 	 * no audio or video is decoded... */
 	FILE *f = fopen("/proc/interrupts", "r");
-
 	if (! f) /* huh? */
 		return 0;
-
 	while ((r = getline(&line, &n, f)) != -1)
 	{
 		if (r <= (ssize_t) strlen("mailbox")) /* should not happen... */
 			continue;
-
 		line[r - 1] = 0; /* remove \n */
-
 		if (!strcmp(&line[r - 1 - strlen("mailbox")], "mailbox"))
 		{
 			count =  atoi(line + 5);
 			break;
 		}
 	}
-
 	free(line);
 	fclose(f);
 	int ret = (count == lastcount); /* no new decode -> return 1 */
@@ -999,18 +872,14 @@ void cVideo::VideoParamWatchdog(void)
 #if 0
 	static unsigned int _v_info = (unsigned int) -1;
 	unsigned int v_info;
-
 	if (fd == -1)
 		return;
-
 	ioctl(fd, MPEG_VID_GET_V_INFO_RAW, &v_info);
-
 	if (_v_info != v_info)
 	{
 		hal_debug("%s params changed. old: %08x new: %08x\n", __FUNCTION__, _v_info, v_info);
 		setAspectRatio(-1, -1);
 	}
-
 	_v_info = v_info;
 #endif
 }
@@ -1031,7 +900,6 @@ void cVideo::Pig(int x, int y, int w, int h, int osd_w, int osd_h, int startx, i
 	int xres = 720; /* proc_get_hex("/proc/stb/vmpeg/0/xres") */
 	int yres = 576; /* proc_get_hex("/proc/stb/vmpeg/0/yres") */
 	hal_debug("#%d %s: x:%d y:%d w:%d h:%d ow:%d oh:%d\n", devnum, __func__, x, y, w, h, osd_w, osd_h);
-
 	if (x == -1 && y == -1 && w == -1 && h == -1)
 	{
 		_w = xres;
@@ -1057,7 +925,6 @@ void cVideo::Pig(int x, int y, int w, int h, int osd_w, int osd_h, int startx, i
 		_w /= 1280;
 		_h /= 720;
 	}
-
 	hal_debug("#%d %s: x:%d y:%d w:%d h:%d xr:%d yr:%d\n", devnum, __func__, _x, _y, _w, _h, xres, yres);
 	sprintf(buffer, "%x %x %x %x", _x, _y, _w, _h);
 	proc_put(VMPEG_dst_all[devnum], buffer, strlen(buffer));
@@ -1069,32 +936,23 @@ static inline int rate2csapi(int rate)
 	{
 		case 23976:
 			return 0;
-
 		case 24000:
 			return 1;
-
 		case 25000:
 			return 2;
-
 		case 29970:
 			return 3;
-
 		case 30000:
 			return 4;
-
 		case 50000:
 			return 5;
-
 		case 59940:
 			return 6;
-
 		case 60000:
 			return 7;
-
 		default:
 			break;
 	}
-
 	return -1;
 }
 
@@ -1102,22 +960,18 @@ void cVideo::getPictureInfo(int &width, int &height, int &rate)
 {
 	video_size_t s;
 	int r;
-
 	if (fd == -1)
 	{
 		/* in movieplayer mode, fd is not opened -> fall back to procfs */
 		char buf[16];
 		int n = proc_get(VMPEG_framerate[devnum], buf, 16);
-
 		if (n > 0)
 			sscanf(buf, "%i", &r);
-
 		width  = proc_get_hex(VMPEG_xres[devnum]);
 		height = proc_get_hex(VMPEG_yres[devnum]);
 		rate   = rate2csapi(r);
 		return;
 	}
-
 	ioctl(fd, VIDEO_GET_SIZE, &s);
 	ioctl(fd, VIDEO_GET_FRAME_RATE, &r);
 	rate = rate2csapi(r);
@@ -1161,19 +1015,15 @@ int cVideo::SetStreamType(VIDEO_FORMAT type)
 		case VIDEO_FORMAT_MPEG4_H264:
 			t = VIDEO_STREAMTYPE_MPEG4_H264;
 			break;
-
 		case VIDEO_FORMAT_MPEG4_H265:
 			t = VIDEO_STREAMTYPE_H265_HEVC;
 			break;
-
 		case VIDEO_FORMAT_AVS:
 			t = VIDEO_STREAMTYPE_AVS;
 			break;
-
 		case VIDEO_FORMAT_VC1:
 			t = VIDEO_STREAMTYPE_VC1;
 			break;
-
 		case VIDEO_FORMAT_MPEG2:
 		default:
 			t = VIDEO_STREAMTYPE_MPEG2;
@@ -1182,17 +1032,14 @@ int cVideo::SetStreamType(VIDEO_FORMAT type)
 
 	if (ioctl(fd, VIDEO_SET_STREAMTYPE, t) < 0)
 		hal_info("%s VIDEO_SET_STREAMTYPE(%d) failed: %m\n", __func__, t);
-
 	return 0;
 }
 
 int64_t cVideo::GetPTS(void)
 {
 	int64_t pts = 0;
-
 	if (ioctl(fd, VIDEO_GET_PTS, &pts) < 0)
 		hal_info("%s: GET_PTS failed (%m)\n", __func__);
-
 	return pts;
 }
 
@@ -1204,35 +1051,29 @@ void cVideo::SetDemux(cDemux *)
 void cVideo::SetControl(int control, int value)
 {
 	const char *p = NULL;
-
 	switch (control)
 	{
 		case VIDEO_CONTROL_BRIGHTNESS:
 			brightness = value;
 			p = "/proc/stb/video/plane/psi_brightness";
 			break;
-
 		case VIDEO_CONTROL_CONTRAST:
 			contrast = value;
 			p = "/proc/stb/video/plane/psi_contrast";
 			break;
-
 		case VIDEO_CONTROL_SATURATION:
 			saturation = value;
 			p = "/proc/stb/video/plane/psi_saturation";
 			break;
-
 		case VIDEO_CONTROL_HUE:
 			hue = value;
 			p = "/proc/stb/video/plane/psi_tint";
 			break;
 	}
-
 	if (p)
 	{
 		char buf[20];
 		int len = snprintf(buf, sizeof(buf), "%d", value);
-
 		if (len < (int) sizeof(buf))
 			proc_put(p, buf, len);
 	}
@@ -1241,38 +1082,30 @@ void cVideo::SetControl(int control, int value)
 void cVideo::SetColorFormat(COLOR_FORMAT color_format)
 {
 	const char *p = NULL;
-
 	switch (color_format)
 	{
 		case COLORFORMAT_RGB:
 			p = "rgb";
 			break;
-
 		case COLORFORMAT_YUV:
 			p = "yuv";
 			break;
-
 		case COLORFORMAT_CVBS:
 			p = "cvbs";
 			break;
-
 		case COLORFORMAT_SVIDEO:
 			p = "svideo";
 			break;
-
 		case COLORFORMAT_HDMI_RGB:
 			p = "hdmi_rgb";
 			break;
-
 		case COLORFORMAT_HDMI_YCBCR444:
 			p = "hdmi_yuv";
 			break;
-
 		case COLORFORMAT_HDMI_YCBCR422:
 			p = "hdmi_422";
 			break;
 	}
-
 	if (p)
 		proc_put("/proc/stb/avs/0/colorformat", p, strlen(p));
 }
@@ -1516,13 +1349,11 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 		hal_info("%s: WARNING, video != NULL?\n", __func__);
 
 	fbfd = open("/dev/fb0", O_RDWR);
-
 	if (fbfd < 0)
 	{
 		hal_info("%s: cannot open open /dev/fb0 (%m)\n", __func__);
 		return false;
 	}
-
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &fix_screeninfo) == -1)
 		hal_info("%s: FBIOGET_FSCREENINFO (%m)\n", __func__);
 
@@ -1535,7 +1366,6 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 		close(fbfd);
 		return false;
 	}
-
 	if (fix_screeninfo.line_length - (var_screeninfo.xres * 4) != 0)
 	{
 		hal_info("%s: framebuffer with offset not supported.\n", __func__);
@@ -1547,11 +1377,9 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 	osd_y = var_screeninfo.yres;
 	getPictureInfo(vid_x, vid_y, aspect); /* aspect is dummy here */
 	aspect = getAspectRatio();
-
 	//if x and y is zero than this is most probably a stillpicture
 	if (vid_x == 0)
 		vid_x = 1280;
-
 	if (vid_y == 0)
 		vid_y = 720;
 
@@ -1582,45 +1410,36 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 	int vidmem = 0;
 	int osdmem = 0;
 	int outmem = xres * yres * 4;
-
 	if (get_video)
 		vidmem = vid_x * vid_y * 3;
-
 	if (get_osd)
 		osdmem = osd_x * osd_y * 4;
 
 	bpafd = open("/dev/bpamem0", O_RDWR | O_CLOEXEC);
-
 	if (bpafd < 0)
 	{
 		hal_info("%s: cannot open /dev/bpamem0: %m\n", __func__);
 		goto error_cleanup;
 	}
-
 	BPAMemAllocMemData bpa_data;
 	bpa_data.bpa_part = (char *)"LMI_VID";
 	bpa_data.mem_size = outmem + osdmem + vidmem + 4096;
-
 	if (ioctl(bpafd, BPAMEMIO_ALLOCMEM, &bpa_data))
 	{
 		hal_info("%s: cannot allocate %lu bytes of BPA2 memory\n", __func__, bpa_data.mem_size);
 		goto error_cleanup;
 	}
-
 	close(bpafd);
 
 	char bpa_mem_device[30];
 	sprintf(bpa_mem_device, "/dev/bpamem%d", bpa_data.device_num);
 	bpafd = open(bpa_mem_device, O_RDWR | O_CLOEXEC);
-
 	if (bpafd < 0)
 	{
 		hal_info("%s: cannot open secondary bpamem device %s: %m\n", __func__, bpa_mem_device);
 		goto error_cleanup;
 	}
-
 	bpa = (uint8_t *)mmap(0, bpa_data.mem_size, PROT_WRITE | PROT_READ, MAP_SHARED, bpafd, 0);
-
 	if (bpa == MAP_FAILED)
 	{
 		hal_info("%s: cannot map from bpamem: %m\n", __func__);
@@ -1630,7 +1449,6 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 
 	vid = bpa + outmem;
 	osd = vid + vidmem;
-
 	if (get_video)
 	{
 		int mfd = -1;
@@ -1640,19 +1458,16 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 		unsigned long vid_phys_addr = 0x00000000;
 		char buf[512];
 		FILE *pipe = fopen("/proc/bpa2", "r");
-
 		if (pipe)
 		{
 			bool found_part = false;
 			unsigned long mem_size = 0;
 			unsigned long phys_addr = 0;
-
 			while (fgets(buf, sizeof(buf), pipe))
 			{
 				if (found_part || strstr(buf, "LMI_VID") != NULL)
 				{
 					found_part = true;
-
 					if (sscanf(buf, "- %lu B at %lx", &mem_size, &phys_addr) == 2)
 					{
 						if (mem_size == vid_mem_size)
@@ -1663,17 +1478,14 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 					}
 				}
 			}
-
 			fclose(pipe);
 		}
-
 		if (vid_phys_addr == 0)
 		{
 			hal_info("%s: primary display pane not found in /proc/bpa2\n", __func__);
 		}
 
 		mfd = open("/dev/mem", O_RDWR | O_CLOEXEC);
-
 		if (mfd < 0)
 		{
 			hal_info("%s: cannot open open /dev/mem (%m)\n", __func__);
@@ -1682,7 +1494,6 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 
 		hal_info("%s: Using bpa2 part LMI_VID - 0x%lx %lu\n", __func__, vid_phys_addr, vid_mem_size);
 		decode_surface = (uint8_t *)mmap(0, vid_mem_size, PROT_READ, MAP_SHARED, mfd, vid_phys_addr);
-
 		if (decode_surface == MAP_FAILED)
 		{
 			hal_info("%s: cannot mmap /dev/mem for VIDEO (%m)\n", __func__);
@@ -1708,10 +1519,8 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 
 		ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
 #if 0
-
 		if (vdec)
 			ioctl(vdec->fd, VIDEO_FREEZE);
-
 #endif
 		//luma
 		layer_offset  = 0;
@@ -1719,7 +1528,6 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 		OUTITERoffset = 0;
 		OUTINC        = 1; /*no spaces between pixel*/
 		out           = luma;
-
 		//now we have 16,6ms(60hz) to 50ms(20hz) to get the whole picture
 		for (even = 0; even < 2; even++)
 		{
@@ -1732,7 +1540,6 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 				{
 					int line;
 					OUTITER = OUTITERoffset;
-
 					for (line = 0; line < 16; line++)
 					{
 						OUT_LU_16(offset, line);
@@ -1743,7 +1550,6 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 					offset += 0x200;
 					OUTITERoffset += 16;
 				}
-
 				OUTITERoffset += (vid_x << 5) - vid_x; /* * 31*/
 			}
 		}
@@ -1789,26 +1595,21 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 						offset += (offset % 0x100 ? 0x180/*80->200*/ : 0x80/*0->80*/);
 						OUTITERoffset += 16/*OUTINC*8=16*/;
 					}
-
 					OUTITERoffset += (vid_x << 4) - vid_x /* * 15*/;
 				}
 			}
 		}
-
 		munmap(decode_surface, vid_mem_size);
 		close(mfd);
 #if 0
-
 		if (vdec)
 			ioctl(vdec->fd, VIDEO_CONTINUE);
-
 #endif
 		/* yuv2rgb conversion (4:2:0)
 		   TODO: there has to be a way to use the blitter for this */
 		const int rgbstride = vid_x * 3;
 		const int scans = vid_y / 2;
 		int y;
-
 		for (y = 0; y < scans; ++y)
 		{
 			int x;
@@ -1867,7 +1668,6 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 	if (get_osd)
 	{
 		uint8_t *lfb = (uint8_t *)mmap(0, fix_screeninfo.smem_len, PROT_READ, MAP_SHARED, fbfd, 0);
-
 		if (lfb == MAP_FAILED)
 			hal_info("%s: mmap fb memory failed (%m)\n", __func__);
 		else
@@ -1879,7 +1679,6 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 
 	/* use the blitter to copy / scale / blend the pictures */
 	STMFBIO_BLT_EXTERN_DATA blt_data;
-
 	if (get_video)
 	{
 		int pip_x = 0;
@@ -1887,37 +1686,34 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 		int pip_w = xres;
 		int pip_h = yres;
 		bool scale = false;
-
 		if (get_osd)
 		{
 			pip_x = proc_get_hex("/proc/stb/vmpeg/0/dst_left");
 			pip_y = proc_get_hex("/proc/stb/vmpeg/0/dst_top");
 			pip_w = proc_get_hex("/proc/stb/vmpeg/0/dst_width");
 			pip_h = proc_get_hex("/proc/stb/vmpeg/0/dst_height");
-
 			if (pip_x != 0 || pip_y != 0 || pip_w != 720 || pip_h != 576)
 				scale = true;
-
 			pip_x = pip_x * xres / 720;
 			pip_y = pip_y * yres / 576;
 			pip_w = pip_w * xres / 720;
 			pip_h = pip_h * yres / 576;
-
 			if (scale == false && aspect == 1)
 			{
 				pip_w = xres * 9 / 16 * 4 / 3;
 				pip_x = (xres - pip_w) / 2;
 			}
 		}
-
 		if (scale || aspect == 1)
 		{
 			/* todo: use the blitter, luke */
 			uint8_t *p = bpa - 1;
-
 			for (int i = 0; i < outmem; i += 4)
 			{
-				*++p = 0; *++p = 0; *++p = 0; *++p = 0xff;
+				*++p = 0;
+				*++p = 0;
+				*++p = 0;
+				*++p = 0xff;
 			}
 		}
 
@@ -1942,21 +1738,17 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 		blt_data.dstMemBase = (char *)bpa;
 		blt_data.srcMemSize = vidmem;
 		blt_data.dstMemSize = outmem;
-
 		if (ioctl(fbfd, STMFBIO_BLT_EXTERN, &blt_data) < 0)
 			hal_info("%s: STMFBIO_BLT_EXTERN video: %m\n", __func__);
 	}
-
 	if (get_osd)
 	{
 		memset(&blt_data, 0, sizeof(STMFBIO_BLT_EXTERN_DATA));
 		blt_data.operation  = BLT_OP_COPY;
-
 		if (get_video)
 			blt_data.ulFlags    = BLT_OP_FLAGS_BLEND_SRC_ALPHA | BLT_OP_FLAGS_BLEND_DST_MEMORY;
 		else
 			blt_data.ulFlags    = 0;
-
 		blt_data.srcOffset  = 0;
 		blt_data.srcPitch   = fix_screeninfo.line_length;
 		blt_data.dstOffset  = 0;
@@ -1975,20 +1767,16 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 		blt_data.dstMemBase = (char *)bpa;
 		blt_data.srcMemSize = osdmem;
 		blt_data.dstMemSize = outmem;
-
 		if (ioctl(fbfd, STMFBIO_BLT_EXTERN, &blt_data) < 0)
 			hal_info("%s: STMFBIO_BLT_EXTERN osd: %m\n", __func__);
 	}
-
 	ioctl(fbfd, STMFBIO_SYNC_BLITTER);
 
 	video = (unsigned char *)malloc(outmem);
-
 	if (video)
 		memcpy(video, bpa, outmem);
 	else
 		hal_info("%s: could not allocate screenshot buffer (%d bytes)\n", __func__, xres * yres * 4);
-
 	munmap(bpa, bpa_data.mem_size);
 	ioctl(bpafd, BPAMEMIO_FREEMEM);
 	close(bpafd);
@@ -1996,18 +1784,14 @@ bool cVideo::GetScreenImage(unsigned char *&video, int &xres, int &yres, bool ge
 	return true;
 
 error_cleanup:
-
 	if (bpa != MAP_FAILED)
 		munmap(bpa, bpa_data.mem_size);
-
 	if (bpafd > -1)
 	{
 		ioctl(bpafd, BPAMEMIO_FREEMEM);
 		close(bpafd);
 	}
-
 	if (fbfd > -1)
 		close(fbfd);
-
 	return false;
 }

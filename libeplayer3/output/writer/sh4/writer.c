@@ -116,7 +116,6 @@ ssize_t WriteWithRetry(Context_t *context, int pipefd, int fd, void *pDVBMtx, co
 			tv.tv_usec = 500000; // 500ms
 
 			retval = select(pipefd + 1, &rfds, NULL, NULL, &tv);
-
 			if (retval < 0)
 			{
 				break;
@@ -138,14 +137,12 @@ ssize_t WriteWithRetry(Context_t *context, int pipefd, int fd, void *pDVBMtx, co
 
 		//printf(">> Before Write fd [%d]\n", fd);
 		ret = write(fd, buf, size);
-
 		//printf(">> After Write ret[%d] size[%d]\n", (int)ret, size);
 		if (ret == size)
 			ret = 0; // no error
 
 		break;
 	}
-
 	return ret;
 }
 

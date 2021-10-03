@@ -94,7 +94,6 @@ bool WriterDIVX::Write(AVPacket *packet, int64_t pts)
 		iov[ic++].iov_len = get_codecpar(stream)->extradata_size;
 		initialHeader = false;
 	}
-
 	iov[ic].iov_base = packet->data;
 	iov[ic++].iov_len = packet->size;
 

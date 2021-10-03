@@ -84,7 +84,6 @@ static int ManagerAdd(Context_t *context __attribute__((unused)), Track_t track)
 	{
 		Tracks = malloc(sizeof(Track_t) * TRACKWRAP);
 		int i;
-
 		for (i = 0; i < TRACKWRAP; i++)
 			Tracks[i].Id = -1;
 	}
@@ -96,7 +95,6 @@ static int ManagerAdd(Context_t *context __attribute__((unused)), Track_t track)
 	}
 
 	int i;
-
 	for (i = 0; i < TRACKWRAP; i++)
 	{
 		if (Tracks[i].Id == track.Id)
@@ -145,13 +143,11 @@ static char **ManagerList(Context_t *context __attribute__((unused)))
 		{
 			if (Tracks[i].pending)
 				continue;
-
 			char tmp[20];
 			snprintf(tmp, sizeof(tmp), "%d", (int)Tracks[i].chapter_start);
 			tracklist[j] = strdup(tmp);
 			tracklist[j + 1] = strdup(Tracks[i].Name);
 		}
-
 		tracklist[j] = NULL;
 	}
 
@@ -172,7 +168,6 @@ static int ManagerDel(Context_t *context __attribute__((unused)))
 		{
 			freeTrack(&Tracks[i]);
 		}
-
 		free(Tracks);
 		Tracks = NULL;
 	}
@@ -204,30 +199,24 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			ret = ManagerAdd(context, *track);
 			break;
 		}
-
 		case MANAGER_LIST:
 		{
 			container_ffmpeg_update_tracks(context, context->playback->uri, 0);
 			*((char ***) argument) = (char **) ManagerList(context);
 			break;
 		}
-
 		case MANAGER_DEL:
 		{
 			ret = ManagerDel(context);
 			break;
 		}
-
 		case MANAGER_INIT_UPDATE:
 		{
 			int i;
-
 			for (i = 0; i < TrackCount; i++)
 				Tracks[i].pending = 1;
-
 			break;
 		}
-
 		default:
 			chapter_mgr_err("%s::%s ContainerCmd %d not supported!\n", FILENAME, __FUNCTION__, command);
 			ret = cERR_CHAPTER_MGR_ERROR;

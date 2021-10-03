@@ -126,7 +126,6 @@ bool WriterVC1::Write(AVPacket *packet, int64_t pts)
 		iov[1].iov_base = PesPayload;
 		iov[1].iov_len = PesPtr - PesPayload;
 		iov[0].iov_len = InsertPesHeader(PesHeader, iov[1].iov_len, VC1_VIDEO_PES_START_CODE, INVALID_PTS_VALUE, 0);
-
 		if (writev(fd, iov, 2) < 0)
 			return false;
 
@@ -135,7 +134,6 @@ bool WriterVC1::Write(AVPacket *packet, int64_t pts)
 		iov[1].iov_base = get_codecpar(stream)->extradata;
 		iov[1].iov_len = get_codecpar(stream)->extradata_size;
 		iov[0].iov_len = InsertPesHeader(PesHeader, iov[1].iov_len, VC1_VIDEO_PES_START_CODE, INVALID_PTS_VALUE, 0);
-
 		if (writev(fd, iov, 2) < 0)
 			return false;
 
@@ -159,28 +157,21 @@ bool WriterVC1::Write(AVPacket *packet, int64_t pts)
 
 				if (!FrameHeaderSeen && (packet->size > 3) && (memcmp(packet->data, Vc1FrameStartCode, 4) == 0))
 					FrameHeaderSeen = true;
-
 				if (!FrameHeaderSeen)
 				{
 					memcpy(&PesHeader[HeaderLength], Vc1FrameStartCode, sizeof(Vc1FrameStartCode));
 					HeaderLength += sizeof(Vc1FrameStartCode);
 				}
-
 				insertSampleHeader = false;
 			}
 
 			struct iovec iov[2];
-
 			iov[0].iov_base = PesHeader;
-
 			iov[0].iov_len = HeaderLength;
-
 			iov[1].iov_base = packet->data + Position;
-
 			iov[1].iov_len = PacketLength;
 
 			ssize_t l = writev(fd, iov, 2);
-
 			if (l < 0)
 				return false;
 

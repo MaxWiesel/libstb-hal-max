@@ -64,14 +64,12 @@ int8_t PlaybackDieNow(int8_t val)
 	{
 		uint32_t i = 0;
 		dieNow = 1;
-
 		while (i < MAX_PLAYBACK_DIE_NOW_CALLBACKS)
 		{
 			if (playbackDieNowCallbacks[i] == NULL)
 			{
 				break;
 			}
-
 			playbackDieNowCallbacks[i]();
 			i += 1;
 		}
@@ -80,18 +78,15 @@ int8_t PlaybackDieNow(int8_t val)
 	{
 		dieNow = 0;
 	}
-
 	return dieNow;
 }
 
 bool PlaybackDieNowRegisterCallback(PlaybackDieNowCallback callback)
 {
 	bool ret = false;
-
 	if (callback)
 	{
 		uint32_t i = 0;
-
 		while (i < MAX_PLAYBACK_DIE_NOW_CALLBACKS)
 		{
 			if (playbackDieNowCallbacks[i] == callback)
@@ -106,11 +101,9 @@ bool PlaybackDieNowRegisterCallback(PlaybackDieNowCallback callback)
 				ret = true;
 				break;
 			}
-
 			i += 1;
 		}
 	}
-
 	return ret;
 }
 
@@ -170,7 +163,6 @@ static int PlaybackOpen(Context_t *context, PlayFiles_t *pFiles)
 	if (!strncmp("file://", uri, 7) || !strncmp("myts://", uri, 7))
 	{
 		context->playback->isFile = 1;
-
 		if (!strncmp("myts://", uri, 7))
 		{
 			memcpy(context->playback->uri, "file", 4);
@@ -182,7 +174,6 @@ static int PlaybackOpen(Context_t *context, PlayFiles_t *pFiles)
 		}
 
 		extension = getExtension(context->playback->uri + 7);
-
 		if (!extension)
 		{
 			playback_err("Wrong extension (%s)\n", context->playback->uri + 7);
@@ -199,7 +190,6 @@ static int PlaybackOpen(Context_t *context, PlayFiles_t *pFiles)
 	{
 		context->playback->isHttp = 1;
 		extension = "mp3";
-
 		if (!strncmp("mms://", uri, 6))
 		{
 			// mms is in reality called rtsp, and ffmpeg expects this
@@ -224,19 +214,16 @@ static int PlaybackOpen(Context_t *context, PlayFiles_t *pFiles)
 	}
 
 	pFiles->szFirstFile = context->playback->uri;
-
 	if ((context->container->Command(context, CONTAINER_ADD, extension) < 0) ||
 		(!context->container->selectedContainer) ||
 		(context->container->selectedContainer->Command(context, CONTAINER_INIT, pFiles) < 0))
 	{
 		playback_err("CONTAINER_ADD failed\n");
-
 		if (context->playback->uri)
 		{
 			free(context->playback->uri);
 			context->playback->uri = NULL;
 		}
-
 		return cERR_PLAYBACK_ERROR;
 	}
 
@@ -255,13 +242,10 @@ static int PlaybackClose(Context_t *context)
 	{
 		playback_err("container delete failed\n");
 	}
-
 	if (context->manager->audio)
 		context->manager->audio->Command(context, MANAGER_DEL, NULL);
-
 	if (context->manager->video)
 		context->manager->video->Command(context, MANAGER_DEL, NULL);
-
 	if (context->manager->chapter)
 		context->manager->chapter->Command(context, MANAGER_DEL, NULL);
 
@@ -271,7 +255,6 @@ static int PlaybackClose(Context_t *context)
 	context->playback->BackWard     = 0;
 	context->playback->SlowMotion   = 0;
 	context->playback->Speed        = 0;
-
 	if (context->playback->uri)
 	{
 		free(context->playback->uri);
@@ -439,6 +422,7 @@ static int32_t PlaybackStop(Context_t *context)
 	playback_printf(10, "\n");
 
 	PlaybackDieNow(1);
+
 	context->playback->stamp = (void *) -1;
 
 	if (context && context->playback && context->playback->isPlaying)
@@ -452,7 +436,6 @@ static int32_t PlaybackStop(Context_t *context)
 
 		if (context->output && context->output->Command)
 			context->output->Command(context, OUTPUT_STOP, NULL);
-
 		if (context->container && context->container->selectedContainer)
 			context->container->selectedContainer->Command(context, CONTAINER_STOP, NULL);
 	}
@@ -497,7 +480,6 @@ static int32_t PlaybackTerminate(Context_t *context)
 		}
 
 		ret = context->container->selectedContainer->Command(context, CONTAINER_STOP, NULL);
-
 		if (context && context->playback)
 		{
 			context->playback->isPaused     = 0;
@@ -507,7 +489,6 @@ static int32_t PlaybackTerminate(Context_t *context)
 			context->playback->SlowMotion   = 0;
 			context->playback->Speed        = 0;
 		}
-
 		if (context && context->output)
 			context->output->Command(context, OUTPUT_STOP, NULL);
 	}
@@ -642,11 +623,9 @@ static int32_t PlaybackSlowMotion(Context_t *context, int *speed)
 			case 2:
 				context->playback->SlowMotion = 2;
 				break;
-
 			case 4:
 				context->playback->SlowMotion = 4;
 				break;
-
 			case 8:
 				context->playback->SlowMotion = 8;
 				break;
@@ -685,7 +664,6 @@ static int32_t PlaybackSeek(Context_t *context, int64_t *pos, uint8_t absolute)
 		stamp += 1;
 		context->playback->stamp = (void *)stamp;
 		context->output->Command(context, OUTPUT_CLEAR, NULL);
-
 		if (absolute)
 		{
 			context->container->selectedContainer->Command(context, CONTAINER_SEEK_ABS, pos);
@@ -694,7 +672,6 @@ static int32_t PlaybackSeek(Context_t *context, int64_t *pos, uint8_t absolute)
 		{
 			context->container->selectedContainer->Command(context, CONTAINER_SEEK, pos);
 		}
-
 		context->playback->isSeeking = 0;
 	}
 	else
@@ -814,7 +791,6 @@ static int32_t PlaybackSwitchAudio(Context_t *context, int32_t *track)
 			{
 				context->container->selectedContainer->Command(context, CONTAINER_SWITCH_AUDIO, &nextrackid);
 			}
-
 			//PlaybackContinue(context);
 		}
 	}
@@ -919,115 +895,96 @@ static int32_t Command(Context_t *context, PlaybackCmd_t command, void *argument
 			ret = PlaybackOpen(context, (PlayFiles_t *)argument);
 			break;
 		}
-
 		case PLAYBACK_CLOSE:
 		{
 			ret = PlaybackClose(context);
 			break;
 		}
-
 		case PLAYBACK_PLAY:
 		{
 			ret = PlaybackPlay(context);
 			break;
 		}
-
 		case PLAYBACK_STOP:
 		{
 			ret = PlaybackStop(context);
 			break;
 		}
-
 		case PLAYBACK_PAUSE:
 		{
 			ret = PlaybackPause(context);
 			break;
 		}
-
 		case PLAYBACK_CONTINUE:
 		{
 			ret = PlaybackContinue(context);
 			break;
 		}
-
 		case PLAYBACK_TERM:
 		{
 			ret = PlaybackTerminate(context);
 			break;
 		}
-
 		case PLAYBACK_FASTFORWARD:
 		{
 			ret = PlaybackFastForward(context, (int *)argument);
 			break;
 		}
-
 		case PLAYBACK_SEEK:
 		{
 			ret = PlaybackSeek(context, (int64_t *)argument, 0);
 			break;
 		}
-
 		case PLAYBACK_SEEK_ABS:
 		{
 			ret = PlaybackSeek(context, (int64_t *)argument, -1);
 			break;
 		}
-
 		case PLAYBACK_PTS:
 		{
 			ret = PlaybackPts(context, (int64_t *)argument);
 			break;
 		}
-
 		case PLAYBACK_LENGTH:
 		{
 			ret = PlaybackLength(context, (int64_t *)argument);
 			break;
 		}
-
 		case PLAYBACK_SWITCH_AUDIO:
 		{
 			ret = PlaybackSwitchAudio(context, (int *)argument);
 			break;
 		}
-
 		case PLAYBACK_SWITCH_SUBTITLE:
 		{
 			ret = PlaybackSwitchSubtitle(context, (int *)argument);
 			break;
 		}
-
 		case PLAYBACK_INFO:
 		{
 			ret = PlaybackInfo(context, (char **)argument);
 			break;
 		}
-
 		case PLAYBACK_SLOWMOTION:
 		{
 			ret = PlaybackSlowMotion(context, (int *)argument);
 			break;
 		}
-
 		case PLAYBACK_FASTBACKWARD:
 		{
 			ret = PlaybackFastBackward(context, (int *)argument);
 			break;
 		}
-
 		case PLAYBACK_GET_FRAME_COUNT:
 		{
 			ret = PlaybackGetFrameCount(context, (uint64_t *)argument);
 			break;
 		}
-
 		case PLAYBACK_METADATA:
 		{
 			ret = PlaybackMetadata(context, (char ***) argument);
 			break;
 		}
-
 		default:
 			playback_err("PlaybackCmd %d not supported!\n", command);
 			ret = cERR_PLAYBACK_ERROR;

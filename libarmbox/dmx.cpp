@@ -137,7 +137,6 @@ cDemux::cDemux(int n)
 	}
 	else
 		num = n;
-
 	fd = -1;
 	pdata = (void *)calloc(1, sizeof(dmx_pdata));
 	P->last_source = -1;
@@ -173,15 +172,12 @@ static bool _open(cDemux *thiz, int num, int &fd, int &last_source, DMX_CHANNEL_
 {
 	int flags = O_RDWR | O_CLOEXEC;
 	int devnum = dmx_source[num];
-
 	if (last_source == devnum)
 	{
 		hal_debug_z("%s #%d: source (%d) did not change\n", __func__, num, last_source);
-
 		if (fd > -1)
 			return true;
 	}
-
 	if (fd > -1)
 	{
 		/* we changed source -> close and reopen the fd */
@@ -194,13 +190,11 @@ static bool _open(cDemux *thiz, int num, int &fd, int &last_source, DMX_CHANNEL_
 		flags |= O_NONBLOCK;
 
 	fd = open(devname(0, devnum), flags);
-
 	if (fd < 0)
 	{
 		hal_info_z("%s %s: %m\n", __FUNCTION__, devname(0, devnum));
 		return false;
 	}
-
 	hal_debug_z("%s #%d pes_type: %s(%d), uBufferSize: %d fd: %d\n", __func__,
 		num, DMX_T[dmx_type], dmx_type, buffersize, fd);
 
@@ -211,16 +205,13 @@ static bool _open(cDemux *thiz, int num, int &fd, int &last_source, DMX_CHANNEL_
 		/* this should not change anything... */
 		int n = DMX_SOURCE_FRONT0 + devnum;
 		hal_info_z("%s: setting %s to source %d\n", __func__, devname(0, devnum), n);
-
 		if (ioctl(fd, DMX_SET_SOURCE, &n) < 0)
 			hal_info_z("%s DMX_SET_SOURCE failed!\n", __func__);
 		else
 			init[devnum] = true;
 	}
-
 	if (buffersize == 0)
 		buffersize = 0xffff; // may or may not be reasonable  --martii
-
 	if (buffersize > 0)
 	{
 		/* probably uBufferSize == 0 means "use default size". TODO: find a reasonable default */
@@ -235,7 +226,6 @@ static bool _open(cDemux *thiz, int num, int &fd, int &last_source, DMX_CHANNEL_
 void cDemux::Close(void)
 {
 	hal_debug("%s #%d, fd = %d\n", __FUNCTION__, num, fd);
-
 	if (fd < 0)
 	{
 		hal_info("%s #%d: not open!\n", __FUNCTION__, num);
@@ -251,13 +241,11 @@ void cDemux::Close(void)
 bool cDemux::Start(bool)
 {
 	hal_debug("%s #%d fd: %d type: %s\n", __func__, num, fd, DMX_T[dmx_type]);
-
 	if (fd < 0)
 	{
 		hal_info("%s #%d: not open!\n", __FUNCTION__, num);
 		return false;
 	}
-
 	ioctl(fd, DMX_START);
 	return true;
 }
@@ -265,13 +253,11 @@ bool cDemux::Start(bool)
 bool cDemux::Stop(void)
 {
 	hal_debug("%s #%d fd: %d type: %s\n", __func__, num, fd, DMX_T[dmx_type]);
-
 	if (fd < 0)
 	{
 		hal_info("%s #%d: not open!\n", __FUNCTION__, num);
 		return false;
 	}
-
 	ioctl(fd, DMX_STOP);
 	return true;
 }
@@ -279,19 +265,15 @@ bool cDemux::Stop(void)
 int cDemux::Read(unsigned char *buff, int len, int timeout)
 {
 #if 0
-
 	if (len != 4095 && timeout != 10)
 		fprintf(stderr, "cDemux::%s #%d fd: %d type: %s len: %d timeout: %d\n",
 			__FUNCTION__, num, fd, DMX_T[dmx_type], len, timeout);
-
 #endif
-
 	if (fd < 0)
 	{
 		hal_info("%s #%d: not open!\n", __func__, num);
 		return -1;
 	}
-
 	/* avoid race in destructor: ~cDemux needs to wait until Read() returns */
 	OpenThreads::ScopedLock<OpenThreads::Mutex> m_lock(*P->mutex);
 	int rc;
@@ -311,14 +293,12 @@ int cDemux::Read(unsigned char *buff, int len, int timeout)
 	{
 retry:
 		rc = ::poll(&ufds, 1, to);
-
 		if (ufds.fd != fd)
 		{
 			/* Close() will set fd to -1, this is normal. Everything else is not. */
 			hal_info("%s:1 ========== fd has changed, %d->%d ==========\n", __func__, ufds.fd, fd);
 			return -1;
 		}
-
 		if (!rc)
 		{
 			if (timeout == 0) /* we took the emergency exit */
@@ -326,45 +306,36 @@ retry:
 				dmx_err("timed out for timeout=0!, %s", "", 0);
 				return -1; /* this timeout is an error */
 			}
-
 			return 0; // timeout
 		}
 		else if (rc < 0)
 		{
 			dmx_err("poll: %s,", strerror(errno), 0)
-
 			//hal_info("%s poll: %m\n", __FUNCTION__);
 			/* happens, when running under gdb... */
 			if (errno == EINTR)
 				goto retry;
-
 			return -1;
 		}
-
 #if 0
-
 		if (ufds.revents & POLLERR) /* POLLERR means buffer error, i.e. buffer overflow */
 		{
 			dmx_err("received %s,", "POLLERR", ufds.revents);
 			/* this seems to happen sometimes at recording start, without bad effects */
 			return 0;
 		}
-
 #endif
-
 		if (ufds.revents & POLLHUP) /* we get POLLHUP if e.g. a too big DMX_BUFFER_SIZE was set */
 		{
 			dmx_err("received %s,", "POLLHUP", ufds.revents);
 			return -1;
 		}
-
 		if (!(ufds.revents & POLLIN)) /* we requested POLLIN but did not get it? */
 		{
 			dmx_err("received %s, please report!", "POLLIN", ufds.revents);
 			return 0;
 		}
 	}
-
 	if (ufds.fd != fd)	/* does this ever happen? and if, is it harmful? */
 	{
 		/* read(-1,...) will just return EBADF anyway... */
@@ -373,7 +344,6 @@ retry:
 	}
 
 	rc = ::read(fd, buff, len);
-
 	//fprintf(stderr, "fd %d ret: %d\n", fd, rc);
 	if (rc < 0)
 		dmx_err("read: %s", strerror(errno), 0);
@@ -396,70 +366,56 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		hal_info("%s #%d: len too long: %d, DMX_FILTER_SIZE %d\n", __func__, num, len, DMX_FILTER_SIZE);
 		len = DMX_FILTER_SIZE;
 	}
-
 	flt = filter[0];
 	s_flt.pid = pid;
 	s_flt.timeout = timeout;
 	memcpy(s_flt.filter.filter, filter, len);
 	memcpy(s_flt.filter.mask,   mask,   len);
-
 	if (negmask != NULL)
 		memcpy(s_flt.filter.mode, negmask, len);
 
 	s_flt.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
 	int to = 0;
-
 	switch (filter[0])
 	{
 		case 0x00: /* program_association_section */
 			to = 2000;
 			break;
-
 		case 0x01: /* conditional_access_section */
 			to = 6000;
 			break;
-
 		case 0x02: /* program_map_section */
 			to = 1500;
 			break;
-
 		case 0x03: /* transport_stream_description_section */
 			to = 10000;
 			break;
-
 		/* 0x04 - 0x3F: reserved */
 		case 0x40: /* network_information_section - actual_network */
 			to = 10000;
 			break;
-
 		case 0x41: /* network_information_section - other_network */
 			to = 15000;
 			break;
-
 		case 0x42: /* service_description_section - actual_transport_stream */
 			to = 10000;
 			break;
-
 		/* 0x43 - 0x45: reserved for future use */
 		case 0x46: /* service_description_section - other_transport_stream */
 			to = 10000;
 			break;
-
 		/* 0x47 - 0x49: reserved for future use */
 		case 0x4A: /* bouquet_association_section */
 			to = 11000;
 			break;
-
 		/* 0x4B - 0x4D: reserved for future use */
 		case 0x4E: /* event_information_section - actual_transport_stream, present/following */
 			to = 2000;
 			break;
-
 		case 0x4F: /* event_information_section - other_transport_stream, present/following */
 			to = 10000;
 			break;
-
 		/* 0x50 - 0x5F: event_information_section - actual_transport_stream, schedule */
 		/* 0x60 - 0x6F: event_information_section - other_transport_stream, schedule */
 		case 0x70: /* time_date_section */
@@ -468,38 +424,31 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 			//s_flt.pid     = 0x0014;
 			to = 30000;
 			break;
-
 		case 0x71: /* running_status_section */
 			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
 			to = 0;
 			break;
-
 		case 0x72: /* stuffing_section */
 			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
 			to = 0;
 			break;
-
 		case 0x73: /* time_offset_section */
 			s_flt.flags |= DMX_ONESHOT;
 			//s_flt.pid     = 0x0014;
 			to = 30000;
 			break;
-
 		case 0x74: /* application_information_section */
 			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
 			to = 12000;
 			break;
-
 		/* 0x75 - 0x7D: reserved for future use */
 		case 0x7E: /* discontinuity_information_section */
 			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
 			to = 0;
 			break;
-
 		case 0x7F: /* selection_information_section */
 			to = 0;
 			break;
-
 		/* 0x80 - 0x8F: ca_message_section */
 		/* 0x90 - 0xFE: user defined */
 		/*        0xFF: reserved */
@@ -507,7 +456,6 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 			//return -1;
 			break;
 	}
-
 	/* the negmask == NULL is a hack: the users of negmask are PMT-update
 	 * and sectionsd EIT-Version change. And they really want no timeout
 	 * if timeout == 0 instead of "default timeout" */
@@ -520,27 +468,20 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 	if (debuglevel == 2)
 	{
 		fprintf(stderr, "filt: ");
-
 		for (int i = 0; i < len; i++)
 			fprintf(stderr, "%02hhx ", s_flt.filter.filter[i]);
-
 		fprintf(stderr, "\n");
 		fprintf(stderr, "mask: ");
-
 		for (int i = 0; i < len; i++)
 			fprintf(stderr, "%02hhx ", s_flt.filter.mask  [i]);
-
 		fprintf(stderr, "\n");
 		fprintf(stderr, "mode: ");
-
 		for (int i = 0; i < len; i++)
 			fprintf(stderr, "%02hhx ", s_flt.filter.mode  [i]);
-
 		fprintf(stderr, "\n");
 	}
 
 	ioctl(fd, DMX_STOP);
-
 	if (ioctl(fd, DMX_SET_FILTER, &s_flt) < 0)
 		return false;
 
@@ -552,7 +493,6 @@ bool cDemux::pesFilter(const unsigned short _pid)
 	struct dmx_pes_filter_params p_flt;
 	pid = _pid;
 	flt = 0;
-
 	/* allow PID 0 for web streaming e.g.
 	 * this check originally is from tuxbox cvs but I'm not sure
 	 * what it is good for...
@@ -577,34 +517,27 @@ bool cDemux::pesFilter(const unsigned short _pid)
 		case DMX_PCR_ONLY_CHANNEL:
 			p_flt.pes_type = DMX_PES_PCR;
 			break;
-
 		case DMX_AUDIO_CHANNEL:
 			p_flt.pes_type = DMX_PES_AUDIO;
 			break;
-
 		case DMX_VIDEO_CHANNEL:
 			p_flt.pes_type = DMX_PES_VIDEO;
 			break;
-
 		case DMX_PIP_CHANNEL: /* PIP is a special version of DMX_VIDEO_CHANNEL */
 			p_flt.pes_type = DMX_PES_VIDEO1;
 			break;
-
 		case DMX_PES_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
 			p_flt.output  = DMX_OUT_TAP;
 			break;
-
 		case DMX_TP_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
 			p_flt.output  = DMX_OUT_TSDEMUX_TAP;
 			break;
-
 		default:
 			hal_info("%s #%d invalid dmx_type %d!\n", __func__, num, dmx_type);
 			return false;
 	}
-
 	return (ioctl(fd, DMX_SET_PES_FILTER, &p_flt) >= 0);
 }
 
@@ -630,26 +563,20 @@ bool cDemux::addPid(unsigned short Pid)
 	hal_debug("%s: pid 0x%04hx\n", __func__, Pid);
 	pes_pids pfd;
 	int ret;
-
 	if (dmx_type != DMX_TP_CHANNEL)
 	{
 		hal_info("%s pes_type %s not implemented yet! pid=%hx\n", __FUNCTION__, DMX_T[dmx_type], Pid);
 		return false;
 	}
-
 	_open(this, num, fd, P->last_source, dmx_type, buffersize);
-
 	if (fd == -1)
 		hal_info("%s bucketfd not yet opened? pid=%hx\n", __FUNCTION__, Pid);
-
 	pfd.fd = fd; /* dummy */
 	pfd.pid = Pid;
 	pesfds.push_back(pfd);
 	ret = (ioctl(fd, DMX_ADD_PID, &Pid));
-
 	if (ret < 0)
 		hal_info("%s: DMX_ADD_PID (%m) pid=%hx\n", __func__, Pid);
-
 	return (ret != -1);
 }
 
@@ -660,21 +587,17 @@ void cDemux::removePid(unsigned short Pid)
 		hal_info("%s pes_type %s not implemented yet! pid=%hx\n", __FUNCTION__, DMX_T[dmx_type], Pid);
 		return;
 	}
-
 	for (std::vector<pes_pids>::iterator i = pesfds.begin(); i != pesfds.end(); ++i)
 	{
 		if ((*i).pid == Pid)
 		{
 			hal_debug("removePid: removing demux fd %d pid 0x%04x\n", fd, Pid);
-
 			if (ioctl(fd, DMX_REMOVE_PID, Pid) < 0)
 				hal_info("%s: (DMX_REMOVE_PID, 0x%04hx): %m\n", __func__, Pid);
-
 			pesfds.erase(i);
 			return; /* TODO: what if the same PID is there multiple times */
 		}
 	}
-
 	hal_info("%s pid 0x%04x not found\n", __FUNCTION__, Pid);
 }
 
@@ -684,10 +607,8 @@ void cDemux::getSTC(int64_t *STC)
 	 * but that's good enough for dvbsub */
 	hal_debug("%s #%d\n", __func__, num);
 	int64_t pts = 0;
-
 	if (videoDecoder)
 		pts = videoDecoder->GetPTS();
-
 	*STC = pts;
 }
 
@@ -707,14 +628,11 @@ bool cDemux::SetSource(int unit, int source)
 		hal_info_c("%s: unit (%d) out of range, NUM_DEMUX %d\n", __func__, unit, NUM_DEMUX);
 		return false;
 	}
-
 	hal_debug_c("%s(%d, %d) => %d to %d\n", __func__, unit, source, dmx_source[unit], source);
-
 	if (source < 0 || source >= NUM_DEMUXDEV)
 		hal_info_c("%s(%d, %d) ERROR: source %d out of range!\n", __func__, unit, source, source);
 	else
 		dmx_source[unit] = source;
-
 	return true;
 }
 
@@ -725,7 +643,6 @@ int cDemux::GetSource(int unit)
 		hal_info_c("%s: unit (%d) out of range, NUM_DEMUX %d\n", __func__, unit, NUM_DEMUX);
 		return -1;
 	}
-
 	hal_debug_c("%s(%d) => %d\n", __func__, unit, dmx_source[unit]);
 	return dmx_source[unit];
 }

@@ -94,7 +94,6 @@ static int writeData(WriterAVCallData_t *call)
 	int vorbis_header_len[3];
 	uint8_t vorbis_header_len_raw[3][2];
 	pcmPrivateData_t *pcmPrivateData  = (pcmPrivateData_t *)call->private_data;
-
 	uint32_t headerSize = InsertPesHeader(PesHeader, call->len, MPEG_AUDIO_PES_START_CODE, call->Pts, 0);
 
 	if (pcmPrivateData->codec_id == AV_CODEC_ID_VORBIS)
@@ -132,14 +131,11 @@ static int writeData(WriterAVCallData_t *call)
 		PesHeader[headerSize++] = (payloadSize >> 16) & 0xFF;
 		PesHeader[headerSize++] = (payloadSize >> 8) & 0xFF;
 		PesHeader[headerSize++] = payloadSize & 0xFF;
-
 		int32_t channels        = pcmPrivateData->channels;
 		uint32_t sample_rate    = pcmPrivateData->sample_rate;
-
 		int32_t bits_per_sample = pcmPrivateData->bits_per_coded_sample;
 		uint32_t byte_rate      = pcmPrivateData->bit_rate / 8;
 		uint32_t block_align    = pcmPrivateData->block_align;
-
 		int32_t format_tag = 0;
 
 		switch (pcmPrivateData->codec_id)
@@ -147,58 +143,46 @@ static int writeData(WriterAVCallData_t *call)
 			case AV_CODEC_ID_WMAV1:
 				format_tag = 0x160;
 				break;
-
 			case AV_CODEC_ID_WMAV2:
 				format_tag = 0x161;
 				break;
-
 			case AV_CODEC_ID_WMAPRO:
 				format_tag = 0x162;
 				break;
-
 			case AV_CODEC_ID_WMALOSSLESS:
 				format_tag = 0x163;
 				break;
-
 			case AV_CODEC_ID_VORBIS:
 				bits_per_sample = 8;
 				byte_rate = 32000;
 				block_align = 1;
 				break;
-
 			default:
 				format_tag = 0xFFFF;
 				break;
 		}
-
 		/* format tag */
 		PesHeader[headerSize++] = format_tag & 0xff;
 		PesHeader[headerSize++] = (format_tag >> 8) & 0xff;
-
 		/* channels */
 		PesHeader[headerSize++] = channels & 0xff;
 		PesHeader[headerSize++] = (channels >> 8) & 0xff;
-
 		/* sample rate */
 		PesHeader[headerSize++] = sample_rate & 0xff;
 		PesHeader[headerSize++] = (sample_rate >> 8) & 0xff;
 		PesHeader[headerSize++] = (sample_rate >> 16) & 0xff;
 		PesHeader[headerSize++] = (sample_rate >> 24) & 0xff;
-
 		/* byte rate */
 		PesHeader[headerSize++] = byte_rate & 0xff;
 		PesHeader[headerSize++] = (byte_rate >> 8) & 0xff;
 		PesHeader[headerSize++] = (byte_rate >> 16) & 0xff;
 		PesHeader[headerSize++] = (byte_rate >> 24) & 0xff;
-
 		/* block align */
 		PesHeader[headerSize++] = block_align & 0xff;
 		PesHeader[headerSize++] = (block_align >> 8) & 0xff;
-
 		/* bits per sample */
 		PesHeader[headerSize++] = bits_per_sample & 0xff;
 		PesHeader[headerSize++] = (bits_per_sample >> 8) & 0xff;
-
 		/* Codec Specific Data Size */
 		PesHeader[headerSize++] = private_size & 0xff;
 		PesHeader[headerSize++] = (private_size >> 8) & 0xff;
@@ -206,9 +190,7 @@ static int writeData(WriterAVCallData_t *call)
 
 	PesHeader[6] |= 1;
 	UpdatePesHeaderPayloadSize(PesHeader, headerSize - 6 + private_size + call->len);
-
 	struct iovec iov[5];
-
 	i = 0;
 	iov[i].iov_base = PesHeader;
 	iov[i++].iov_len  = headerSize;
@@ -221,7 +203,6 @@ static int writeData(WriterAVCallData_t *call)
 			{
 				iov[i].iov_base = vorbis_header_len_raw[i];
 				iov[i++].iov_len  = 2;
-
 				iov[i].iov_base = vorbis_header_start;
 				iov[i++].iov_len  = vorbis_header_len[i];
 			}
@@ -232,7 +213,6 @@ static int writeData(WriterAVCallData_t *call)
 			iov[i++].iov_len  = private_size;
 		}
 	}
-
 	iov[i].iov_base = call->data;
 	iov[i++].iov_len  = call->len;
 

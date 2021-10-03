@@ -133,7 +133,6 @@ static int reset()
 		free(pLATMCtx);
 		pLATMCtx = NULL;
 	}
-
 	needInitHeader = true;
 	return 0;
 }
@@ -217,10 +216,9 @@ static int writeDataADTS(WriterAVCallData_t *call)
 	uint8_t PesHeader[PES_MAX_HEADER_SIZE + AAC_HEADER_LENGTH + MAX_PCE_SIZE];
 	uint32_t headerSize = InsertPesHeader(PesHeader, PacketLength, MPEG_AUDIO_PES_START_CODE, call->Pts, 0);
 	uint8_t *pExtraData = &PesHeader[headerSize];
-
 	needInitHeader = false;
-	aac_printf(10, "AudioPts %lld\n", call->Pts);
 
+	aac_printf(10, "AudioPts %lld\n", call->Pts);
 	if (call->private_data == NULL)
 	{
 		aac_printf(10, "private_data = NULL\n");
@@ -294,7 +292,6 @@ static int writeDataLATM(WriterAVCallData_t *call)
 
 	unsigned char PesHeader[PES_MAX_HEADER_SIZE];
 	int ret = latmenc_decode_extradata(pLATMCtx, call->private_data, call->private_size);
-
 	if (ret)
 	{
 		/* printf("%02x %02x %02x %02x %02x %02x %02x %02x\n", (int)call->data[0], (int)call->data[1], (int)call->data[2], (int)call->data[3], \
@@ -303,9 +300,7 @@ static int writeDataLATM(WriterAVCallData_t *call)
 		aac_err("latm_decode_extradata failed. ignoring...\n");
 		return 0;
 	}
-
 	ret = latmenc_write_packet(pLATMCtx, call->data, call->len, call->private_data, call->private_size);
-
 	if (ret)
 	{
 		aac_err("latm_write_packet failed. ignoring...\n");

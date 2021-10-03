@@ -59,7 +59,6 @@ bool WriterDTS::Write(AVPacket *packet, int64_t pts)
 		Data[i] = Data[i + 1];
 		Data[i + 1] = Tmp;
 	}
-
 #endif
 
 	struct iovec iov[2];

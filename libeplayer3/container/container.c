@@ -46,7 +46,6 @@ static void printContainerCapabilities()
 			container_printf(10, "%s ", AvailableContainer[i]->Capabilities[j]);
 		}
 	}
-
 	container_printf(10, "\n");
 }
 
@@ -99,19 +98,16 @@ static int Command(Context_t *context, ContainerCmd_t command, void *argument __
 			ret = selectContainer(context, (char *) argument);
 			break;
 		}
-
 		case CONTAINER_CAPABILITIES:
 		{
 			printContainerCapabilities();
 			break;
 		}
-
 		case CONTAINER_DEL:
 		{
 			context->container->selectedContainer = NULL;
 			break;
 		}
-
 		default:
 			container_err("%s::%s ContainerCmd %d not supported!\n", __FILE__, __FUNCTION__, command);
 			break;

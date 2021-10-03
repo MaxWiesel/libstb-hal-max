@@ -116,13 +116,11 @@ static int32_t UpdateExtraData(uint8_t **ppExtraData, uint32_t *pExtraDataSize, 
 
 	// Find SPS and PPS NALUs in AVCC data
 	uint8_t *d = pData;
-
 	while (d + 4 < pData + dataSize)
 	{
 		uint32_t nalLen = ReadUint32(d);
 
 		uint8_t nalType = d[4] & 0x1f;
-
 		if (nalType == 7)
 		{
 			/* SPS */
@@ -136,7 +134,6 @@ static int32_t UpdateExtraData(uint8_t **ppExtraData, uint32_t *pExtraDataSize, 
 				h264_err("SPS no free space to copy...\n");
 				return -1;
 			}
-
 			memcpy(&(sps[spsIdx]), d + 4, nalLen);
 			spsIdx += nalLen;
 
@@ -157,7 +154,6 @@ static int32_t UpdateExtraData(uint8_t **ppExtraData, uint32_t *pExtraDataSize, 
 				h264_err("PPS not free space to copy...\n");
 				return -1;
 			}
-
 			memcpy(&(pps[ppsIdx]), d + 4, nalLen);
 			ppsIdx += nalLen;
 
@@ -165,10 +161,8 @@ static int32_t UpdateExtraData(uint8_t **ppExtraData, uint32_t *pExtraDataSize, 
 
 			h264_printf(10, "PPS len[%u]...\n", nalLen);
 		}
-
 		d += 4 + nalLen;
 	}
-
 	uint32_t idx = 0;
 	*ppExtraData = malloc(7 + spsIdx + ppsIdx);
 	aExtraData = *ppExtraData;
@@ -179,7 +173,6 @@ static int32_t UpdateExtraData(uint8_t **ppExtraData, uint32_t *pExtraDataSize, 
 	aExtraData[idx++] = 0xff;           // nal size - 1
 
 	aExtraData[idx++] = 0xe0 | numSps;
-
 	if (numSps)
 	{
 		memcpy(&(aExtraData[idx]), sps, spsIdx);
@@ -187,7 +180,6 @@ static int32_t UpdateExtraData(uint8_t **ppExtraData, uint32_t *pExtraDataSize, 
 	}
 
 	aExtraData[idx++] = numPps;
-
 	if (numPps)
 	{
 		memcpy(&(aExtraData[idx]), pps, ppsIdx);
@@ -303,7 +295,6 @@ static int32_t writeData(void *_call)
 		if (private_size <= sizeof(avcC_t))
 		{
 			UpdateExtraData(&private_data, &private_size, call->data, call->len);
-
 			if (private_data != call->private_data)
 			{
 				avc3 = 1;
@@ -345,7 +336,6 @@ static int32_t writeData(void *_call)
 		iov[ic].iov_base = HeaderData;
 		iov[ic++].iov_len = ParametersLength;
 		len = call->WriteV(call->fd, iov, ic);
-
 		if (len < 0)
 		{
 			return len;
@@ -365,7 +355,6 @@ static int32_t writeData(void *_call)
 		ParamOffset     = 0;
 		ic = 0;
 		iov[ic++].iov_base = PesHeader;
-
 		for (i = 0; i < ParamSets; i++)
 		{
 			unsigned int  PsLength = (avcCHeader->Params[ParamOffset] << 8) + avcCHeader->Params[ParamOffset + 1];
@@ -386,7 +375,6 @@ static int32_t writeData(void *_call)
 		h264_printf(20,  "    number of picture param sets:  %d\n", ParamSets);
 
 		ParamOffset++;
-
 		for (i = 0; i < ParamSets; i++)
 		{
 			unsigned int  PsLength      = (avcCHeader->Params[ParamOffset] << 8) + avcCHeader->Params[ParamOffset + 1];
@@ -432,21 +420,17 @@ static int32_t writeData(void *_call)
 		memcpy(NalData, call->data + VideoPosition, NalLengthBytes);
 		VideoPosition += NalLengthBytes;
 		NalStart += NalLengthBytes;
-
 		switch (NalLengthBytes)
 		{
 			case 1:
 				NalLength = (NalData[0]);
 				break;
-
 			case 2:
 				NalLength = (NalData[0] <<  8) | (NalData[1]);
 				break;
-
 			case 3:
 				NalLength = (NalData[0] << 16) | (NalData[1] <<  8) | (NalData[2]);
 				break;
-
 			default:
 				NalLength = (NalData[0] << 24) | (NalData[1] << 16) | (NalData[2] << 8) | (NalData[3]);
 				break;
@@ -482,10 +466,8 @@ static int32_t writeData(void *_call)
 
 			iov[0].iov_len = InsertPesHeader(PesHeader, NalLength, MPEG_VIDEO_PES_START_CODE, VideoPts, 0);
 			ssize_t l = call->WriteV(call->fd, iov, ic);
-
 			if (l < 0)
 				return l;
-
 			len += l;
 
 			VideoPts = INVALID_PTS_VALUE;

@@ -113,11 +113,11 @@ typedef struct CA_MESSAGE
 typedef std::set<int> ca_map_t;
 typedef ca_map_t::iterator ca_map_iterator_t;
 
-typedef std::vector<u16>			bSIDVector;
+typedef std::vector<u16> bSIDVector;
 
-typedef std::vector<u16>			CaIdVector;
-typedef std::vector<u16>::iterator		CaIdVectorIterator;
-typedef std::vector<u16>::const_iterator	CaIdVectorConstIterator;
+typedef std::vector<u16> CaIdVector;
+typedef std::vector<u16>::iterator CaIdVectorIterator;
+typedef std::vector<u16>::const_iterator CaIdVectorConstIterator;
 
 #define CA_MESSAGE_SIZE		sizeof(CA_MESSAGE)
 #define CA_MESSAGE_ENTRIES	256

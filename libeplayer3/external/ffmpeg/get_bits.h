@@ -419,17 +419,14 @@ static inline int init_get_bits8(GetBitContext *s, const uint8_t *buffer, int by
 {
 	if (byte_size > INT_MAX / 8 || byte_size < 0)
 		byte_size = -1;
-
 	return init_get_bits(s, buffer, byte_size * 8);
 }
 
 static inline const uint8_t *align_get_bits(GetBitContext *s)
 {
 	int n = -get_bits_count(s) & 7;
-
 	if (n)
 		skip_bits(s, n);
-
 	return s->buffer + (s->index >> 3);
 }
 
@@ -511,7 +508,6 @@ static inline int decode012(GetBitContext *gb)
 {
 	int n;
 	n = get_bits1(gb);
-
 	if (n == 0)
 		return 0;
 	else
@@ -539,7 +535,6 @@ static inline int skip_1stop_8data_bits(GetBitContext *gb)
 	while (get_bits1(gb))
 	{
 		skip_bits(gb, 8);
-
 		if (get_bits_left(gb) <= 0)
 			return AVERROR_INVALIDDATA;
 	}

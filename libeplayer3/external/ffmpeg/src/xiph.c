@@ -30,7 +30,6 @@ int avpriv_split_xiph_headers(const uint8_t *extradata, int extradata_size,
 	if (extradata_size >= 6 && AV_RB16(extradata) == first_header_size)
 	{
 		int overall_len = 6;
-
 		for (i = 0; i < 3; i++)
 		{
 			header_len[i] = AV_RB16(extradata);
@@ -48,11 +47,9 @@ int avpriv_split_xiph_headers(const uint8_t *extradata, int extradata_size,
 	{
 		int overall_len = 3;
 		extradata++;
-
 		for (i = 0; i < 2; i++, extradata++)
 		{
 			header_len[i] = 0;
-
 			for (; overall_len < extradata_size && *extradata == 0xff; extradata++)
 			{
 				header_len[i] += 0xff;
@@ -65,7 +62,6 @@ int avpriv_split_xiph_headers(const uint8_t *extradata, int extradata_size,
 			if (overall_len > extradata_size)
 				return -1;
 		}
-
 		header_len[2] = extradata_size - overall_len;
 		header_start[0] = extradata;
 		header_start[1] = header_start[0] + header_len[0];

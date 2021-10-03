@@ -113,7 +113,6 @@ static int writeData(WriterAVCallData_t *call)
 		bool ok = true;
 		uint32_t pos = 4;
 		uint32_t sheader_data_len = 0;
-
 		while (pos < data_len && ok)
 		{
 			if (pos >= data_len)
@@ -133,7 +132,6 @@ static int writeData(WriterAVCallData_t *call)
 
 				if (pos >= data_len)
 					break;
-
 				sheader_data_len += 64;
 			}
 
@@ -144,10 +142,8 @@ static int writeData(WriterAVCallData_t *call)
 
 				if (pos >= data_len)
 					break;
-
 				sheader_data_len += 64;
 			}
-
 			pos += 1;
 
 			if (pos + 3 >= data_len)
@@ -158,12 +154,10 @@ static int writeData(WriterAVCallData_t *call)
 				// extended start code
 				pos += 3;
 				sheader_data_len += 3;
-
 				do
 				{
 					pos += 1;
 					++sheader_data_len;
-
 					if (pos + 2 > data_len)
 					{
 						ok = false;
@@ -184,12 +178,10 @@ static int writeData(WriterAVCallData_t *call)
 				// private data
 				pos += 3;
 				sheader_data_len += 3;
-
 				do
 				{
 					pos += 1;
 					++sheader_data_len;
-
 					if (pos + 2 > data_len)
 					{
 						ok = false;
@@ -204,13 +196,11 @@ static int writeData(WriterAVCallData_t *call)
 
 			free(private_data);
 			private_data = malloc(sheader_data_len);
-
 			if (private_data)
 			{
 				private_size = sheader_data_len;
 				memcpy(private_data, data + pos - sheader_data_len, sheader_data_len);
 			}
-
 			must_send_header = false;
 			break;
 		}
@@ -241,25 +231,19 @@ static int writeData(WriterAVCallData_t *call)
 			}
 
 			struct iovec iov[4];
-
 			iov[0].iov_base = PesHeader;
-
 			iov[0].iov_len = InsertPesHeader(PesHeader, call->len + codec_data_size, MPEG_VIDEO_PES_START_CODE, call->Pts, 0);
 
 			iov[1].iov_base = data;
-
 			iov[1].iov_len = pos;
 
 			iov[2].iov_base = codec_data;
-
 			iov[2].iov_len = codec_data_size;
 
 			iov[3].iov_base = data + pos;
-
 			iov[3].iov_len = data_len - pos;
 
 			must_send_header = false;
-
 			return call->WriteV(call->fd, iov, 4);
 		}
 	}
@@ -267,23 +251,19 @@ static int writeData(WriterAVCallData_t *call)
 	struct iovec iov[2];
 
 	iov[0].iov_base = PesHeader;
-
 	iov[0].iov_len = InsertPesHeader(PesHeader, call->len, MPEG_VIDEO_PES_START_CODE, call->Pts, 0);
 
 	iov[1].iov_base = data;
-
 	iov[1].iov_len = data_len;
 
 	PesHeader[6] = 0x81;
 
 	UpdatePesHeaderPayloadSize(PesHeader, data_len + iov[0].iov_len - 6);
-
 	if (iov[0].iov_len != (unsigned)WriteExt(call->WriteV, call->fd, iov[0].iov_base, iov[0].iov_len))
 		return -1;
 
 	if (iov[1].iov_len != (unsigned)WriteExt(call->WriteV, call->fd, iov[1].iov_base, iov[1].iov_len))
 		return -1;
-
 	return 1;
 }
 

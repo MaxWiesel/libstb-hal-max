@@ -49,7 +49,7 @@
 
 static Track_t *Tracks = NULL;
 static int TrackCount = 0;
-static int CurrentTrack = 0; //TRACK[0] as default.
+static int CurrentTrack = 0;    //TRACK[0] as default.
 
 /* ***************************** */
 /* Prototypes                    */
@@ -67,7 +67,6 @@ static int ManagerAdd(Context_t *context, Track_t track)
 	{
 		Tracks = malloc(sizeof(Track_t) * TRACKWRAP);
 		int i;
-
 		for (i = 0; i < TRACKWRAP; i++)
 		{
 			Tracks[i].Id = -1;
@@ -81,19 +80,16 @@ static int ManagerAdd(Context_t *context, Track_t track)
 	}
 
 	int i = 0;
-
 	for (i = 0; i < TRACKWRAP; i++)
 	{
 		if (Tracks[i].Id == track.Id)
 		{
 			Tracks[i].pending = 0;
-
 			if (track.aacbuf)
 			{
 				free(track.aacbuf);
 				track.aacbuf = NULL;
 			}
-
 			return cERR_AUDIO_MGR_NO_ERROR;
 		}
 	}
@@ -149,7 +145,6 @@ static char **ManagerList(Context_t *context __attribute__((unused)))
 			tracklist[j] = strdup(tmp);
 			tracklist[j + 1] = strdup(Tracks[i].Encoding);
 		}
-
 		tracklist[j] = NULL;
 	}
 
@@ -203,7 +198,6 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			ret = ManagerAdd(context, *track);
 			break;
 		}
-
 		case MANAGER_LIST:
 		{
 			container_ffmpeg_update_tracks(context, context->playback->uri, 0);
@@ -211,19 +205,16 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			*((char ***)argument) = (char **)ManagerList(context);
 			break;
 		}
-
 		case MANAGER_REF_LIST:
 		{
 			*((Track_t **)argument) = Tracks;
 			break;
 		}
-
 		case MANAGER_REF_LIST_SIZE:
 		{
 			*((int *)argument) = TrackCount;
 			break;
 		}
-
 		case MANAGER_GET:
 		{
 			audio_mgr_printf(20, "%s::%s MANAGER_GET\n", __FILE__, __FUNCTION__);
@@ -236,17 +227,14 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((int *)argument) = (int) -1;
 			}
-
 			break;
 		}
-
 		case MANAGER_GET_TRACK_DESC:
 		{
 			if ((TrackCount > 0) && (CurrentTrack >= 0))
 			{
 				TrackDescription_t *track =  malloc(sizeof(TrackDescription_t));
 				*((TrackDescription_t **)argument) = track;
-
 				if (track)
 				{
 					memset(track, 0, sizeof(TrackDescription_t));
@@ -259,10 +247,8 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((TrackDescription_t **)argument) = NULL;
 			}
-
 			break;
 		}
-
 		case MANAGER_GET_TRACK:
 		{
 			audio_mgr_printf(20, "%s::%s MANAGER_GET_TRACK\n", __FILE__, __FUNCTION__);
@@ -275,10 +261,8 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((Track_t **)argument) = NULL;
 			}
-
 			break;
 		}
-
 		case MANAGER_GETENCODING:
 		{
 			if ((TrackCount > 0) && (CurrentTrack >= 0) && (Tracks[CurrentTrack].Encoding != NULL))
@@ -289,10 +273,8 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((char **)argument) = (char *)strdup("");
 			}
-
 			break;
 		}
-
 		case MANAGER_GETNAME:
 		{
 			if ((TrackCount > 0) && (CurrentTrack >= 0) && (Tracks[CurrentTrack].Name != NULL))
@@ -303,10 +285,8 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 			{
 				*((char **)argument) = (char *)strdup("");
 			}
-
 			break;
 		}
-
 		case MANAGER_SET:
 		{
 			int i;
@@ -326,28 +306,22 @@ static int Command(Context_t *context, ManagerCmd_t command, void *argument)
 				audio_mgr_err("%s::%s track id %d unknown\n", __FILE__, __FUNCTION__, *((int *)argument));
 				ret = cERR_AUDIO_MGR_ERROR;
 			}
-
 			break;
 		}
-
 		case MANAGER_DEL:
 		{
 			ret = ManagerDel(context);
 			break;
 		}
-
 		case MANAGER_INIT_UPDATE:
 		{
 			int i;
-
 			for (i = 0; i < TrackCount; i++)
 			{
 				Tracks[i].pending = 1;
 			}
-
 			break;
 		}
-
 		default:
 			audio_mgr_err("%s::%s ContainerCmd %d not supported!\n", __FILE__, __FUNCTION__, command);
 			ret = cERR_AUDIO_MGR_ERROR;

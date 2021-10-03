@@ -103,7 +103,6 @@ static void *g_pWriteStamp = NULL;
 static void WriteWakeUp()
 {
 	int ret = write(g_pfd[1], "x", 1);
-
 	if (ret != 1)
 	{
 		buff_printf(20, "WriteWakeUp write return %d\n", ret);
@@ -133,7 +132,6 @@ static void LinuxDvbBuffThread(Context_t *context)
 
 	/* Make read end nonblocking */
 	flags |= O_NONBLOCK;
-
 	if (fcntl(g_pfd[0], F_SETFL, flags) == -1)
 	{
 		buff_err("critical error\n");
@@ -146,7 +144,6 @@ static void LinuxDvbBuffThread(Context_t *context)
 
 	/* Make write end nonblocking */
 	flags |= O_NONBLOCK;
-
 	if (fcntl(g_pfd[1], F_SETFL, flags) == -1)
 	{
 		buff_err("critical error\n");
@@ -158,13 +155,11 @@ static void LinuxDvbBuffThread(Context_t *context)
 	{
 		pthread_mutex_lock(&bufferingMtx);
 		g_bDuringWrite = false;
-
 		if (g_bSignalWriteFinish)
 		{
 			pthread_cond_signal(&bufferingWriteFinishedCond);
 			g_bSignalWriteFinish = false;
 		}
-
 		if (nodePtr)
 		{
 			free(nodePtr);
@@ -186,7 +181,6 @@ static void LinuxDvbBuffThread(Context_t *context)
 		{
 			nodePtr = bufferingQueueHead;
 			bufferingQueueHead = bufferingQueueHead->next;
-
 			if (bufferingQueueHead == NULL)
 			{
 				bufferingQueueTail = NULL;
@@ -215,7 +209,6 @@ static void LinuxDvbBuffThread(Context_t *context)
 			int fd = nodePtr->dataType == OUTPUT_VIDEO ? videofd : audiofd;
 			g_bDuringWrite = true;
 			pthread_mutex_unlock(&bufferingMtx);
-
 			if (0 != WriteWithRetry(context, g_pfd[0], fd, g_pDVBMtx, dataPtr, nodePtr->dataSize))
 			{
 				buff_err("Something is WRONG\n");
@@ -368,7 +361,6 @@ int32_t LinuxDvbBuffFlush(Context_t *context __attribute__((unused)))
 	WriteWakeUp();
 
 	pthread_mutex_lock(&bufferingMtx);
-
 	while (bufferingQueueHead)
 	{
 		nodePtr = bufferingQueueHead;
@@ -376,7 +368,6 @@ int32_t LinuxDvbBuffFlush(Context_t *context __attribute__((unused)))
 		bufferingDataSize -= (nodePtr->dataSize + sizeof(BufferingNode_t));
 		free(nodePtr);
 	}
-
 	bufferingQueueHead = NULL;
 	bufferingQueueTail = NULL;
 	buff_printf(40, "bufferingDataSize [%u]\n", bufferingDataSize);
@@ -391,7 +382,6 @@ int32_t LinuxDvbBuffFlush(Context_t *context __attribute__((unused)))
 		g_bSignalWriteFinish = true;
 		pthread_cond_wait(&bufferingWriteFinishedCond, &bufferingMtx);
 	}
-
 	pthread_mutex_unlock(&bufferingMtx);
 	buff_printf(40, "EXIT\n");
 
@@ -422,7 +412,6 @@ ssize_t BufferingWriteV(int fd, const struct iovec *iov, int ic)
 	int i = 0;
 
 	buff_printf(60, "ENTER\n");
-
 	if (fd == videofd)
 	{
 		buff_printf(60, "VIDEO\n");
@@ -443,12 +432,10 @@ ssize_t BufferingWriteV(int fd, const struct iovec *iov, int ic)
 	{
 		chunkSize += iov[i].iov_len;
 	}
-
 	chunkSize += sizeof(BufferingNode_t);
 
 	/* Allocate memory for queue node + data */
 	nodePtr = malloc(chunkSize);
-
 	if (!nodePtr)
 	{
 		buff_err("OUT OF MEM\n");
@@ -457,7 +444,6 @@ ssize_t BufferingWriteV(int fd, const struct iovec *iov, int ic)
 
 	/* Copy data to new buffer */
 	dataPtr = (uint8_t *)nodePtr + sizeof(BufferingNode_t);
-
 	for (i = 0; i < ic; ++i)
 	{
 		memcpy(dataPtr, iov[i].iov_base, iov[i].iov_len);
@@ -465,7 +451,6 @@ ssize_t BufferingWriteV(int fd, const struct iovec *iov, int ic)
 	}
 
 	pthread_mutex_lock(&bufferingMtx);
-
 	while (0 == PlaybackDieNow(0))
 	{
 		if (bufferingDataSize + chunkSize >= maxBufferingDataSize)
@@ -499,7 +484,6 @@ ssize_t BufferingWriteV(int fd, const struct iovec *iov, int ic)
 			break;
 		}
 	}
-
 	pthread_mutex_unlock(&bufferingMtx);
 	buff_printf(60, "EXIT\n");
 	return chunkSize;

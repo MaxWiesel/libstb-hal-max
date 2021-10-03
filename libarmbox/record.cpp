@@ -99,12 +99,10 @@ bool cRecord::Start(int fd, unsigned short vpid, unsigned short *apids, int nump
 
 	file_fd = fd;
 	exit_flag = RECORD_RUNNING;
-
 	if (posix_fadvise(file_fd, 0, 0, POSIX_FADV_DONTNEED))
 		perror("posix_fadvise");
 
 	i = pthread_create(&record_thread, 0, execute_record_thread, this);
-
 	if (i != 0)
 	{
 		exit_flag = RECORD_FAILED_READ;
@@ -114,7 +112,6 @@ bool cRecord::Start(int fd, unsigned short vpid, unsigned short *apids, int nump
 		dmx = NULL;
 		return false;
 	}
-
 	record_thread_running = true;
 	return true;
 }
@@ -127,10 +124,8 @@ bool cRecord::Stop(void)
 		hal_info("%s: status not RUNNING? (%d)\n", __func__, exit_flag);
 
 	exit_flag = RECORD_STOPPED;
-
 	if (record_thread_running)
 		pthread_join(record_thread, NULL);
-
 	record_thread_running = false;
 
 	/* We should probably do that from the destructor... */
@@ -138,14 +133,12 @@ bool cRecord::Stop(void)
 		hal_info("%s: dmx == NULL?\n", __func__);
 	else
 		delete dmx;
-
 	dmx = NULL;
 
 	if (file_fd != -1)
 		close(file_fd);
 	else
 		hal_info("%s: file_fd not open??\n", __func__);
-
 	file_fd = -1;
 	return true;
 }
@@ -157,21 +150,17 @@ bool cRecord::ChangePids(unsigned short /*vpid*/, unsigned short *apids, int num
 	bool found;
 	unsigned short pid;
 	hal_info("%s\n", __func__);
-
 	if (!dmx)
 	{
 		hal_info("%s: DMX = NULL\n", __func__);
 		return false;
 	}
-
 	pids = dmx->pesfds;
-
 	/* the first PID is the video pid, so start with the second PID... */
 	for (std::vector<pes_pids>::const_iterator i = pids.begin() + 1; i != pids.end(); ++i)
 	{
 		found = false;
 		pid = (*i).pid;
-
 		for (j = 0; j < numapids; j++)
 		{
 			if (pid == apids[j])
@@ -180,15 +169,12 @@ bool cRecord::ChangePids(unsigned short /*vpid*/, unsigned short *apids, int num
 				break;
 			}
 		}
-
 		if (!found)
 			dmx->removePid(pid);
 	}
-
 	for (j = 0; j < numapids; j++)
 	{
 		found = false;
-
 		for (std::vector<pes_pids>::const_iterator i = pids.begin() + 1; i != pids.end(); ++i)
 		{
 			if ((*i).pid == apids[j])
@@ -197,11 +183,9 @@ bool cRecord::ChangePids(unsigned short /*vpid*/, unsigned short *apids, int num
 				break;
 			}
 		}
-
 		if (!found)
 			dmx->addPid(apids[j]);
 	}
-
 	return true;
 }
 
@@ -209,21 +193,17 @@ bool cRecord::AddPid(unsigned short pid)
 {
 	std::vector<pes_pids> pids;
 	hal_info("%s: \n", __func__);
-
 	if (!dmx)
 	{
 		hal_info("%s: DMX = NULL\n", __func__);
 		return false;
 	}
-
 	pids = dmx->pesfds;
-
 	for (std::vector<pes_pids>::const_iterator i = pids.begin(); i != pids.end(); ++i)
 	{
 		if ((*i).pid == pid)
 			return true; /* or is it an error to try to add the same PID twice? */
 	}
-
 	return dmx->addPid(pid);
 }
 
@@ -234,29 +214,22 @@ void cRecord::WriterThread()
 	threadname[16] = 0;
 	prctl(PR_SET_NAME, (unsigned long)&threadname);
 	unsigned int chunk = 0;
-
 	while (!sem_wait(&sem))
 	{
 		if (!io_len[chunk]) // empty, assume end of recording
 			return;
-
 		unsigned char *p_buf = io_buf[chunk];
 		size_t p_len = io_len[chunk];
-
 		while (p_len)
 		{
 			ssize_t written = write(file_fd, p_buf, p_len);
-
 			if (written < 0)
 				break;
-
 			p_len -= written;
 			p_buf += written;
 		}
-
 		if (posix_fadvise(file_fd, 0, 0, POSIX_FADV_DONTNEED))
 			perror("posix_fadvise");
-
 		chunk++;
 		chunk %= RECORD_WRITER_CHUNKS;
 	}
@@ -278,21 +251,17 @@ void cRecord::RecordThread()
 
 	buf = (uint8_t *)malloc(bufsize);
 	hal_info("BUFSIZE=0x%x READSIZE=0x%x\n", bufsize, readsize);
-
 	if (!buf)
 	{
 		exit_flag = RECORD_FAILED_MEMORY;
 		hal_info("%s: unable to allocate buffer! (out of memory)\n", __func__);
-
 		if (failureCallback)
 			failureCallback(failureData);
-
 		hal_info("%s: end\n", __func__);
 		pthread_exit(NULL);
 	}
 
 	int val = fcntl(file_fd, F_GETFL);
-
 	if (fcntl(file_fd, F_SETFL, val | O_APPEND))
 		hal_info("%s: O_APPEND? (%m)\n", __func__);
 
@@ -304,7 +273,6 @@ void cRecord::RecordThread()
 	int overflow_count = 0;
 	bool overflow = false;
 	int r = 0;
-
 	while (exit_flag == RECORD_RUNNING)
 	{
 		if (buf_pos < bufsize)
@@ -314,16 +282,12 @@ void cRecord::RecordThread()
 				hal_info("%s: Overflow cleared after %d iterations\n", __func__, overflow_count);
 				overflow_count = 0;
 			}
-
 			int toread = bufsize - buf_pos;
-
 			if (toread > readsize)
 				toread = readsize;
-
 			ssize_t s = dmx->Read(buf + buf_pos, toread, 50);
 			hal_debug("%s: buf_pos %6d s %6d / %6d\n", __func__,
 				buf_pos, (int)s, bufsize - buf_pos);
-
 			if (s < 0)
 			{
 				if (errno != EAGAIN && (errno != EOVERFLOW || !overflow))
@@ -338,7 +302,6 @@ void cRecord::RecordThread()
 			{
 				overflow = false;
 				buf_pos += s;
-
 				if (count > 100)
 				{
 					if (buf_pos < bufsize / 2)
@@ -354,26 +317,19 @@ void cRecord::RecordThread()
 		{
 			if (!overflow)
 				overflow_count = 0;
-
 			overflow = true;
-
 			if (!(overflow_count % 10))
 				hal_info("%s: buffer full! Overflow? (%d)\n", __func__, ++overflow_count);
-
 			state = REC_STATUS_SLOW;
 		}
-
 		r = aio_error(&a);
-
 		if (r == EINPROGRESS)
 		{
 			hal_debug("%s: aio in progress, free: %d\n", __func__, bufsize - buf_pos);
 			continue;
 		}
-
 		// not calling aio_return causes a memory leak  --martii
 		r = aio_return(&a);
-
 		if (r < 0)
 		{
 			exit_flag = RECORD_FAILED_FILE;
@@ -382,21 +338,17 @@ void cRecord::RecordThread()
 		}
 		else
 			hal_debug("%s: aio_return = %d, free: %d\n", __func__, r, bufsize - buf_pos);
-
 		if (posix_fadvise(file_fd, 0, 0, POSIX_FADV_DONTNEED))
 			perror("posix_fadvise");
-
 		if (queued)
 		{
 			memmove(buf, buf + queued, buf_pos - queued);
 			buf_pos -= queued;
 		}
-
 		queued = buf_pos;
 		a.aio_buf = buf;
 		a.aio_nbytes = queued;
 		r = aio_write(&a);
-
 		if (r)
 		{
 			hal_info("%s: aio_write %d (%m)\n", __func__, r);
@@ -404,32 +356,25 @@ void cRecord::RecordThread()
 			break;
 		}
 	}
-
 	dmx->Stop();
-
 	while (true) /* write out the unwritten buffer content */
 	{
 		hal_debug("%s: run-out write, buf_pos %d\n", __func__, buf_pos);
 		r = aio_error(&a);
-
 		if (r == EINPROGRESS)
 		{
 			usleep(50000);
 			continue;
 		}
-
 		r = aio_return(&a);
-
 		if (r < 0)
 		{
 			exit_flag = RECORD_FAILED_FILE;
 			hal_info("%s: aio_result: %d (%m)\n", __func__, r);
 			break;
 		}
-
 		if (!queued)
 			break;
-
 		memmove(buf, buf + queued, buf_pos - queued);
 		buf_pos -= queued;
 		queued = buf_pos;
@@ -437,7 +382,6 @@ void cRecord::RecordThread()
 		a.aio_nbytes = queued;
 		r = aio_write(&a);
 	}
-
 	free(buf);
 
 #if 0
@@ -456,7 +400,6 @@ void cRecord::RecordThread()
 
 	if ((exit_flag != RECORD_STOPPED) && failureCallback)
 		failureCallback(failureData);
-
 	hal_info("%s: end\n", __func__);
 	pthread_exit(NULL);
 }

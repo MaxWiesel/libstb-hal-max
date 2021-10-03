@@ -96,7 +96,6 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 			end_eof = 1;
 			break;
 		}
-
 		case GST_MESSAGE_ERROR:
 		{
 			gchar *debug;
@@ -104,7 +103,6 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 			gst_message_parse_error(msg, &err, &debug);
 			g_free(debug);
 			hal_info_c("%s:%s - GST_MESSAGE_ERROR: %s (%i) from %s\n", FILENAME, __FUNCTION__, err->message, err->code, sourceName);
-
 			if (err->domain == GST_STREAM_ERROR)
 			{
 				if (err->code == GST_STREAM_ERROR_CODEC_NOT_FOUND)
@@ -115,14 +113,12 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 						hal_info_c("%s:%s - GST_MESSAGE_ERROR: audioSink\n", FILENAME, __FUNCTION__);   //FIXME: how shall playback handle this event???
 				}
 			}
-
 			g_error_free(err);
 
 			end_eof = 1; 	// NOTE: just to exit
 
 			break;
 		}
-
 		case GST_MESSAGE_INFO:
 		{
 			gchar *debug;
@@ -130,55 +126,45 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 
 			gst_message_parse_info(msg, &inf, &debug);
 			g_free(debug);
-
 			if (inf->domain == GST_STREAM_ERROR && inf->code == GST_STREAM_ERROR_DECODE)
 			{
 				if (g_strrstr(sourceName, "videosink"))
 					hal_info_c("%s:%s - GST_MESSAGE_INFO: videosink\n", FILENAME, __FUNCTION__);   //FIXME: how shall playback handle this event???
 			}
-
 			g_error_free(inf);
 			break;
 		}
-
 		case GST_MESSAGE_TAG:
 		{
 			GstTagList *tags, *result;
 			gst_message_parse_tag(msg, &tags);
 
 			result = gst_tag_list_merge(m_stream_tags, tags, GST_TAG_MERGE_REPLACE);
-
 			if (result)
 			{
 				if (m_stream_tags)
 					gst_tag_list_free(m_stream_tags);
-
 				m_stream_tags = result;
 			}
 
 			const GValue *gv_image = gst_tag_list_get_value_index(tags, GST_TAG_IMAGE, 0);
-
 			if (gv_image)
 			{
 				GstBuffer *buf_image;
 				buf_image = gst_value_get_buffer(gv_image);
 				int fd = open("/tmp/.id3coverart", O_CREAT | O_WRONLY | O_TRUNC, 0644);
-
 				if (fd >= 0)
 				{
 					int ret = write(fd, GST_BUFFER_DATA(buf_image), GST_BUFFER_SIZE(buf_image));
 					close(fd);
 					hal_info_c("%s:%s - GST_MESSAGE_INFO: cPlayback::state /tmp/.id3coverart %d bytes written\n", FILENAME, __FUNCTION__, ret);
 				}
-
 				//FIXME: how shall playback handle this event???
 			}
-
 			gst_tag_list_free(tags);
 			hal_info_c("%s:%s - GST_MESSAGE_INFO: update info tags\n", FILENAME, __FUNCTION__);   //FIXME: how shall playback handle this event???
 			break;
 		}
-
 		case GST_MESSAGE_STATE_CHANGED:
 		{
 			if (GST_MESSAGE_SRC(msg) != GST_OBJECT(m_gst_playbin))
@@ -189,7 +175,6 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 
 			if (old_state == new_state)
 				break;
-
 			hal_info_c("%s:%s - GST_MESSAGE_STATE_CHANGED: state transition %s -> %s\n", FILENAME, __FUNCTION__, gst_element_state_get_name(old_state), gst_element_state_get_name(new_state));
 
 			GstStateChange transition = (GstStateChange)GST_STATE_TRANSITION(old_state, new_state);
@@ -200,11 +185,9 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 				{
 				}
 				break;
-
 				case GST_STATE_CHANGE_READY_TO_PAUSED:
 				{
 					GstIterator *children;
-
 					if (audioSink)
 					{
 						gst_object_unref(GST_OBJECT(audioSink));
@@ -216,25 +199,20 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 						gst_object_unref(GST_OBJECT(videoSink));
 						videoSink = NULL;
 					}
-
 					children = gst_bin_iterate_recurse(GST_BIN(m_gst_playbin));
 					audioSink = GST_ELEMENT_CAST(gst_iterator_find_custom(children, (GCompareFunc)match_sinktype, (gpointer)"GstDVBAudioSink"));
 					videoSink = GST_ELEMENT_CAST(gst_iterator_find_custom(children, (GCompareFunc)match_sinktype, (gpointer)"GstDVBVideoSink"));
 					gst_iterator_free(children);
-
 				}
 				break;
-
 				case GST_STATE_CHANGE_PAUSED_TO_PLAYING:
 				{
 				}
 				break;
-
 				case GST_STATE_CHANGE_PLAYING_TO_PAUSED:
 				{
 				}
 				break;
-
 				case GST_STATE_CHANGE_PAUSED_TO_READY:
 				{
 					if (audioSink)
@@ -242,7 +220,6 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 						gst_object_unref(GST_OBJECT(audioSink));
 						audioSink = NULL;
 					}
-
 					if (videoSink)
 					{
 						gst_object_unref(GST_OBJECT(videoSink));
@@ -250,18 +227,14 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 					}
 				}
 				break;
-
 				case GST_STATE_CHANGE_READY_TO_NULL:
 				{
 				}
 				break;
 			}
-
 			break;
 		}
-
 #if 0
-
 		case GST_MESSAGE_ELEMENT:
 		{
 			if (gst_structure_has_name(gst_message_get_structure(msg), "prepare-xwindow-id"))
@@ -276,10 +249,8 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 				gst_x_overlay_expose(GST_X_OVERLAY(GST_MESSAGE_SRC(msg)));
 			}
 		}
-
 #endif
 		break;
-
 		default:
 			break;
 	}
@@ -488,7 +459,6 @@ bool cPlayback::Play(void)
 		playing = true;
 		playstate = STATE_PLAY;
 	}
-
 	hal_info("%s:%s playing %d\n", FILENAME, __FUNCTION__, playing);
 
 	return playing;
@@ -498,7 +468,6 @@ bool cPlayback::Stop(void)
 {
 	if (playing == false)
 		return false;
-
 	hal_info("%s:%s playing %d\n", FILENAME, __FUNCTION__, playing);
 
 	// stop
@@ -658,7 +627,6 @@ bool cPlayback::GetPosition(int &position, int &duration)
 
 		gst_element_query_duration(m_gst_playbin, &fmt_d, &len);
 		length = len / 1000000.0;
-
 		if (length < 0)
 			length = 0;
 
@@ -683,7 +651,6 @@ bool cPlayback::SetPosition(int position, bool absolute)
 	{
 		gst_element_query_position(m_gst_playbin, &fmt, &pos);
 		time_nanoseconds = pos + (position * 1000000.0);
-
 		if (time_nanoseconds < 0)
 			time_nanoseconds = 0;
 
@@ -717,7 +684,6 @@ void cPlayback::FindAllPids(int *apids, unsigned int *ac3flags, unsigned int *nu
 			GstPad *pad = 0;
 			g_signal_emit_by_name(m_gst_playbin, "get-audio-pad", i, &pad);
 			GstCaps *caps = gst_pad_get_negotiated_caps(pad);
-
 			if (!caps)
 				continue;
 
@@ -752,15 +718,12 @@ void cPlayback::FindAllPids(int *apids, unsigned int *ac3flags, unsigned int *nu
 						}
 						*/
 						ac3flags[i] = 4;
-
 					case 2:
 						//return atAAC;
 						ac3flags[i] = 5;
-
 					case 4:
 						//return atAAC;
 						ac3flags[i] = 5;
-
 					default:
 						//return atUnknown;
 						ac3flags[i] = 0;

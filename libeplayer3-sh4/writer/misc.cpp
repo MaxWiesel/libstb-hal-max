@@ -37,11 +37,9 @@ void PutBits(BitPacker_t *ld, unsigned int code, unsigned int length)
 	bit_left = ld->Remaining;
 
 #ifdef DEBUG_PUTBITS
-
 	if (ld->debug)
 		dprintf("code = %d, length = %d, bit_buf = 0x%x, bit_left = %d\n",
 			code, length, bit_buf, bit_left);
-
 #endif
 
 	if (length < bit_left)
@@ -67,10 +65,8 @@ void PutBits(BitPacker_t *ld, unsigned int code, unsigned int length)
 	}
 
 #ifdef DEBUG_PUTBITS
-
 	if (ld->debug)
 		dprintf("bit_left = %d, bit_buf = 0x%x\n", bit_left, bit_buf);
-
 #endif
 
 	/* writeback */
@@ -81,20 +77,16 @@ void PutBits(BitPacker_t *ld, unsigned int code, unsigned int length)
 void FlushBits(BitPacker_t *ld)
 {
 	ld->BitBuffer <<= ld->Remaining;
-
 	while (ld->Remaining < 32)
 	{
 #ifdef DEBUG_PUTBITS
-
 		if (ld->debug)
 			dprintf("flushing 0x%2.2x\n", ld->BitBuffer >> 24);
-
 #endif
 		*ld->Ptr++ = ld->BitBuffer >> 24;
 		ld->BitBuffer <<= 8;
 		ld->Remaining += 8;
 	}
-
 	ld->Remaining = 32;
 	ld->BitBuffer = 0;
 }

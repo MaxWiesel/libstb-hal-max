@@ -87,31 +87,23 @@ static int writeData(WriterAVCallData_t *call)
 	}
 
 	mp3_printf(10, "AudioPts %lld\n", call->Pts);
-
 	call->private_size = 0;
 
 	uint32_t headerSize = InsertPesHeader(PesHeader, call->len + call->private_size, MPEG_AUDIO_PES_START_CODE, call->Pts, 0);
-
 	if (call->private_size > 0)
 	{
 		memcpy(&PesHeader[headerSize], call->private_data, call->private_size);
 		headerSize += call->private_size;
 	}
-
 	struct iovec iov[2];
-
 	iov[0].iov_base = PesHeader;
-
 	iov[0].iov_len = headerSize;
-
 	iov[1].iov_base = call->data;
-
 	iov[1].iov_len = call->len;
 
 	int len = call->WriteV(call->fd, iov, 2);
 
 	mp3_printf(10, "mp3_Write-< len=%d\n", len);
-
 	return len;
 }
 

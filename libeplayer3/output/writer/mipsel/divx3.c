@@ -95,7 +95,6 @@ static int reset()
 static int writeData(WriterAVCallData_t *call)
 {
 	unsigned char PesHeader[PES_MAX_HEADER_SIZE + 4];
-
 	divx_printf(10, "\n");
 
 	if (call == NULL)
@@ -153,7 +152,6 @@ static int writeData(WriterAVCallData_t *call)
 	{
 		headerSize = InsertPesHeader(PesHeader, call->len, MPEG_VIDEO_PES_START_CODE, call->Pts, 0);
 	}
-
 	iov[ic++].iov_len = headerSize;
 
 	iov[ic].iov_base = call->data;

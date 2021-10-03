@@ -22,7 +22,6 @@ static hw_caps_t caps;
 hw_caps_t *get_hwcaps(void)
 {
 	struct utsname u;
-
 	if (initialized)
 		return &caps;
 
@@ -43,7 +42,6 @@ hw_caps_t *get_hwcaps(void)
 	strcpy(caps.startup_file, "");
 	strcpy(caps.boxvendor, "Generic");
 	strcpy(caps.boxname, "PC");
-
 	if (! uname(&u))
 	{
 		strncpy(caps.boxarch, u.machine, sizeof(caps.boxarch));

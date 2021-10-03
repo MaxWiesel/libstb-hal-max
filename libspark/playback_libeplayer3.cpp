@@ -44,7 +44,6 @@ void cPlayback::Close(void)
 
 	//Dagobert: movieplayer does not call stop, it calls close ;)
 	Stop();
-
 	if (decoders_closed)
 	{
 		audioDecoder->openDevice();
@@ -71,10 +70,8 @@ bool cPlayback::Start(char *filename, int vpid, int vtype, int apid, int ac3, in
 	unlink("/tmp/.id3coverart");
 
 	std::string file;
-
 	if (*filename == '/')
 		file = "file://";
-
 	file += filename;
 
 	if ((file.find(":31339/id=") != std::string::npos) || (file.find(":10000") != std::string::npos) || (file.find(":8001/") != std::string::npos)) // for LocalTV and Entertain-TV streaming
@@ -98,10 +95,8 @@ bool cPlayback::Start(char *filename, int vpid, int vtype, int apid, int ac3, in
 		if (pm == PLAYMODE_TS)
 		{
 			struct stat64 s;
-
 			if (!stat64(file.c_str(), &s))
 				last_size = s.st_size;
-
 			ret = true;
 			videoDecoder->Stop(false);
 			audioDecoder->Stop();
@@ -110,7 +105,6 @@ bool cPlayback::Start(char *filename, int vpid, int vtype, int apid, int ac3, in
 		{
 			std::vector<std::string> keys, values;
 			int selected_program = 0;
-
 			if (vpid || apid)
 			{
 				;
@@ -118,13 +112,11 @@ bool cPlayback::Start(char *filename, int vpid, int vtype, int apid, int ac3, in
 			else if (GetPrograms(keys, values) && (keys.size() > 1) && ProgramSelectionCallback)
 			{
 				const char *key = ProgramSelectionCallback(ProgramSelectionCallbackData, keys, values);
-
 				if (!key)
 				{
 					player->Close();
 					return false;
 				}
-
 				selected_program = atoi(key);
 			}
 			else if (keys.size() > 0)
@@ -134,15 +126,12 @@ bool cPlayback::Start(char *filename, int vpid, int vtype, int apid, int ac3, in
 			{
 				if (apid)
 					SetAPid(apid);
-
 				if (vpid)
 					SetVPid(vpid);
 			}
-
 			playing = true;
 			player->output.Open();
 			ret = player->Play();
-
 			if (ret && !isHTTP)
 				playing = ret = player->Pause();
 		}
@@ -210,7 +199,6 @@ bool cPlayback::SetSpeed(int speed)
 		/* direction switch ? */
 		if (player->isBackWard)
 			player->FastBackward(0);
-
 		res = player->FastForward(speed);
 	}
 	else if (speed < 0)
@@ -218,7 +206,6 @@ bool cPlayback::SetSpeed(int speed)
 		/* direction switch ? */
 		if (player->isForwarding)
 			player->Continue();
-
 		res = player->FastBackward(speed);
 	}
 	else if (speed == 0)
@@ -268,21 +255,17 @@ bool cPlayback::GetPosition(int &position, int &duration)
 	if (pm == PLAYMODE_TS)
 	{
 		struct stat64 s;
-
 		if (!stat64(fn_ts.c_str(), &s))
 		{
 			if (!playing || last_size != s.st_size)
 			{
 				last_size = s.st_size;
 				time_t curr_time = s.st_mtime;
-
 				if (!stat64(fn_xml.c_str(), &s))
 				{
 					duration = (curr_time - s.st_mtime) * 1000;
-
 					if (!playing)
 						return true;
-
 					got_duration = true;
 				}
 			}
@@ -332,7 +315,6 @@ bool cPlayback::GetPosition(int &position, int &duration)
 bool cPlayback::SetPosition(int position, bool absolute)
 {
 	hal_info("%s %d\n", __func__, position);
-
 	if (!playing)
 	{
 		/* the calling sequence is:
@@ -344,7 +326,6 @@ bool cPlayback::SetPosition(int position, bool absolute)
 		init_jump = position;
 		return false;
 	}
-
 	player->Seek((int64_t)position * (AV_TIME_BASE / 1000), absolute);
 	return true;
 }
@@ -357,7 +338,6 @@ void cPlayback::FindAllPids(int *pids, unsigned int *ac3flags, unsigned int *num
 	if (IsPlaying())
 	{
 		std::vector<Track> tracks = player->manager.getAudioTracks();
-
 		for (std::vector<Track>::iterator it = tracks.begin(); it != tracks.end() && i < *numpids; ++it)
 		{
 			pids[i] = it->pid;
@@ -366,7 +346,6 @@ void cPlayback::FindAllPids(int *pids, unsigned int *ac3flags, unsigned int *num
 			i++;
 		}
 	}
-
 	*numpids = i;
 }
 
@@ -376,7 +355,6 @@ void cPlayback::FindAllSubtitlePids(int *pids, unsigned int *numpids, std::strin
 	unsigned int i = 0;
 
 	std::vector<Track> tracks = player->manager.getSubtitleTracks();
-
 	for (std::vector<Track>::iterator it = tracks.begin(); it != tracks.end() && i < *numpids; ++it)
 	{
 		pids[i] = it->pid;
@@ -393,12 +371,10 @@ void cPlayback::FindAllTeletextsubtitlePids(int *pids, unsigned int *numpids, st
 	unsigned int i = 0;
 
 	std::vector<Track> tracks = player->manager.getTeletextTracks();
-
 	for (std::vector<Track>::iterator it = tracks.begin(); it != tracks.end() && i < *numpids; ++it)
 	{
 		if (it->type != 2 && it->type != 5) // return subtitles only
 			continue;
-
 		pids[i] = it->pid;
 		language[i] = it->title;
 		mags[i] = it->mag;
@@ -412,13 +388,11 @@ void cPlayback::FindAllTeletextsubtitlePids(int *pids, unsigned int *numpids, st
 int cPlayback::GetFirstTeletextPid(void)
 {
 	std::vector<Track> tracks = player->manager.getTeletextTracks();
-
 	for (std::vector<Track>::iterator it = tracks.begin(); it != tracks.end(); ++it)
 	{
 		if (it->type == 1)
 			return it->pid;
 	}
-
 	return -1;
 }
 
@@ -474,7 +448,6 @@ cPlayback::~cPlayback()
 void cPlayback::RequestAbort()
 {
 	player->RequestAbort();
-
 	while (player->isPlaying)
 		usleep(100000);
 }

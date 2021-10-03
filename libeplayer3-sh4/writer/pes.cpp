@@ -88,7 +88,6 @@ int InsertPesHeader(uint8_t *data, int size, uint8_t stream_id, int64_t pts, int
 		PutBits(&ld2, 0x5, 8);
 	else
 		PutBits(&ld2, 0x0, 8);	// PES_header_data_length
-
 	//9 = 8+1
 
 	if (pts != INVALID_PTS_VALUE)
@@ -101,7 +100,6 @@ int InsertPesHeader(uint8_t *data, int size, uint8_t stream_id, int64_t pts, int
 		PutBits(&ld2, pts & 0x7fff, 15);
 		PutBits(&ld2, 0x1, 1);
 	}
-
 	//14 = 9+5
 
 	if (pic_start_code)

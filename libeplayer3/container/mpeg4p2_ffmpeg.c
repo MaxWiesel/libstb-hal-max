@@ -17,25 +17,21 @@ static Mpeg4P2Context *mpeg4p2_context_open()
 {
 	Mpeg4P2Context *context = NULL;
 	const AVBitStreamFilter *bsf = av_bsf_get_by_name("mpeg4_unpack_bframes");
-
 	if (bsf)
 	{
 		context = malloc(sizeof(Mpeg4P2Context));
-
 		if (context)
 		{
 			memset(context, 0x00, sizeof(Mpeg4P2Context));
 			context->bsf = bsf;
 		}
 	}
-
 	return context;
 }
 
 static void mpeg4p2_write(Context_t *ctx, Mpeg4P2Context *mpeg4p2_ctx, Track_t *track, int64_t start_time, int64_t *currentVideoPts, int64_t *latest_Pts, AVPacket *pkt)
 {
 	*currentVideoPts = track->pts = doCalcPts(start_time, mpeg4p2_ctx->ctx->time_base_out, pkt->pts);
-
 	if ((*currentVideoPts > *latest_Pts) && (*currentVideoPts != INVALID_PTS_VALUE))
 	{
 		*latest_Pts = *currentVideoPts;
@@ -65,22 +61,18 @@ static void mpeg4p2_write(Context_t *ctx, Mpeg4P2Context *mpeg4p2_ctx, Track_t *
 static int mpeg4p2_context_reset(Mpeg4P2Context *context)
 {
 	int ret = 0;
-
 	if (context && context->ctx)
 	{
 		// Flush
 		ret = av_bsf_send_packet(context->ctx, NULL);
-
 		if (ret == 0)
 		{
 			AVPacket *pkt = NULL;
-
 			while ((ret = av_bsf_receive_packet(context->ctx, pkt)) == 0)
 			{
 				wrapped_frame_unref(pkt);
 			}
 		}
-
 		av_bsf_free(&context->ctx);
 	}
 
@@ -90,19 +82,16 @@ static int mpeg4p2_context_reset(Mpeg4P2Context *context)
 static int mpeg4p2_write_packet(Context_t *ctx, Mpeg4P2Context *mpeg4p2_ctx, Track_t *track, int cAVIdx, int64_t *pts_current, int64_t *pts_latest, AVPacket *pkt)
 {
 	int ret = 0;
-
 	if (mpeg4p2_ctx)
 	{
 		// Setup is needed
 		if (!mpeg4p2_ctx->ctx)
 		{
 			ret = av_bsf_alloc(mpeg4p2_ctx->bsf, &mpeg4p2_ctx->ctx);
-
 			if (ret == 0)
 			{
 				AVStream *in = track->stream;
 				ret = avcodec_parameters_copy(mpeg4p2_ctx->ctx->par_in, in->codecpar);
-
 				if (ret == 0)
 				{
 					mpeg4p2_ctx->ctx->time_base_in = in->time_base;
@@ -114,7 +103,6 @@ static int mpeg4p2_write_packet(Context_t *ctx, Mpeg4P2Context *mpeg4p2_ctx, Tra
 		if (ret == 0)
 		{
 			ret = av_bsf_send_packet(mpeg4p2_ctx->ctx, pkt);
-
 			if (ret == 0)
 			{
 				while ((ret = av_bsf_receive_packet(mpeg4p2_ctx->ctx, pkt)) == 0)
@@ -138,13 +126,11 @@ static int mpeg4p2_write_packet(Context_t *ctx, Mpeg4P2Context *mpeg4p2_ctx, Tra
 		{
 			ffmpeg_err("bsf setup failed error 0x%x\n", ret);
 		}
-
 	}
 	else
 	{
 		ret = -1;
 	}
-
 	return ret;
 }
 

@@ -93,7 +93,6 @@ static inline void put_bits(BW *p, uint32 bits, uint32 value)
 static inline void pad_to_boundary(BW *p)
 {
 	uint32 bits = 8 - (p->bitoffset % 8);
-
 	if (bits < 8)
 	{
 		put_bits(p, bits, 0);
@@ -108,22 +107,18 @@ static inline void flash_bw(BW *p)
 	{
 		case 0: // nothing to do
 			break;
-
 		case 8:
 			p->buf[p->pos++] = (p->tmp >> 24) & 0xff;
 			break;
-
 		case 16:
 			p->buf[p->pos++] = (p->tmp >> 24) & 0xff;
 			p->buf[p->pos++] = (p->tmp >> 16) & 0xff;
 			break;
-
 		case 24:
 			p->buf[p->pos++] = (p->tmp >> 24) & 0xff;
 			p->buf[p->pos++] = (p->tmp >> 16) & 0xff;
 			p->buf[p->pos++] = (p->tmp >> 8) & 0xff;
 			break;
-
 		default:
 			break;
 	}

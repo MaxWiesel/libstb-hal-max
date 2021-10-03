@@ -64,7 +64,6 @@ void copyTrack(Track_t *to, Track_t *from)
 	if (NULL != to && NULL != from)
 	{
 		*to = *from;
-
 		if (from->Name != NULL)
 		{
 			to->Name = strdup(from->Name);

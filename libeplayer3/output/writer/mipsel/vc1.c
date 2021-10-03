@@ -117,22 +117,18 @@ static int writeData(WriterAVCallData_t *call)
 	unsigned int PacketLength = 0;
 
 	iov[ic++].iov_base = PesHeader;
-
 	if (initialHeader)
 	{
 		initialHeader = 0;
-
 		if (videocodecdata.data)
 		{
 			free(videocodecdata.data);
 			videocodecdata.data = NULL;
 		}
-
 		videocodecdata.length = call->private_size + 8;
 		videocodecdata.data  = malloc(videocodecdata.length);
 		memset(videocodecdata.data, 0, videocodecdata.length);
 		memcpy(videocodecdata.data + 8, call->private_data, call->private_size);
-
 		if (STB_DREAMBOX == GetSTBType() || 0 != ioctl(call->fd, VIDEO_SET_CODEC_DATA, &videocodecdata))
 		{
 			iov[ic].iov_base  = videocodecdata.data;
@@ -142,7 +138,6 @@ static int writeData(WriterAVCallData_t *call)
 	}
 
 	uint8_t needFrameStartCode = 0;
-
 	if (sizeof(Vc1FrameStartCode) >= call->len ||
 		memcmp(call->data, Vc1FrameStartCode, sizeof(Vc1FrameStartCode)) != 0)
 	{
