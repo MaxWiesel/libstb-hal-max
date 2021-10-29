@@ -11,7 +11,8 @@ AM_CPPFLAGS += \
 AM_CXXFLAGS = -fno-rtti -fno-exceptions -fno-strict-aliasing
 
 AM_LDFLAGS = \
-	-lao -lrt \
+	-lrt \
+	-lao \
 	-lOpenThreads \
 	@AVFORMAT_LIBS@ \
 	@AVUTIL_LIBS@ \

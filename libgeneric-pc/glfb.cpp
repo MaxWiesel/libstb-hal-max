@@ -455,7 +455,7 @@ void GLFbPC::render()
 						break;
 				}
 				break;
-			case -1:	/* mVA < mOA -- video is taller than display */
+			case -1:		/* mVA < mOA -- video is taller than display */
 				hal_debug("%s: mVA < mOA\n", __func__);
 				xscale = av_q2d(mVA) / av_q2d(mOA);
 				switch (mCrop)

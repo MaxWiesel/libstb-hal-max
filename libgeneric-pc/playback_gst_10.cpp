@@ -42,7 +42,7 @@
 #define hal_debug_c(args...) _hal_debug(HAL_DEBUG_PLAYBACK, NULL, args)
 #define hal_info_c(args...) _hal_info(HAL_DEBUG_PLAYBACK, NULL, args)
 
-static const char *FILENAME = "[playback.cpp]";
+static const char *FILENAME = "[playback_gst.cpp]";
 
 #include <gst/gst.h>
 #include <gst/tag/tag.h>
@@ -232,7 +232,7 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 			if (sourceName)
 				g_free(sourceName);
 
-			end_eof = 1; 		// NOTE: just to exit
+			end_eof = 1; 	// NOTE: just to exit
 
 			break;
 		}
@@ -352,7 +352,8 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 			{
 				case GST_STATE_CHANGE_NULL_TO_READY:
 				{
-				}	break;
+				}
+				break;
 				case GST_STATE_CHANGE_READY_TO_PAUSED:
 				{
 					GstIterator *children;
@@ -390,10 +391,12 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 				break;
 				case GST_STATE_CHANGE_PAUSED_TO_PLAYING:
 				{
-				}	break;
+				}
+				break;
 				case GST_STATE_CHANGE_PLAYING_TO_PAUSED:
 				{
-				}	break;
+				}
+				break;
 				case GST_STATE_CHANGE_PAUSED_TO_READY:
 				{
 					if (audioSink)
@@ -410,7 +413,8 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 				break;
 				case GST_STATE_CHANGE_READY_TO_NULL:
 				{
-				}	break;
+				}
+				break;
 			}
 			break;
 		}
@@ -590,7 +594,7 @@ bool cPlayback::Start(char *filename, int /*vpid*/, int /*vtype*/, int /*apid*/,
 
 	hal_info("%s:%s - filename=%s\n", FILENAME, __FUNCTION__, filename);
 
-	guint flags =	GST_PLAY_FLAG_AUDIO | GST_PLAY_FLAG_VIDEO | GST_PLAY_FLAG_NATIVE_VIDEO;
+	guint flags = GST_PLAY_FLAG_AUDIO | GST_PLAY_FLAG_VIDEO | GST_PLAY_FLAG_NATIVE_VIDEO;
 
 	/* increase the default 2 second / 2 MB buffer limitations to 5s / 5MB */
 	int m_buffer_size = 5 * 1024 * 1024;
@@ -840,7 +844,7 @@ bool cPlayback::GetPosition(int &position, int &duration)
 				hal_info("%s - %d failed\n", __FUNCTION__, __LINE__);
 			}
 		}
-		position = pts /  1000000.0;
+		position = pts / 1000000.0;
 		// duration
 		GstFormat fmt_d = GST_FORMAT_TIME; //Returns time in nanosecs
 		double length = 0;
@@ -968,7 +972,7 @@ void cPlayback::FindAllPids(int *apids, unsigned int *ac3flags, unsigned int *nu
 			if (caps)
 				gst_caps_unref(caps);
 
-			//(ac3flags[i] > 2) ?	ac3flags[i] = 1 : ac3flags[i] = 0;
+			//(ac3flags[i] > 2) ? ac3flags[i] = 1 : ac3flags[i] = 0;
 
 			g_signal_emit_by_name(m_gst_playbin, "get-audio-tags", i, &tags);
 			if (tags)

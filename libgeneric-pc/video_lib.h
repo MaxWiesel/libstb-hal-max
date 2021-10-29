@@ -181,8 +181,8 @@ class cVideo : public OpenThreads::Thread
 
 		/* aspect ratio */
 		int getAspectRatio(void);
-		void getPictureInfo(int &width, int &height, int &rate);
 		int setAspectRatio(int aspect, int mode);
+		void getPictureInfo(int &width, int &height, int &rate);
 
 		/* cropping mode */
 		int setCroppingMode(int x = 0 /*vidDispMode_t x = VID_DISPMODE_NORM*/);
@@ -194,24 +194,24 @@ class cVideo : public OpenThreads::Thread
 		int getBlank(void);
 		int setBlank(int enable);
 
+		/* set video_system */
+		int SetVideoSystem(int video_system, bool remember = true);
+		int GetVideoSystem();
+
 		/* change video play state. Parameters are all unused. */
 		int Start(void *PcrChannel = NULL, unsigned short PcrPid = 0, unsigned short VideoPid = 0, void *x = NULL);
 		int Stop(bool blank = true);
 		bool Pause(void);
 
-		/* get video system infos */
-		int GetVideoSystem();
-
-		/* set video_system */
-		int SetVideoSystem(int video_system, bool remember = true);
 		int SetStreamType(VIDEO_FORMAT type);
+		bool ShowPicture(const char *fname);
+
 		void SetSyncMode(AVSYNC_TYPE mode);
 		bool SetCECMode(VIDEO_HDMI_CEC_MODE) { return true; };
 		void SetCECAutoView(bool) { return; };
 		void SetCECAutoStandby(bool) { return; };
 		int  GetAudioDestination() { return 0; };
 		void SetAudioDestination(int /*audio_dest*/) { return; };
-		bool ShowPicture(const char *fname);
 		void StopPicture();
 		void Standby(unsigned int bOn);
 		void Pig(int x, int y, int w, int h, int osd_w = 1064, int osd_h = 600, int startx = 0, int starty = 0, int endx = 1279, int endy = 719);

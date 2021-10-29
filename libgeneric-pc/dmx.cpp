@@ -19,18 +19,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
+#include "config.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <errno.h>
 #include <inttypes.h>
-#include <unistd.h>
 
 #include <cstring>
 #include <cstdio>
 #include <string>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include "dmx_hal.h"
 #include "hal_debug.h"
@@ -136,6 +136,7 @@ bool cDemux::Open(DMX_CHANNEL_TYPE pes_type, void * /*hVideoBuffer*/, int uBuffe
 			hal_info("%s DMX_SET_BUFFER_SIZE failed (%m)\n", __func__);
 	}
 	buffersize = uBufferSize;
+
 	return true;
 }
 
@@ -264,9 +265,9 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		hal_info("%s #%d: len too long: %d, DMX_FILTER_SIZE %d\n", __func__, num, len, DMX_FILTER_SIZE);
 		len = DMX_FILTER_SIZE;
 	}
-	flt = filter[0];
 	s_flt.pid = pid;
 	s_flt.timeout = timeout;
+	flt = filter[0];
 	memcpy(s_flt.filter.filter, filter, len);
 	memcpy(s_flt.filter.mask,   mask,   len);
 	if (negmask != NULL)
@@ -349,8 +350,8 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		/* 0x90 - 0xFE: user defined */
 		/*        0xFF: reserved */
 		default:
-			//return -1;
 			break;
+//		return -1;
 	}
 	/* the negmask == NULL is a hack: the users of negmask are PMT-update
 	 * and sectionsd EIT-Version change. And they really want no timeout

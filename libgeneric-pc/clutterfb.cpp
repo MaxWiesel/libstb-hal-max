@@ -231,10 +231,12 @@ void GLFramebuffer::run()
 	clutter_stage_set_user_resizable(CLUTTER_STAGE(stage), TRUE);
 	clutter_actor_grab_key_focus(stage);
 	clutter_actor_show(stage);
+
 	/* 32bit FB depth, *2 because tuxtxt uses a shadow buffer */
 	int fbmem = x * y * 4 * 2;
 	osd_buf.resize(fbmem);
 	hal_info("GLFB: OSD buffer set to %d bytes at 0x%p\n", fbmem, osd_buf.data());
+
 	/* video plane is below FB plane, so it comes first */
 	vid_actor = clutter_actor_new();
 	ClutterContent *fb = clutter_image_new();
@@ -256,6 +258,7 @@ void GLFramebuffer::run()
 	clutter_actor_set_pivot_point(vid_actor, 0.5, 0.5);
 	clutter_actor_add_child(stage, vid_actor);
 	clutter_actor_show(vid_actor);
+
 	fb_actor = clutter_actor_new();
 	fb = clutter_image_new();
 	if (!clutter_image_set_data(CLUTTER_IMAGE(fb), osd_buf.data(), COGL_PIXEL_FORMAT_BGRA_8888, x, y, x * 4, NULL))
@@ -274,6 +277,7 @@ void GLFramebuffer::run()
 	clutter_actor_set_content_gravity(fb_actor, CLUTTER_CONTENT_GRAVITY_RESIZE_ASPECT);
 	clutter_actor_add_child(stage, fb_actor);
 	clutter_actor_show(fb_actor);
+
 	glfb_priv->mInitDone = true; /* signal that setup is finished */
 	tl = clutter_timeline_new(100);
 	g_signal_connect(tl, "new-frame", G_CALLBACK(GLFbPC::rendercb), NULL);
@@ -397,7 +401,7 @@ void GLFbPC::render()
 						break;
 				}
 				break;
-			case -1:	/* mVA < mOA -- video is taller than display */
+			case -1:		/* mVA < mOA -- video is taller than display */
 				hal_debug("%s: mVA < mOA\n", __func__);
 				switch (mCrop)
 				{

@@ -230,7 +230,7 @@ GstBusSyncReply Gst_bus_call(GstBus *bus, GstMessage *msg, gpointer user_data)
 			if (sourceName)
 				g_free(sourceName);
 
-			end_eof = 1;        // NOTE: just to exit
+			end_eof = 1; 	// NOTE: just to exit
 
 			break;
 		}
@@ -848,7 +848,7 @@ bool cPlayback::GetPosition(int &position, int &duration)
 				hal_info("%s - %d failed\n", __FUNCTION__, __LINE__);
 			}
 		}
-		position = pts /  1000000.0;
+		position = pts / 1000000.0;
 		// duration
 		GstFormat fmt_d = GST_FORMAT_TIME; //Returns time in nanosecs
 		double length = 0;
@@ -897,6 +897,7 @@ bool cPlayback::SetPosition(int position, bool absolute)
 		{
 			time_nanoseconds = position * 1000000.0;
 		}
+
 		gst_element_seek(m_gst_playbin, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE), GST_SEEK_TYPE_SET, time_nanoseconds, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
 	}
 

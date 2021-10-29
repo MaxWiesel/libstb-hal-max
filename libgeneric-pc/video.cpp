@@ -25,27 +25,16 @@
 
 #include "config.h"
 #include <unistd.h>
-
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
 
-#include "glfb_priv.h"
-#include "video_lib.h"
-#include "hal_debug.h"
-
-extern "C"
-{
+extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
 }
-
-#define hal_debug(args...) _hal_debug(HAL_DEBUG_VIDEO, this, args)
-#define hal_info(args...) _hal_info(HAL_DEBUG_VIDEO, this, args)
-#define hal_debug_c(args...) _hal_debug(HAL_DEBUG_VIDEO, NULL, args)
-#define hal_info_c(args...) _hal_info(HAL_DEBUG_VIDEO, NULL, args)
 
 /* ffmpeg buf 32k */
 #define INBUF_SIZE 0x8000
@@ -58,6 +47,14 @@ extern "C"
 #if USE_CLUTTER
 #define VDEC_PIXFMT AV_PIX_FMT_BGR24
 #endif
+
+#include "video_lib.h"
+#include "glfb_priv.h"
+#include "hal_debug.h"
+#define hal_debug(args...) _hal_debug(HAL_DEBUG_VIDEO, this, args)
+#define hal_info(args...) _hal_info(HAL_DEBUG_VIDEO, this, args)
+#define hal_debug_c(args...) _hal_debug(HAL_DEBUG_VIDEO, NULL, args)
+#define hal_info_c(args...) _hal_info(HAL_DEBUG_VIDEO, NULL, args)
 
 cVideo *videoDecoder = NULL;
 extern cDemux *videoDemux;
@@ -142,7 +139,7 @@ int cVideo::getAspectRatio(void)
 	else if (ar < 200)	/* 16:9 */
 		ret = 3;
 	else
-		ret = 4;	/* 20:9 */
+		ret = 4;		/* 20:9 */
 out:
 	buf_m.unlock();
 	return ret;
@@ -333,7 +330,6 @@ bool cVideo::ShowPicture(const char *fname)
 		struct SwsContext *convert = sws_getContext(c->width, c->height, c->pix_fmt,
 				c->width, c->height, VDEC_PIXFMT,
 				SWS_BICUBIC, 0, 0, 0);
-
 		if (!convert)
 			hal_info("%s: ERROR setting up SWS context\n", __func__);
 		else
@@ -582,7 +578,6 @@ void cVideo::run(void)
 			usleep(10000);
 			continue;
 		}
-
 		int got_frame = 0;
 		av_ret = avcodec_send_packet(c, avpkt);
 
@@ -597,11 +592,9 @@ void cVideo::run(void)
 			continue;
 		}
 		av_ret = avcodec_receive_frame(c, frame);
-
 		if (!av_ret)
 			got_frame = 1;
 		still_m.lock();
-
 		if (got_frame && ! stillpicture)
 		{
 			unsigned int need = av_image_get_buffer_size(VDEC_PIXFMT, c->width, c->height, 1);
@@ -615,7 +608,6 @@ void cVideo::run(void)
 			{
 				buf_m.lock();
 				SWFramebuffer *f = &buffers[buf_in];
-
 				if (f->size() < need)
 					f->resize(need);
 				av_image_fill_arrays(rgbframe->data, rgbframe->linesize, &(*f)[0], VDEC_PIXFMT,
@@ -740,19 +732,16 @@ static bool swscale(unsigned char *src, unsigned char *dst, int sw, int sh, int 
 		av_frame_free(&sframe);
 		sframe = NULL;
 	}
-
 	if (dframe)
 	{
 		av_frame_free(&dframe);
 		dframe = NULL;
 	}
-
 	if (scale)
 	{
 		sws_freeContext(scale);
 		scale = NULL;
 	}
-
 	hal_info_c("%s: %s scale %ix%i to %ix%i ,len %i\n", ret ? " " : "ERROR", __func__, sw, sh, dw, dh, len);
 
 	return ret;
@@ -797,7 +786,6 @@ bool cVideo::GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get
 		osd = glfb_priv->getOSDBuffer();
 	unsigned int need = av_image_get_buffer_size(AV_PIX_FMT_RGB32, xres, yres, 1);
 	data = (unsigned char *)realloc(data, need); /* will be freed by caller */
-
 	if (data == NULL)	/* out of memory? */
 		return false;
 

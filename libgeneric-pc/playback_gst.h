@@ -86,8 +86,6 @@ class cPlayback
 		bool IsPlaying(void) { return false; }
 		void FindAllSubs(uint16_t *pids, unsigned short *supported, uint16_t *numpida, std::string *language);
 		bool SelectSubtitles(int pid);
-		void GetTitles(std::vector<int> &playlists, std::vector<std::string> &titles, int &current);
-		void SetTitle(int title);
 		uint64_t GetReadCount(void);
 		void GetChapters(std::vector<int> &positions, std::vector<std::string> &titles);
 		void GetMetadata(std::vector<std::string> &keys, std::vector<std::string> &values);
@@ -95,6 +93,9 @@ class cPlayback
 		void ReleaseAVFormatContext();
 		std::string extra_headers;
 		std::string user_agent;
+
+		void GetTitles(std::vector<int> &playlists, std::vector<std::string> &titles, int &current);
+		void SetTitle(int title);
 
 		//
 		~cPlayback();
