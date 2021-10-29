@@ -19,7 +19,7 @@
 #if BOXMODEL_RASPI
 #include "../libraspi/playback_lib.h"
 #else
-#if ENABLE_GSTREAMER
+#if ENABLE_GSTREAMER_10
 #include "../libgeneric-pc/playback_gst.h"
 #else
 #include "../libgeneric-pc/playback_lib.h"
