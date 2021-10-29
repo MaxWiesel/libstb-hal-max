@@ -49,21 +49,6 @@ else
 	AC_DEFINE(USE_OPENGL,1,[use opengl instead of clutter])
 fi
 
-if test x"$BOXTYPE" = x"tripledragon"; then
-	PKG_CHECK_MODULES([DIRECTFB], [directfb])
-fi
-
-AC_ARG_ENABLE(gstreamer_01,
-	AS_HELP_STRING(--enable-gstreamer_01, use gstreamer 0.10 playback),
-	,[enable_gstreamer_01=no])
-
-AM_CONDITIONAL(ENABLE_GSTREAMER_01,test "$enable_gstreamer_01" = "yes")
-if test "$enable_gstreamer_01" = "yes"; then
-	AC_DEFINE(ENABLE_GSTREAMER_01, 1, [use gstreamer 0.10 playback])
-	PKG_CHECK_MODULES([GSTREAMER], [gstreamer-0.10])
-	PKG_CHECK_MODULES([GSTREAMER_INTERFACES], [gstinterfaces-0.10])
-fi
-
 AC_ARG_ENABLE(gstreamer_10,
 	AS_HELP_STRING(--enable-gstreamer_10, use gstreamer 1.0 playback),
 	,[enable_gstreamer_10=no])
