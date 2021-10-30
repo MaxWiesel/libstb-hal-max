@@ -40,7 +40,7 @@ if USE_OPENGL
 libgeneric_la_SOURCES += glfb.cpp
 endif
 
-if ENABLE_GSTREAMER_10
+if ENABLE_GSTREAMER
 libgeneric_la_SOURCES += \
 	playback_gst.cpp
 AM_LDFLAGS += \

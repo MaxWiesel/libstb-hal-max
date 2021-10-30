@@ -49,19 +49,13 @@ else
 	AC_DEFINE(USE_OPENGL,1,[use opengl instead of clutter])
 fi
 
-AC_ARG_ENABLE(gstreamer_10,
-	AS_HELP_STRING(--enable-gstreamer_10, use gstreamer 1.0 playback),
-	,[enable_gstreamer_10=no])
+AC_ARG_ENABLE(gstreamer,
+	AS_HELP_STRING(--enable-gstreamer, use gstreamer 1.0 playback),
+	,[enable_gstreamer=no])
 
-AM_CONDITIONAL(ENABLE_GSTREAMER_10, test "$enable_gstreamer_10" = "yes")
-if test "$enable_gstreamer_10" = "yes"; then
-	AC_DEFINE(ENABLE_GSTREAMER_10, 1, [use gstreamer 1.0 playback])
-	PKG_CHECK_MODULES([GSTREAMER], [gstreamer-1.0])
-	PKG_CHECK_MODULES([GSTREAMER_AUDIO], [gstreamer-audio-1.0])
-	PKG_CHECK_MODULES([GSTREAMER_VIDEO], [gstreamer-video-1.0])
-fi
-
-if test x$BOXTYPE = xarmbox -a "$enable_gstreamer_10" = "yes"; then
+AM_CONDITIONAL(ENABLE_GSTREAMER, test "$enable_gstreamer" = "yes")
+if test "$enable_gstreamer" = "yes"; then
+	AC_DEFINE(ENABLE_GSTREAMER, 1, [use gstreamer 1.0 playback])
 	PKG_CHECK_MODULES([GSTREAMER], [gstreamer-1.0])
 	PKG_CHECK_MODULES([GSTREAMER_AUDIO], [gstreamer-audio-1.0])
 	PKG_CHECK_MODULES([GSTREAMER_VIDEO], [gstreamer-video-1.0])

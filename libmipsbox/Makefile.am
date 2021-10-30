@@ -21,9 +21,7 @@ libmipsbox_la_SOURCES = \
 	audio.cpp \
 	init.cpp \
 	record.cpp \
-	hdmi_cec.cpp
-
-libmipsbox_la_SOURCES += \
+	hdmi_cec.cpp \
 	playback_libeplayer3.cpp
 
 AM_CPPFLAGS += \
