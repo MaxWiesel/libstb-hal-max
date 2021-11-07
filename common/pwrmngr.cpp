@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <config.h>
 
 #include "pwrmngr.h"
@@ -60,7 +61,7 @@ unsigned long cCpuFreqManager::GetDelta(void)
 	return 0;
 }
 
-#if HAVE_SPARK_HARDWARE || HAVE_DUCKBOX_HARDWARE
+#if HAVE_DUCKBOX_HARDWARE
 unsigned long cCpuFreqManager::GetCpuFreq(void)
 {
 	int freq = 0;
@@ -88,7 +89,7 @@ unsigned long cCpuFreqManager::GetCpuFreq(void)
 bool cCpuFreqManager::SetCpuFreq(unsigned long f)
 {
 	hal_info("%s(%lu) => set standby = %s\n", __func__, f, f ? "true" : "false");
-#if HAVE_SPARK_HARDWARE || HAVE_DUCKBOX_HARDWARE
+#if HAVE_DUCKBOX_HARDWARE
 	if (f)
 	{
 		FILE *pll0 = fopen("/proc/cpu_frequ/pll0_ndiv_mdiv", "w");
