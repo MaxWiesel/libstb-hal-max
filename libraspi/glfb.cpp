@@ -60,6 +60,7 @@ GLFramebuffer::GLFramebuffer(int x, int y)
 {
 	width = x;
 	height = y;
+
 	/* linux framebuffer compat mode */
 	si.bits_per_pixel = 32;
 	si.xres = si.xres_virtual = width;
@@ -69,6 +70,7 @@ GLFramebuffer::GLFramebuffer(int x, int y)
 	si.green.offset = 8;
 	si.red.offset = 16;
 	si.transp.offset = 24;
+
 	OpenThreads::Thread::start();
 	while (!ready)
 		usleep(1);
@@ -112,9 +114,12 @@ void GLFramebuffer::setup()
 	/* broadcom example code has this ALIGN_UP in there for a reasin, I suppose */
 	if (pitch != width * 4)
 		hal_info("GLFB: WARNING: width not a multiple of 8? I doubt this will work...\n");
+
 	/* global alpha nontransparent (255) */
 	VC_DISPMANX_ALPHA_T alpha = { DISPMANX_FLAGS_ALPHA_FROM_SOURCE, 255, 0 };
+
 	bcm_host_init();
+
 	display = vc_dispmanx_display_open(0);
 	ret = vc_dispmanx_display_get_info(display, &info);
 	CHECK(ret == 0);

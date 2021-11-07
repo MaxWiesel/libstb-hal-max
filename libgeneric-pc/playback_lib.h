@@ -19,6 +19,7 @@ class cPlayback
 		int mAudioStream;
 		int mSubtitleStream;
 		int mTeletextStream;
+
 	public:
 		cPlayback(int);
 		bool Open(playmode_t PlayMode);

@@ -18,6 +18,7 @@
  * for the Raspberry Pi
  *
  */
+
 #include <cstring>
 #include <stdlib.h>
 #include <unistd.h>
@@ -114,6 +115,7 @@ void Input::run()
 	out_fd = open("/tmp/neutrino.input", O_RDWR | O_CLOEXEC | O_NONBLOCK);
 	if (out_fd < 0)
 		hal_info("could not create /tmp/neutrino.input. good luck. error: %m\n");
+
 	n = scandir("/dev/input", &namelist, dirfilter, NULL);
 	if (n < 0)
 		hal_info("no input devices /dev/input/eventX??\n");
@@ -142,6 +144,7 @@ void Input::run()
 		}
 		free(namelist);
 	}
+
 	fd_max++;
 	running = true;
 	while (running)
@@ -149,6 +152,7 @@ void Input::run()
 		FD_ZERO(&rfds);
 		for (std::set<int>::iterator i = in_fds.begin(); i != in_fds.end(); ++i)
 			FD_SET((*i), &rfds);
+
 		/* timeout should not be necessary, but somehow cancel / cleanup did not
 		 * work correctly with OpenThreads::Thread :-( */
 		struct timeval timeout = { 0, 100000 }; /* 100ms */
@@ -160,10 +164,12 @@ void Input::run()
 			hal_info("input: select returned %d (%m)\n", ret);
 			continue;
 		}
+
 		for (std::set<int>::iterator i = in_fds.begin(); i != in_fds.end(); ++i)
 		{
 			if (!FD_ISSET((*i), &rfds))
 				continue;
+
 			ret = read(*i, &in, sizeof(in));
 			if (ret != sizeof(in))
 			{
@@ -215,6 +221,7 @@ void hal_api_init()
 		hal_info("%s: setting Framebuffer size to %dx%d\n", __func__, x, y);
 		if (!p)
 			hal_info("%s: export GLFB_RESOLUTION=\"<w>,<h>\" to set another resolution\n", __func__);
+
 		glfb = new GLFramebuffer(x, y); /* hard coded to PAL resolution for now */
 	}
 	if (! thread)

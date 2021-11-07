@@ -329,8 +329,8 @@ bool cVideo::ShowPicture(const char *fname)
 	{
 		unsigned int need = av_image_get_buffer_size(VDEC_PIXFMT, c->width, c->height, 1);
 		struct SwsContext *convert = sws_getContext(c->width, c->height, c->pix_fmt,
-				c->width, c->height, VDEC_PIXFMT,
-				SWS_BICUBIC, 0, 0, 0);
+			c->width, c->height, VDEC_PIXFMT,
+			SWS_BICUBIC, 0, 0, 0);
 		if (!convert)
 			hal_info("%s: ERROR setting up SWS context\n", __func__);
 		else
@@ -517,11 +517,11 @@ void cVideo::run(void)
 	avpkt = av_packet_alloc();
 	inp = av_find_input_format("mpegts");
 	AVIOContext *pIOCtx = avio_alloc_context(inbuf, INBUF_SIZE, // internal Buffer and its size
-			0,		// bWriteable (1=true,0=false)
-			NULL,		// user data; will be passed to our callback functions
-			my_read,	// read callback
-			NULL,		// write callback
-			NULL);		// seek callback
+		0,		// bWriteable (1=true,0=false)
+		NULL,		// user data; will be passed to our callback functions
+		my_read,	// read callback
+		NULL,		// write callback
+		NULL);		// seek callback
 	avfc = avformat_alloc_context();
 	avfc->pb = pIOCtx;
 	avfc->iformat = inp;
@@ -600,9 +600,9 @@ void cVideo::run(void)
 		{
 			unsigned int need = av_image_get_buffer_size(VDEC_PIXFMT, c->width, c->height, 1);
 			convert = sws_getCachedContext(convert,
-					c->width, c->height, c->pix_fmt,
-					c->width, c->height, VDEC_PIXFMT,
-					SWS_BICUBIC, 0, 0, 0);
+				c->width, c->height, c->pix_fmt,
+				c->width, c->height, VDEC_PIXFMT,
+				SWS_BICUBIC, 0, 0, 0);
 			if (!convert)
 				hal_info("%s: ERROR setting up SWS context\n", __func__);
 			else
@@ -611,15 +611,12 @@ void cVideo::run(void)
 				SWFramebuffer *f = &buffers[buf_in];
 				if (f->size() < need)
 					f->resize(need);
-				av_image_fill_arrays(rgbframe->data, rgbframe->linesize, &(*f)[0], VDEC_PIXFMT,
-					c->width, c->height, 1);
-				sws_scale(convert, frame->data, frame->linesize, 0, c->height,
-					rgbframe->data, rgbframe->linesize);
+				av_image_fill_arrays(rgbframe->data, rgbframe->linesize, &(*f)[0], VDEC_PIXFMT, c->width, c->height, 1);
+				sws_scale(convert, frame->data, frame->linesize, 0, c->height, rgbframe->data, rgbframe->linesize);
 
 				if (dec_w != c->width || dec_h != c->height)
 				{
-					hal_info("%s: pic changed %dx%d -> %dx%d\n", __func__,
-						dec_w, dec_h, c->width, c->height);
+					hal_info("%s: pic changed %dx%d -> %dx%d\n", __func__, dec_w, dec_h, c->width, c->height);
 					dec_w = c->width;
 					dec_h = c->height;
 					w_h_changed = true;
@@ -659,13 +656,14 @@ void cVideo::run(void)
 				dec_r = c->time_base.den / (c->time_base.num * c->ticks_per_frame);
 				buf_m.unlock();
 			}
-			hal_debug("%s: time_base: %d/%d, ticks: %d rate: %d pts 0x%" PRIx64 "\n", __func__,
-				c->time_base.num, c->time_base.den, c->ticks_per_frame, dec_r,
+			hal_debug("%s: time_base: %d/%d, ticks: %d rate: %d pts 0x%" PRIx64 "\n",
+				__func__, c->time_base.num, c->time_base.den, c->ticks_per_frame, dec_r,
 #if (LIBAVUTIL_VERSION_MAJOR < 54)
-				av_frame_get_best_effort_timestamp(frame));
+				av_frame_get_best_effort_timestamp(frame)
 #else
-				frame->best_effort_timestamp);
+				frame->best_effort_timestamp
 #endif
+				);
 		}
 		else
 			hal_debug("%s: got_frame: %d stillpicture: %d\n", __func__, got_frame, stillpicture);
@@ -787,13 +785,13 @@ bool cVideo::GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get
 		osd = glfb_priv->getOSDBuffer();
 	unsigned int need = av_image_get_buffer_size(AV_PIX_FMT_RGB32, xres, yres, 1);
 	data = (unsigned char *)realloc(data, need); /* will be freed by caller */
-	if (data == NULL)	/* out of memory? */
+	if (data == NULL) /* out of memory? */
 		return false;
 
 	if (get_video)
 	{
 #if USE_OPENGL //memcpy dont work with copy BGR24 to RGB32
-		if (vid_w != xres || vid_h != yres)  /* scale video into data... */
+		if (vid_w != xres || vid_h != yres) /* scale video into data... */
 		{
 #endif
 			bool ret = swscale(&video[0], data, vid_w, vid_h, xres, yres, VDEC_PIXFMT);
@@ -804,7 +802,7 @@ bool cVideo::GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get
 			}
 #if USE_OPENGL //memcpy dont work with copy BGR24 to RGB32
 		}
-		else   /* get_video and no fancy scaling needed */
+		else /* get_video and no fancy scaling needed */
 		{
 			memcpy(data, &video[0], xres * yres * sizeof(uint32_t));
 		}
@@ -840,7 +838,7 @@ bool cVideo::GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get
 				{
 					uint8_t *in = (uint8_t *)(pixpos);
 					uint8_t *out = (uint8_t *)d;
-					int a = in[3];	/* TODO: big/little endian? */
+					int a = in[3]; /* TODO: big/little endian? */
 					*out = (*out + ((*in - *out) * a) / 256);
 					in++;
 					out++;

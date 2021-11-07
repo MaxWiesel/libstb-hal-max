@@ -118,8 +118,7 @@ void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &m
 	freq = 0;
 	bitrate = 0;	/* not used, but easy to get :-) */
 	mode = 0;	/* default: stereo */
-	hal_debug("%s t: %d l: %d f: %d b: %d m: %d\n",
-		__func__, type, layer, freq, bitrate, mode);
+	hal_debug("%s t: %d l: %d f: %d b: %d m: %d\n", __func__, type, layer, freq, bitrate, mode);
 }
 
 void cAudio::SetSRS(int /*iq_enable*/, int /*nmgr_enable*/, int /*iq_mode*/, int /*iq_level*/)

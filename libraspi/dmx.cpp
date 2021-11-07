@@ -1,8 +1,6 @@
 /*
  * cDemux implementation for generic dvbapi
  *
- * derived from libtriple/dmx_td.cpp
- *
  * (C) 2010-2013 Stefan Seyfried
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,11 +24,11 @@
 #include <poll.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include <cstring>
 #include <cstdio>
 #include <string>
-#include <unistd.h>
 #include <sys/ioctl.h>
 #include "dmx_lib.h"
 #include "hal_debug.h"
@@ -100,17 +98,20 @@ bool cDemux::Open(DMX_CHANNEL_TYPE pes_type, void * /*hVideoBuffer*/, int uBuffe
 	int flags = O_RDWR | O_CLOEXEC;
 	if (fd > -1)
 		hal_info("%s FD ALREADY OPENED? fd = %d\n", __FUNCTION__, fd);
+
 	dmx_type = pes_type;
 	if (pes_type != DMX_PSI_CHANNEL)
 		flags |= O_NONBLOCK;
+
 	fd = open(devname[devnum], flags);
 	if (fd < 0)
 	{
 		hal_info("%s %s: %m\n", __FUNCTION__, devname[devnum]);
 		return false;
 	}
-	hal_debug("%s #%d pes_type: %s(%d), uBufferSize: %d fd: %d\n", __func__,
-		num, DMX_T[pes_type], pes_type, uBufferSize, fd);
+	hal_debug("%s #%d pes_type: %s(%d), uBufferSize: %d fd: %d\n",
+		__func__, num, DMX_T[pes_type], pes_type, uBufferSize, fd);
+
 	if (dmx_type == DMX_VIDEO_CHANNEL)
 		uBufferSize = 0x100000;		/* 1MB */
 	if (dmx_type == DMX_AUDIO_CHANNEL)
@@ -132,6 +133,7 @@ bool cDemux::Open(DMX_CHANNEL_TYPE pes_type, void * /*hVideoBuffer*/, int uBuffe
 			hal_info("%s DMX_SET_BUFFER_SIZE failed (%m)\n", __func__);
 	}
 	buffersize = uBufferSize;
+
 	return true;
 }
 
@@ -143,6 +145,7 @@ void cDemux::Close(void)
 		hal_info("%s #%d: not open!\n", __FUNCTION__, num);
 		return;
 	}
+
 	pesfds.clear();
 	ioctl(fd, DMX_STOP);
 	close(fd);
@@ -194,6 +197,7 @@ int cDemux::Read(unsigned char *buff, int len, int timeout)
 	ufds.fd = fd;
 	ufds.events = POLLIN | POLLPRI | POLLERR;
 	ufds.revents = 0;
+
 	if (timeout > 0)
 	{
 retry:
@@ -228,10 +232,12 @@ retry:
 			return 0;
 		}
 	}
+
 	rc = ::read(fd, buff, len);
 	//fprintf(stderr, "fd %d ret: %d\n", fd, rc);
 	if (rc < 0)
 		dmx_err("read: %s", strerror(errno), 0);
+
 	return rc;
 }
 
@@ -242,6 +248,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 	struct dmx_sct_filter_params s_flt;
 	memset(&s_flt, 0, sizeof(s_flt));
 	pid = _pid;
+
 	if (len > DMX_FILTER_SIZE)
 	{
 		hal_info("%s #%d: len too long: %d, DMX_FILTER_SIZE %d\n", __func__, num, len, DMX_FILTER_SIZE);
@@ -251,10 +258,12 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 	s_flt.pid = pid;
 	s_flt.timeout = timeout;
 	memcpy(s_flt.filter.filter, filter, len);
-	memcpy(s_flt.filter.mask,   mask,   len);
+	memcpy(s_flt.filter.mask, mask, len);
 	if (negmask != NULL)
 		memcpy(s_flt.filter.mode, negmask, len);
+
 	s_flt.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+
 	int to = 0;
 	switch (filter[0])
 	{
@@ -299,7 +308,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		/* 0x60 - 0x6F: event_information_section - other_transport_stream, schedule */
 		case 0x70: /* time_date_section */
 			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
-			//s_flt.pid     = 0x0014;
+			//s_flt.pid = 0x0014;
 			to = 30000;
 			break;
 		case 0x71: /* running_status_section */
@@ -311,7 +320,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 			to = 0;
 			break;
 		case 0x73: /* time_offset_section */
-			//s_flt.pid     = 0x0014;
+			//s_flt.pid = 0x0014;
 			to = 30000;
 			break;
 		/* 0x74 - 0x7D: reserved for future use */
@@ -326,16 +335,18 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		/* 0x90 - 0xFE: user defined */
 		/*        0xFF: reserved */
 		default:
-			//return -1;
 			break;
+//		return -1;
 	}
 	/* the negmask == NULL is a hack: the users of negmask are PMT-update
 	 * and sectionsd EIT-Version change. And they really want no timeout
 	 * if timeout == 0 instead of "default timeout" */
 	if (timeout == 0 && negmask == NULL)
 		s_flt.timeout = to;
-	hal_debug("%s #%d pid:0x%04hx fd:%d type:%s len:%d to:%d flags:%x flt[0]:%02x\n", __func__, num,
-		pid, fd, DMX_T[dmx_type], len, s_flt.timeout, s_flt.flags, s_flt.filter.filter[0]);
+
+	hal_debug("%s #%d pid:0x%04hx fd:%d type:%s len:%d to:%d flags:%x flt[0]:%02x\n",
+		__func__, num, pid, fd, DMX_T[dmx_type], len, s_flt.timeout, s_flt.flags, s_flt.filter.filter[0]);
+
 	if (debuglevel == 2)
 	{
 		fprintf(stderr, "filt: ");
@@ -344,16 +355,18 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		fprintf(stderr, "\n");
 		fprintf(stderr, "mask: ");
 		for (int i = 0; i < DMX_FILTER_SIZE; i++)
-			fprintf(stderr, "%02hhx ", s_flt.filter.mask  [i]);
+			fprintf(stderr, "%02hhx ", s_flt.filter.mask[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "mode: ");
 		for (int i = 0; i < DMX_FILTER_SIZE; i++)
-			fprintf(stderr, "%02hhx ", s_flt.filter.mode  [i]);
+			fprintf(stderr, "%02hhx ", s_flt.filter.mode[i]);
 		fprintf(stderr, "\n");
 	}
+
 	ioctl(fd, DMX_STOP);
 	if (ioctl(fd, DMX_SET_FILTER, &s_flt) < 0)
 		return false;
+
 	return true;
 }
 
@@ -370,33 +383,36 @@ bool cDemux::pesFilter(const unsigned short _pid)
 	 */
 	if ((pid >= 0x0002 && pid <= 0x000f) || pid >= 0x1fff)
 		return false;
+
 	hal_debug("%s #%d pid: 0x%04hx fd: %d type: %s\n", __FUNCTION__, num, pid, fd, DMX_T[dmx_type]);
+
 	memset(&p_flt, 0, sizeof(p_flt));
-	p_flt.pid    = pid;
+	p_flt.pid = pid;
 	p_flt.output = DMX_OUT_DECODER;
-	p_flt.input  = DMX_IN_FRONTEND;
+	p_flt.input = DMX_IN_FRONTEND;
+
 	switch (dmx_type)
 	{
 		case DMX_PCR_ONLY_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
-			p_flt.output  = DMX_OUT_TAP;
+			p_flt.output = DMX_OUT_TAP;
 			return true;
 			break;
 		case DMX_AUDIO_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
-			p_flt.output  = DMX_OUT_TSDEMUX_TAP;
+			p_flt.output = DMX_OUT_TSDEMUX_TAP;
 			break;
 		case DMX_VIDEO_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
-			p_flt.output  = DMX_OUT_TSDEMUX_TAP;
+			p_flt.output = DMX_OUT_TSDEMUX_TAP;
 			break;
 		case DMX_PES_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
-			p_flt.output  = DMX_OUT_TAP;
+			p_flt.output = DMX_OUT_TAP;
 			break;
 		case DMX_TP_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
-			p_flt.output  = DMX_OUT_TSDEMUX_TAP;
+			p_flt.output = DMX_OUT_TSDEMUX_TAP;
 			break;
 		default:
 			hal_info("%s #%d invalid dmx_type %d!\n", __func__, num, dmx_type);

@@ -149,6 +149,7 @@ class cVideo : public OpenThreads::Thread
 {
 		friend class GLFbPC;
 		friend class cDemux;
+
 	private:
 		/* called from GL thread */
 		class SWFramebuffer : public std::vector<unsigned char>
@@ -171,6 +172,7 @@ class cVideo : public OpenThreads::Thread
 		};
 		int buf_in, buf_out, buf_num;
 		int64_t GetPTS(void);
+
 	public:
 		/* constructor & destructor */
 		cVideo(int mode, void *, void *, unsigned int unit = 0);
@@ -228,6 +230,7 @@ class cVideo : public OpenThreads::Thread
 		void SetDemux(cDemux *dmx);
 		bool GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get_video = true, bool get_osd = false, bool scale_to_video = false);
 		SWFramebuffer *getDecBuf(void);
+
 	private:
 		void run();
 		SWFramebuffer buffers[VDEC_MAXBUFS];

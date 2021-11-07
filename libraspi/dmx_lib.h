@@ -32,6 +32,7 @@ class cDemux
 {
 		friend class cRecord;
 		friend class cPlayback;
+
 	public:
 		bool Open(DMX_CHANNEL_TYPE pes_type, void *x = NULL, int y = 0);
 		void Close(void);

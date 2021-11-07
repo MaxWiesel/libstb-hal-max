@@ -170,6 +170,7 @@ class cVideo
 {
 		friend class cPlayback;
 		friend class cDemux;
+
 	private:
 		/* video device */
 		int fd;
@@ -208,6 +209,7 @@ class cVideo
 
 		/* used internally by dmx */
 		int64_t GetPTS(void);
+
 	public:
 		/* constructor & destructor */
 		cVideo(int mode, void *, void *, unsigned int unit = 0);

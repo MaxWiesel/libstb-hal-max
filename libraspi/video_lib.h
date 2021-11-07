@@ -131,6 +131,7 @@ class cVideo
 {
 		friend class GLFramebuffer;
 		friend class cDemux;
+
 	private:
 		/* called from GL thread */
 		class SWFramebuffer : public std::vector<unsigned char>
@@ -153,6 +154,7 @@ class cVideo
 		};
 		int buf_in, buf_out, buf_num;
 		int64_t GetPTS(void);
+
 	public:
 		/* constructor & destructor */
 		cVideo(int mode, void *, void *, unsigned int unit = 0);
@@ -163,8 +165,8 @@ class cVideo
 
 		/* aspect ratio */
 		int getAspectRatio(void);
-		void getPictureInfo(int &width, int &height, int &rate);
 		int setAspectRatio(int aspect, int mode);
+		void getPictureInfo(int &width, int &height, int &rate);
 
 		/* cropping mode */
 		int setCroppingMode(int x = 0 /*vidDispMode_t x = VID_DISPMODE_NORM*/);
@@ -176,19 +178,21 @@ class cVideo
 		int getBlank(void);
 		int setBlank(int enable);
 
+		/* set video_system */
+		int SetVideoSystem(int video_system, bool remember = true);
+
 		/* change video play state. Parameters are all unused. */
 		int Start(void *PcrChannel = NULL, unsigned short PcrPid = 0, unsigned short VideoPid = 0, void *x = NULL);
 		int Stop(bool blank = true);
 		bool Pause(void);
 
-		/* set video_system */
-		int SetVideoSystem(int video_system, bool remember = true);
 		int SetStreamType(VIDEO_FORMAT type);
+		bool ShowPicture(const char *fname);
+
 		void SetSyncMode(AVSYNC_TYPE mode);
 		bool SetCECMode(VIDEO_HDMI_CEC_MODE) { return true; };
 		void SetCECAutoView(bool) { return; };
 		void SetCECAutoStandby(bool) { return; };
-		bool ShowPicture(const char *fname);
 		void StopPicture();
 		void Standby(unsigned int bOn);
 		void Pig(int x, int y, int w, int h, int osd_w = 1064, int osd_h = 600);
@@ -204,6 +208,7 @@ class cVideo
 		int  StopVBI(void) { return 0; };
 		void SetDemux(cDemux *dmx);
 		bool GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get_video = true, bool get_osd = false, bool scale_to_video = false);
+
 	private:
 		SWFramebuffer buffers[VDEC_MAXBUFS];
 		int dec_w, dec_h;
