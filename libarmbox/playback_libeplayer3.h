@@ -84,7 +84,7 @@ class cPlayback
 		void *GetHandle(void);
 		void *GetDmHandle(void);
 		int GetCurrPlaybackSpeed(void) const;
-		void PlaybackNotify(int  Event, void *pData, void *pTag);
+		void PlaybackNotify(int Event, void *pData, void *pTag);
 		void DMNotify(int Event, void *pTsBuf, void *Tag);
 #endif
 };

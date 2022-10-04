@@ -1218,6 +1218,7 @@ static void FFMPEGThread(Context_t *context)
 						int64_t next_out_pts = av_rescale(swr_next_pts(swr, next_in_pts),
 								((AVStream *) audioTrack->stream)->time_base.den,
 								((AVStream *) audioTrack->stream)->time_base.num * (int64_t)out_sample_rate * c->sample_rate);
+
 						currentAudioPts = audioTrack->pts = pts = calcPts(cAVIdx, audioTrack->stream, next_out_pts);
 						out_samples = swr_convert(swr, &output[0], out_samples, (const uint8_t **) &decoded_frame->data[0], in_samples);
 
@@ -2029,7 +2030,7 @@ int32_t container_ffmpeg_init(Context_t *context, PlayFiles_t *playFilesNames)
 
 	context->playback->abortRequested = 0;
 	int32_t res = container_ffmpeg_init_av_context(context, playFilesNames->szFirstFile, playFilesNames->iFirstFileSize, \
-			playFilesNames->szFirstMoovAtomFile, playFilesNames->iFirstMoovAtomOffset, 0);
+		playFilesNames->szFirstMoovAtomFile, playFilesNames->iFirstMoovAtomOffset, 0);
 
 	if (0 != res)
 	{
@@ -2039,7 +2040,7 @@ int32_t container_ffmpeg_init(Context_t *context, PlayFiles_t *playFilesNames)
 	if (playFilesNames->szSecondFile && playFilesNames->szSecondFile[0] != '\0')
 	{
 		res = container_ffmpeg_init_av_context(context, playFilesNames->szSecondFile, playFilesNames->iSecondFileSize, \
-				playFilesNames->szSecondMoovAtomFile, playFilesNames->iSecondMoovAtomOffset, 1);
+			playFilesNames->szSecondMoovAtomFile, playFilesNames->iSecondMoovAtomOffset, 1);
 	}
 
 	if (0 != res)
@@ -2209,9 +2210,9 @@ int32_t container_ffmpeg_update_tracks(Context_t *context, char *filename, int32
 			}
 
 			encoding = Codec2Encoding((int32_t)get_codecpar(stream)->codec_id, (int32_t)get_codecpar(stream)->codec_type, \
-					(uint8_t *)get_codecpar(stream)->extradata, \
-					(int)get_codecpar(stream)->extradata_size, \
-					(int)get_codecpar(stream)->profile, &version);
+				(uint8_t *)get_codecpar(stream)->extradata, \
+				(int)get_codecpar(stream)->extradata_size, \
+				(int)get_codecpar(stream)->profile, &version);
 
 			if (encoding != NULL && !strncmp(encoding, "A_IPCM", 6) && insert_pcm_as_lpcm)
 			{

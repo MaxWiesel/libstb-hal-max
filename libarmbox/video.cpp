@@ -54,23 +54,23 @@ extern "C"
 #define hal_debug_c(args...) _hal_debug(HAL_DEBUG_VIDEO, NULL, args)
 #define hal_info_c(args...) _hal_info(HAL_DEBUG_VIDEO, NULL, args)
 
-#define fop(cmd, args...) ({				\
+#define fop(cmd, args...) ({					\
 		int _r;						\
-		if (fd >= 0) { 					\
+		if (fd >= 0) {					\
 			if ((_r = ::cmd(fd, args)) < 0)		\
 				hal_info(#cmd"(fd, "#args")\n");\
 			else					\
 				hal_debug(#cmd"(fd, "#args")\n");\
 		}						\
-		else { _r = fd; } 				\
+		else { _r = fd; }				\
 		_r;						\
 	})
 
 #ifndef VIDEO_GET_SIZE
-#define VIDEO_GET_SIZE             _IOR('o', 55, video_size_t)
+#define VIDEO_GET_SIZE _IOR('o', 55, video_size_t)
 #endif
 #ifndef VIDEO_GET_FRAME_RATE
-#define VIDEO_GET_FRAME_RATE       _IOR('o', 56, unsigned int)
+#define VIDEO_GET_FRAME_RATE _IOR('o', 56, unsigned int)
 #endif
 
 enum
@@ -175,27 +175,27 @@ static const char *VMPEG_visible[] =
 
 static const char *vid_modes[] =
 {
-	"pal",		// VIDEO_STD_NTSC
-	"pal",		// VIDEO_STD_SECAM
-	"pal",		// VIDEO_STD_PAL
-	"480p",		// VIDEO_STD_480P
-	"576p50",	// VIDEO_STD_576P
-	"720p60",	// VIDEO_STD_720P60
-	"1080i60",	// VIDEO_STD_1080I60
-	"720p50",	// VIDEO_STD_720P50
-	"1080i50",	// VIDEO_STD_1080I50
-	"1080p30",	// VIDEO_STD_1080P30
-	"1080p24",	// VIDEO_STD_1080P24
-	"1080p25",	// VIDEO_STD_1080P25
-	"1080p50",	// VIDEO_STD_1080P50
-	"1080p60",	// VIDEO_STD_1080P60
-	"1080p2397",	// VIDEO_STD_1080P2397
-	"1080p2997",	// VIDEO_STD_1080P2997
-	"2160p24",	// VIDEO_STD_2160P24
-	"2160p25",	// VIDEO_STD_2160P25
-	"2160p30",	// VIDEO_STD_2160P30
-	"2160p50",	// VIDEO_STD_2160P50
-	"720p50"	// VIDEO_STD_AUTO
+	"pal",      // VIDEO_STD_NTSC
+	"pal",      // VIDEO_STD_SECAM
+	"pal",      // VIDEO_STD_PAL
+	"480p",     // VIDEO_STD_480P
+	"576p50",   // VIDEO_STD_576P
+	"720p60",   // VIDEO_STD_720P60
+	"1080i60",  // VIDEO_STD_1080I60
+	"720p50",   // VIDEO_STD_720P50
+	"1080i50",  // VIDEO_STD_1080I50
+	"1080p30",  // VIDEO_STD_1080P30
+	"1080p24",  // VIDEO_STD_1080P24
+	"1080p25",  // VIDEO_STD_1080P25
+	"1080p50",  // VIDEO_STD_1080P50
+	"1080p60",  // VIDEO_STD_1080P60
+	"1080p2397",// VIDEO_STD_1080P2397
+	"1080p2997",// VIDEO_STD_1080P2997
+	"2160p24",  // VIDEO_STD_2160P24
+	"2160p25",  // VIDEO_STD_2160P25
+	"2160p30",  // VIDEO_STD_2160P30
+	"2160p50",  // VIDEO_STD_2160P50
+	"720p50"    // VIDEO_STD_AUTO
 };
 
 #define VIDEO_STREAMTYPE_MPEG2 0
@@ -538,7 +538,7 @@ int cVideo::setAspectRatio(int aspect, int mode)
 	int n;
 
 	int mo = (mode < 0 || mode > 3) ? 4 : mode;
-	hal_debug("%s: a:%d m:%d  %s\n", __func__, aspect, mode, m[mo]);
+	hal_debug("%s: a:%d m:%d %s\n", __func__, aspect, mode, m[mo]);
 
 	if (aspect > 3 || aspect == 0)
 		hal_info("%s: invalid aspect: %d\n", __func__, aspect);
@@ -604,7 +604,7 @@ int cVideo::Start(void * /*PcrChannel*/, unsigned short /*PcrPid*/, unsigned sho
 #if 0
 	if (playstate == VIDEO_PLAYING)
 		return 0;
-	if (playstate == VIDEO_FREEZED)  /* in theory better, but not in practice :-) */
+	if (playstate == VIDEO_FREEZED) /* in theory better, but not in practice :-) */
 		fop(ioctl, MPEG_VID_CONTINUE);
 #endif
 	/* implicitly do StopPicture() on video->Start() */
@@ -849,11 +849,13 @@ void cVideo::QuadPiP(bool active, int _x, int _y, int _w, int _h)
 {
 	char buffer[64];
 	int _a = 1;
-	if (active) {
+	if (active)
+	{
 #if BOXMODEL_VUSOLO4K || BOXMODEL_VUDUO4K || BOXMODEL_VUDUO4KSE || BOXMODEL_VUULTIMO4K || BOXMODEL_VUUNO4KSE || BOXMODEL_VUUNO4K
 		proc_put("/proc/stb/video/decodermode", "mosaic", strlen("mosaic"));
 #endif
-		for (unsigned int i = 0; i < 4; i++) {
+		for (unsigned int i = 0; i < 4; i++)
+		{
 			sprintf(buffer, "%x", _x);
 			proc_put(VMPEG_dst_left[i], buffer, strlen(buffer));
 			sprintf(buffer, "%x", _y);
@@ -865,8 +867,11 @@ void cVideo::QuadPiP(bool active, int _x, int _y, int _w, int _h)
 			sprintf(buffer, "%x", _a);
 			proc_put(VMPEG_dst_apply[i], buffer, strlen(buffer));
 		}
-	} else {
-		for (unsigned int i = 0; i < 4; i++) {
+	}
+	else
+	{
+		for (unsigned int i = 0; i < 4; i++)
+		{
 			sprintf(buffer, "%x", 0);
 			proc_put(VMPEG_dst_left[i], buffer, strlen(buffer));
 			sprintf(buffer, "%x", 0);
@@ -979,9 +984,9 @@ void cVideo::getPictureInfo(int &width, int &height, int &rate)
 		int n = proc_get(VMPEG_framerate[devnum], buf, 16);
 		if (n > 0)
 			sscanf(buf, "%i", &r);
-		width  = proc_get_hex(VMPEG_xres[devnum]);
+		width = proc_get_hex(VMPEG_xres[devnum]);
 		height = proc_get_hex(VMPEG_yres[devnum]);
-		rate   = rate2csapi(r);
+		rate = rate2csapi(r);
 		return;
 	}
 	ioctl(fd, VIDEO_GET_SIZE, &s);
@@ -1173,7 +1178,7 @@ void cVideo::SetHDMIColorimetry(HDMI_COLORIMETRY hdmi_colorimetry)
 bool getvideo2(unsigned char *video, int xres, int yres)
 {
 	bool ret = false;
-	if (video ==  NULL)
+	if (video == NULL)
 		return ret;
 	char videosnapshot[] = "/dev/dvb/adapter0/video0";
 	int fd_video = open(videosnapshot, O_RDONLY);
@@ -1268,6 +1273,7 @@ void get_osd_size(int &xres, int &yres, int &bits_per_pixel)
 	yres = var_screeninfo.yres;
 	fprintf(stderr, "... Framebuffer-Size: %d x %d\n", xres, yres);
 }
+
 void get_osd_buf(unsigned char *osd_data)
 {
 	struct fb_fix_screeninfo fix_screeninfo;
@@ -1317,7 +1323,7 @@ void get_osd_buf(unsigned char *osd_data)
 	close(fb);
 }
 
-inline void rgb24torgb32(unsigned char  *src, unsigned char *dest, int picsize)
+inline void rgb24torgb32(unsigned char *src, unsigned char *dest, int picsize)
 {
 	for (int i = 0; i < picsize; i++)
 	{
@@ -1376,7 +1382,7 @@ bool cVideo::GetScreenImage(unsigned char *&out_data, int &xres, int &yres, bool
 			free(video_src);
 			return false;
 		}
-		if (grab_w != xres || grab_h != yres)  /* scale video into data... */
+		if (grab_w != xres || grab_h != yres) /* scale video into data... */
 		{
 			bool ret = swscale(video_src, out_data, grab_w, grab_h, xres, yres, VDEC_PIXFMT);
 			if (!ret)
@@ -1386,7 +1392,7 @@ bool cVideo::GetScreenImage(unsigned char *&out_data, int &xres, int &yres, bool
 				return false;
 			}
 		}
-		else   /* get_video and no fancy scaling needed */
+		else /* get_video and no fancy scaling needed */
 		{
 			rgb24torgb32(video_src, out_data, grab_w * grab_h);
 		}
@@ -1442,7 +1448,7 @@ bool cVideo::GetScreenImage(unsigned char *&out_data, int &xres, int &yres, bool
 				{
 					uint8_t *in = (uint8_t *)(pixpos);
 					uint8_t *out = (uint8_t *)d;
-					int a = in[3];	/* TODO: big/little endian? */
+					int a = in[3]; /* TODO: big/little endian? */
 					*out = (*out + ((*in - *out) * a) / 256);
 					in++;
 					out++;

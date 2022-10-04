@@ -42,6 +42,7 @@ typedef enum
 class cAudio : public OpenThreads::Thread
 {
 		friend class cPlayback;
+
 	private:
 		int fd;
 		bool Muted;

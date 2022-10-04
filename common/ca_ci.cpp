@@ -651,7 +651,7 @@ bool cCA::SendCAPMT(u64 tpid, u8 source, u8 camask, const unsigned char *cabuf, 
 	bool recordUse_found = false;
 	printf("%s -> %s\n", FILENAME, __func__);
 	if (!num_slots)
-		return true;	/* stb's without ci-slots */
+		return true; /* stb's without ci-slots */
 #if x_debug
 	printf("TP: %llX\n", TP);
 	printf("SID: %04X\n", SID);
@@ -733,7 +733,7 @@ bool cCA::SendCAPMT(u64 tpid, u8 source, u8 camask, const unsigned char *cabuf, 
 			(*It)->pmtlen = calen;
 			for (i = 0; i < calen; i++)
 				(*It)->pmtdata[i] = cabuf[i];
-			(*It)->pmtdata[pos] = 0x04;     // CAPMT_ADD
+			(*It)->pmtdata[pos] = 0x04; // CAPMT_ADD
 			(*It)->newCapmt = true;
 		}
 

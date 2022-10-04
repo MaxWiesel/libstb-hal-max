@@ -1,8 +1,6 @@
 /*
  * cDemux implementation for generic dvbapi
  *
- * derived from libtriple/dmx_td.cpp
- *
  * (C) 2010-2013 Stefan Seyfried
  *
  * This program is free software; you can redistribute it and/or modify
@@ -113,8 +111,9 @@ bool cDemux::Open(DMX_CHANNEL_TYPE pes_type, void * /*hVideoBuffer*/, int uBuffe
 		hal_info("%s %s: %m\n", __FUNCTION__, devname[devnum]);
 		return false;
 	}
-	hal_debug("%s #%d pes_type: %s(%d), uBufferSize: %d fd: %d\n", __func__,
-		num, DMX_T[pes_type], pes_type, uBufferSize, fd);
+	hal_debug("%s #%d pes_type: %s(%d), uBufferSize: %d fd: %d\n",
+		__func__, num, DMX_T[pes_type], pes_type, uBufferSize, fd);
+
 	if (dmx_type == DMX_VIDEO_CHANNEL)
 		uBufferSize = 0x100000;		/* 1MB */
 	if (dmx_type == DMX_AUDIO_CHANNEL)
@@ -359,8 +358,8 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 	if (timeout == 0 && negmask == NULL)
 		s_flt.timeout = to;
 
-	hal_debug("%s #%d pid:0x%04hx fd:%d type:%s len:%d to:%d flags:%x flt[0]:%02x\n", __func__, num,
-		pid, fd, DMX_T[dmx_type], len, s_flt.timeout, s_flt.flags, s_flt.filter.filter[0]);
+	hal_debug("%s #%d pid:0x%04hx fd:%d type:%s len:%d to:%d flags:%x flt[0]:%02x\n",
+		__func__, num, pid, fd, DMX_T[dmx_type], len, s_flt.timeout, s_flt.flags, s_flt.filter.filter[0]);
 
 	if (debuglevel == 2)
 	{

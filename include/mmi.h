@@ -1,8 +1,8 @@
 #ifndef __MMI_H__
 #define __MMI_H__
 
-#define MAX_MMI_ITEMS           40
-#define MAX_MMI_TEXT_LEN        255
+#define MAX_MMI_ITEMS 40
+#define MAX_MMI_TEXT_LEN 255
 #define MAX_MMI_CHOICE_TEXT_LEN 255
 
 typedef enum

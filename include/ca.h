@@ -5,6 +5,7 @@
 #include "cs_types.h"
 #include <vector>
 #include <set>
+
 typedef std::vector<u16> CaIdVector;
 typedef std::vector<u16>::iterator CaIdVectorIterator;
 typedef std::vector<u16>::const_iterator CaIdVectorConstIterator;

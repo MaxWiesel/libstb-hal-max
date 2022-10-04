@@ -450,8 +450,7 @@ cPlayback::cPlayback(int num)
 		nano_str = "";
 
 	hal_info("%s:%s - This program is linked against GStreamer %d.%d.%d %s\n",
-		FILENAME, __FUNCTION__,
-		major, minor, micro, nano_str);
+		FILENAME, __FUNCTION__, 	major, minor, micro, nano_str);
 
 	mAudioStream = 0;
 	mSpeed = 0;

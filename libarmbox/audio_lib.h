@@ -32,11 +32,11 @@ class cAudio
 		bool Muted;
 
 		int clipfd; /* for pcm playback */
-		int mixer_fd;  /* if we are using the OSS mixer */
+		int mixer_fd; /* if we are using the OSS mixer */
 		int mixer_num; /* oss mixer to use, if any */
 
 		int StreamType;
-		AUDIO_SYNC_MODE    SyncMode;
+		AUDIO_SYNC_MODE SyncMode;
 		bool started;
 
 		int volume;
@@ -64,7 +64,7 @@ class cAudio
 
 		/* volume, min = 0, max = 255 */
 		int setVolume(unsigned int left, unsigned int right);
-		int getVolume(void) { return volume;}
+		int getVolume(void) { return volume; }
 		bool getMuteStatus(void) { return Muted; };
 
 		/* start and stop audio */

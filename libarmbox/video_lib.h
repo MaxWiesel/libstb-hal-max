@@ -175,7 +175,6 @@ class cVideo
 {
 		friend class cPlayback;
 		friend class cDemux;
-
 	private:
 		/* video device */
 		int fd;
@@ -214,7 +213,6 @@ class cVideo
 
 		/* used internally by dmx */
 		int64_t GetPTS(void);
-
 	public:
 		/* constructor & destructor */
 		cVideo(int mode, void *, void *, unsigned int unit = 0);
@@ -264,7 +262,7 @@ class cVideo
 		bool SetCECMode(VIDEO_HDMI_CEC_MODE);
 		void SetCECAutoView(bool);
 		void SetCECAutoStandby(bool);
-		int  GetAudioDestination();
+		int GetAudioDestination();
 		void SetAudioDestination(int audio_dest);
 		bool ShowPicture(const char *fname);
 		void StopPicture();
@@ -278,10 +276,10 @@ class cVideo
 		void SetDBDR(int) { return; };
 		void SetAudioHandle(void *) { return; };
 		void SetAutoModes(int [VIDEO_STD_MAX]) { return; };
-		int  OpenVBI(int) { return 0; };
-		int  CloseVBI(void) { return 0; };
-		int  StartVBI(unsigned short) { return 0; };
-		int  StopVBI(void) { return 0; };
+		int OpenVBI(int) { return 0; };
+		int CloseVBI(void) { return 0; };
+		int StartVBI(unsigned short) { return 0; };
+		int StopVBI(void) { return 0; };
 		void SetDemux(cDemux *dmx);
 		void SetHDMIColorimetry(HDMI_COLORIMETRY hdmi_colorimetry);
 		bool GetScreenImage(unsigned char *&data, int &xres, int &yres, bool get_video = true, bool get_osd = false, bool scale_to_video = false);

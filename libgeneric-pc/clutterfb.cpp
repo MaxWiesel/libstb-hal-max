@@ -352,8 +352,7 @@ void GLFbPC::render()
 //			*mX = *mY * mOA.num / mOA.den;
 			clutter_actor_set_size(stage, *mX, *mY);
 		}
-		hal_info("%s: reinit mX:%d mY:%d xoff:%d yoff:%d fs %d\n",
-			__func__, *mX, *mY, xoff, yoff, mFullscreen);
+		hal_info("%s: reinit mX:%d mY:%d xoff:%d yoff:%d fs %d\n", __func__, *mX, *mY, xoff, yoff, mFullscreen);
 	}
 	mReInitLock.unlock();
 

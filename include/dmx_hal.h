@@ -98,11 +98,11 @@ class cDemux
 		int getUnit(void);
 		static bool SetSource(int unit, int source);
 		static int GetSource(int unit);
-		int getFD(void) { return fd; };		/* needed by cPlayback class */
+		int getFD(void) { return fd; }; /* needed by cPlayback class */
 		cDemux(int num = 0);
 		~cDemux();
 	private:
-		void removePid(unsigned short Pid);	/* needed by cRecord class */
+		void removePid(unsigned short Pid); /* needed by cRecord class */
 		int num;
 		int fd;
 		int buffersize;

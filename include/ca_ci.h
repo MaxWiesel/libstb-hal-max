@@ -125,7 +125,7 @@ typedef std::vector<u16>::const_iterator CaIdVectorConstIterator;
 #define CA_MESSAGE_ENTRIES_SC	64
 
 #ifndef CS_CA_PDATA
-#define CS_CA_PDATA		void
+#define CS_CA_PDATA void
 #endif
 
 typedef enum

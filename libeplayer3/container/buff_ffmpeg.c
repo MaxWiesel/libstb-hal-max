@@ -342,6 +342,7 @@ static void ffmpeg_filler(Context_t *context, int32_t id, int32_t *inpause, int3
 
 			if (flag == 1 && hasfillerThreadStarted[id] == 2)
 				break;
+
 			ffmpeg_printf(20, "buffer-status (free buffer=%d)\n", rwdiff - FILLBUFDIFF - len);
 
 			getfillerMutex(__FILE__, __FUNCTION__, __LINE__);

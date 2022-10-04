@@ -390,8 +390,7 @@ void GLFbPC::render()
 		}
 		else
 			*mX = *mY * mOA.num / mOA.den;
-		hal_info("%s: reinit mX:%d mY:%d xoff:%d yoff:%d fs %d\n",
-			__func__, *mX, *mY, xoff, yoff, mFullscreen);
+		hal_info("%s: reinit mX:%d mY:%d xoff:%d yoff:%d fs %d\n", __func__, *mX, *mY, xoff, yoff, mFullscreen);
 		glViewport(xoff, yoff, *mX, *mY);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

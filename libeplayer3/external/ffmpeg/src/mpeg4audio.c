@@ -114,8 +114,8 @@ int avpriv_mpeg4audio_get_config(MPEG4AudioConfig *c, const uint8_t *buf, int bi
 	c->sbr = -1;
 	c->ps  = -1;
 	if (c->object_type == AOT_SBR || (c->object_type == AOT_PS &&
-			// check for W6132 Annex YYYY draft MP3onMP4
-			!(show_bits(&gb, 3) & 0x03 && !(show_bits(&gb, 9) & 0x3F))))
+		// check for W6132 Annex YYYY draft MP3onMP4
+		!(show_bits(&gb, 3) & 0x03 && !(show_bits(&gb, 9) & 0x3F))))
 	{
 		if (c->object_type == AOT_PS)
 			c->ps = 1;

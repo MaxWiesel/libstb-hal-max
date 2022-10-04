@@ -2,8 +2,6 @@
  * cDemux implementation for arm receivers (tested on mutant hd51
  * hardware)
  *
- * derived from libtriple/dmx_td.cpp
- *
  * (C) 2010-2013 Stefan Seyfried
  *
  * This program is free software; you can redistribute it and/or modify
@@ -198,8 +196,8 @@ static bool _open(cDemux *thiz, int num, int &fd, int &last_source, DMX_CHANNEL_
 		hal_info_z("%s %s: %m\n", __FUNCTION__, devname(0, devnum));
 		return false;
 	}
-	hal_debug_z("%s #%d pes_type: %s(%d), uBufferSize: %d fd: %d\n", __func__,
-		num, DMX_T[dmx_type], dmx_type, buffersize, fd);
+	hal_debug_z("%s #%d pes_type: %s(%d), uBufferSize: %d fd: %d\n",
+		__func__, num, DMX_T[dmx_type], dmx_type, buffersize, fd);
 
 	/* this would actually need locking, but the worst that weill happen is, that
 	 * we'll DMX_SET_SOURCE twice per device, so don't bother... */
@@ -214,7 +212,7 @@ static bool _open(cDemux *thiz, int num, int &fd, int &last_source, DMX_CHANNEL_
 			init[devnum] = true;
 	}
 	if (buffersize == 0)
-		buffersize = 0xffff; // may or may not be reasonable  --martii
+		buffersize = 0xffff; // may or may not be reasonable --martii
 	if (buffersize > 0)
 	{
 		/* probably uBufferSize == 0 means "use default size". TODO: find a reasonable default */
@@ -339,7 +337,7 @@ retry:
 			return 0;
 		}
 	}
-	if (ufds.fd != fd)	/* does this ever happen? and if, is it harmful? */
+	if (ufds.fd != fd) /* does this ever happen? and if, is it harmful? */
 	{
 		/* read(-1,...) will just return EBADF anyway... */
 		hal_info("%s:2 ========== fd has changed, %d->%d ==========\n", __func__, ufds.fd, fd);
@@ -373,7 +371,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 	s_flt.pid = pid;
 	s_flt.timeout = timeout;
 	memcpy(s_flt.filter.filter, filter, len);
-	memcpy(s_flt.filter.mask,   mask,   len);
+	memcpy(s_flt.filter.mask, mask, len);
 	if (negmask != NULL)
 		memcpy(s_flt.filter.mode, negmask, len);
 
@@ -424,7 +422,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		case 0x70: /* time_date_section */
 			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
 			s_flt.flags |= DMX_ONESHOT;
-			//s_flt.pid     = 0x0014;
+			//s_flt.pid = 0x0014;
 			to = 30000;
 			break;
 		case 0x71: /* running_status_section */
@@ -437,7 +435,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 			break;
 		case 0x73: /* time_offset_section */
 			s_flt.flags |= DMX_ONESHOT;
-			//s_flt.pid     = 0x0014;
+			//s_flt.pid = 0x0014;
 			to = 30000;
 			break;
 		case 0x74: /* application_information_section */
@@ -465,8 +463,8 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 	if (timeout == 0 && negmask == NULL)
 		s_flt.timeout = to;
 
-	hal_debug("%s #%d pid:0x%04hx fd:%d type:%s len:%d to:%d flags:%x flt[0]:%02x\n", __func__, num,
-		pid, fd, DMX_T[dmx_type], len, s_flt.timeout, s_flt.flags, s_flt.filter.filter[0]);
+	hal_debug("%s #%d pid:0x%04hx fd:%d type:%s len:%d to:%d flags:%x flt[0]:%02x\n",
+		__func__, num, pid, fd, DMX_T[dmx_type], len, s_flt.timeout, s_flt.flags, s_flt.filter.filter[0]);
 
 	if (debuglevel == 2)
 	{
@@ -476,11 +474,11 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		fprintf(stderr, "\n");
 		fprintf(stderr, "mask: ");
 		for (int i = 0; i < len; i++)
-			fprintf(stderr, "%02hhx ", s_flt.filter.mask  [i]);
+			fprintf(stderr, "%02hhx ", s_flt.filter.mask[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "mode: ");
 		for (int i = 0; i < len; i++)
-			fprintf(stderr, "%02hhx ", s_flt.filter.mode  [i]);
+			fprintf(stderr, "%02hhx ", s_flt.filter.mode[i]);
 		fprintf(stderr, "\n");
 	}
 
@@ -510,10 +508,10 @@ bool cDemux::pesFilter(const unsigned short _pid)
 	_open(this, num, fd, P->last_source, dmx_type, buffersize);
 
 	memset(&p_flt, 0, sizeof(p_flt));
-	p_flt.pid    = pid;
-	p_flt.input  = DMX_IN_FRONTEND;
+	p_flt.pid = pid;
+	p_flt.input = DMX_IN_FRONTEND;
 	p_flt.output = DMX_OUT_DECODER;
-	p_flt.flags  = 0;
+	p_flt.flags = 0;
 
 	switch (dmx_type)
 	{
@@ -553,7 +551,7 @@ bool cDemux::pesFilter(const unsigned short _pid)
 			break;
 		case DMX_PES_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
-			p_flt.output   = DMX_OUT_TAP;
+			p_flt.output = DMX_OUT_TAP;
 			break;
 #if 0
 		case DMX_PSI_CHANNEL:
@@ -561,7 +559,7 @@ bool cDemux::pesFilter(const unsigned short _pid)
 #endif
 		case DMX_TP_CHANNEL:
 			p_flt.pes_type = DMX_PES_OTHER;
-			p_flt.output   = DMX_OUT_TSDEMUX_TAP;
+			p_flt.output = DMX_OUT_TSDEMUX_TAP;
 			break;
 		case DMX_PCR_ONLY_CHANNEL:
 			switch (num)

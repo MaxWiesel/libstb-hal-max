@@ -1,20 +1,20 @@
 /*
-	Copyright (C) 2018-2021 TangoCash
+    Copyright (C) 2018-2021 TangoCash
 
-	License: GPLv2
+    License: GPLv2
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation;
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation;
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <fcntl.h>
@@ -52,24 +52,24 @@
 #define hal_debug_c(args...) _hal_debug(HAL_DEBUG_INIT, NULL, args)
 #define hal_info_c(args...) _hal_info(HAL_DEBUG_INIT, NULL, args)
 
-#define fop(cmd, args...) ({				\
+#define fop(cmd, args...) ({					\
 		int _r;						\
-		if (fd >= 0) { 					\
+		if (fd >= 0) {					\
 			if ((_r = ::cmd(fd, args)) < 0)		\
-				hal_info(#cmd"(fd, "#args")\n");	\
+				hal_info(#cmd"(fd, "#args")\n");\
 			else					\
 				hal_debug(#cmd"(fd, "#args")\n");\
 		}						\
-		else { _r = fd; } 				\
+		else { _r = fd; }				\
 		_r;						\
 	})
 
 #define CEC_FALLBACK_DEVICE "/dev/cec0"
 #define CEC_HDMIDEV "/dev/hdmi_cec"
 #if BOXMODEL_H7
-#define RC_DEVICE  "/dev/input/event2"
+#define RC_DEVICE "/dev/input/event2"
 #else
-#define RC_DEVICE  "/dev/input/event1"
+#define RC_DEVICE "/dev/input/event1"
 #endif
 
 hdmi_cec *hdmi_cec::hdmi_cec_instance = NULL;
@@ -681,9 +681,7 @@ void hdmi_cec::Receive(int what)
 				case CEC_OPCODE_DEVICE_VENDOR_ID:
 				case CEC_OPCODE_VENDOR_COMMAND_WITH_ID:
 				{
-					uint64_t iVendorId = ((uint64_t)rxmessage.data[1] << 16) +
-						((uint64_t)rxmessage.data[2] << 8) +
-						(uint64_t)rxmessage.data[3];
+					uint64_t iVendorId = ((uint64_t)rxmessage.data[1] << 16) + ((uint64_t)rxmessage.data[2] << 8) + (uint64_t)rxmessage.data[3];
 					hal_info(GREEN "[CEC] decoded message '%s' (%s)\n" NORMAL, ToString((cec_opcode)rxmessage.opcode), ToString((cec_vendor_id)iVendorId));
 					break;
 				}

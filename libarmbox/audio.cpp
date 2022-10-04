@@ -17,15 +17,15 @@
 #define hal_debug(args...) _hal_debug(HAL_DEBUG_AUDIO, this, args)
 #define hal_info(args...) _hal_info(HAL_DEBUG_AUDIO, this, args)
 
-#define fop(cmd, args...) ({				\
+#define fop(cmd, args...) ({					\
 		int _r;						\
-		if (fd >= 0) { 					\
+		if (fd >= 0) {					\
 			if ((_r = ::cmd(fd, args)) < 0)		\
 				hal_info(#cmd"(fd, "#args")\n");\
 			else					\
 				hal_debug(#cmd"(fd, "#args")\n");\
 		}						\
-		else { _r = fd; } 				\
+		else { _r = fd; }				\
 		_r;						\
 	})
 
@@ -51,7 +51,6 @@ static const char *ADEV[] =
 cAudio::cAudio(void *, void *, void *, unsigned int unit)
 {
 	hw_caps_t *hwcaps = get_hwcaps();
-
 	if (unit > (unsigned int) hwcaps->pip_devs)
 	{
 		hal_info("%s: unit %d out of range, setting to 0\n", __func__, unit);
@@ -59,7 +58,6 @@ cAudio::cAudio(void *, void *, void *, unsigned int unit)
 	}
 	else
 		devnum = unit;
-
 	fd = -1;
 	fdd = false;
 	clipfd = -1;
@@ -465,21 +463,21 @@ void cAudio::getAudioInfo(int &type, int &layer, int &freq, int &bitrate, int &m
 	/* this does not work, some of the values are negative?? */
 	AMPEGStatus A;
 	memcpy(&A, &i.word00, sizeof(i.word00));
-	layer   = A.audio_mpeg_layer;
-	mode    = A.audio_mpeg_mode;
+	layer = A.audio_mpeg_layer;
+	mode = A.audio_mpeg_mode;
 	bitrate = A.audio_mpeg_bitrate;
 	switch (A.audio_mpeg_frequency)
 #endif
 		/* layer and bitrate are not used anyway... */
-		layer   = 0; //(i.word00 >> 17) & 3;
+		layer = 0; //(i.word00 >> 17) & 3;
 	bitrate = 0; //(i.word00 >> 12) & 3;
 	switch (type)
 	{
-		case 0:	/* MPEG */
+		case 0: /* MPEG */
 			mode = (i.word00 >> 6) & 3;
 			freq = freq_mpg[(i.word00 >> 10) & 3];
 			break;
-		case 1:	/* AC3 */
+		case 1: /* AC3 */
 			mode = (i.word00 >> 28) & 7;
 			freq = freq_ac3[(i.word00 >> 16) & 3];
 			break;
@@ -498,7 +496,7 @@ void cAudio::SetSRS(int /*iq_enable*/, int /*nmgr_enable*/, int /*iq_mode*/, int
 
 void cAudio::SetHdmiDD(bool enable)
 {
-	const char *opt[] = {  "downmix", "passthrough" };
+	const char *opt[] = { "downmix", "passthrough" };
 	hal_debug("%s %d\n", __func__, enable);
 	proc_put("/proc/stb/audio/ac3", opt[enable], strlen(opt[enable]));
 }
@@ -506,7 +504,7 @@ void cAudio::SetHdmiDD(bool enable)
 void cAudio::SetSpdifDD(bool enable)
 {
 	//using this function for dts passthrough
-	const char *opt[] = {  "downmix", "passthrough" };
+	const char *opt[] = { "downmix", "passthrough" };
 	hal_debug("%s %d\n", __func__, enable);
 	proc_put("/proc/stb/audio/dts", opt[enable], strlen(opt[enable]));
 }
@@ -521,7 +519,7 @@ void cAudio::EnableAnalogOut(bool enable)
 	hal_debug("%s %d\n", __FUNCTION__, enable);
 }
 
-#define AUDIO_BYPASS_ON  0
+#define AUDIO_BYPASS_ON 0
 #define AUDIO_BYPASS_OFF 1
 void cAudio::setBypassMode(bool disable)
 {

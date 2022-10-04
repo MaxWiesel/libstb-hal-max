@@ -13,10 +13,10 @@ typedef enum
 {
 	RECORD_RUNNING,
 	RECORD_STOPPED,
-	RECORD_FAILED_READ,	/* failed to read from DMX */
-	RECORD_FAILED_OVERFLOW,	/* cannot write fast enough */
-	RECORD_FAILED_FILE,	/* cannot write to file */
-	RECORD_FAILED_MEMORY	/* out of memory */
+	RECORD_FAILED_READ, /* failed to read from DMX */
+	RECORD_FAILED_OVERFLOW, /* cannot write fast enough */
+	RECORD_FAILED_FILE, /* cannot write to file */
+	RECORD_FAILED_MEMORY /* out of memory */
 } record_state_t;
 
 class cRecord
@@ -38,7 +38,6 @@ class cRecord
 #define RECORD_WRITER_CHUNKS 16
 		unsigned char *io_buf[RECORD_WRITER_CHUNKS];
 		size_t io_len[RECORD_WRITER_CHUNKS];
-
 	public:
 		cRecord(int num = 0, int bs_dmx = 2048 * 1024, int bs = 4096 * 1024);
 		void setFailureCallback(void (*f)(void *), void *d) { failureCallback = f; failureData = d; }
@@ -48,7 +47,7 @@ class cRecord
 		bool Start(int fd, unsigned short vpid, unsigned short *apids, int numapids, uint64_t ch = 0);
 		bool Stop(void);
 		bool AddPid(unsigned short pid);
-		int  GetStatus();
+		int GetStatus();
 		void ResetStatus();
 		bool ChangePids(unsigned short vpid, unsigned short *apids, int numapids);
 
