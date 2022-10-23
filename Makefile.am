@@ -12,6 +12,7 @@ libstb_hal_la_LIBADD = \
 #libstb_hal_test_LDADD = libstb-hal.la
 
 # there has to be a better way to do this...
+
 if BOXTYPE_GENERIC
 if BOXMODEL_RASPI
 SUBDIRS += libraspi
