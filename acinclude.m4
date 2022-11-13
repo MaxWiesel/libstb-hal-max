@@ -88,7 +88,7 @@ AC_ARG_WITH(boxtype,
 
 AC_ARG_WITH(boxmodel,
 	AS_HELP_STRING([--with-boxmodel], [valid for generic: generic, raspi])
-AS_HELP_STRING([], [valid for armbox: hd60, hd61, multibox, multiboxse, hd51, bre2ze4k, e4hdultra, h7, osmini4k, osmio4k, osmio4kplus, vusolo4k, vuduo4k, vuduo4kse, vuultimo4k, vuuno4k, vuuno4kse, vuzero4k])
+AS_HELP_STRING([], [valid for armbox: hd60, hd61, multibox, multiboxse, hd51, bre2ze4k, h7, e4hdultra, protek4k, osmini4k, osmio4k, osmio4kplus, vusolo4k, vuduo4k, vuduo4kse, vuultimo4k, vuuno4k, vuuno4kse, vuzero4k])
 AS_HELP_STRING([], [valid for mipsbox: vuduo, vuduo2, gb800se, osnino, osninoplus, osninopro]),
 	[case "${withval}" in
 		generic|raspi)
@@ -98,7 +98,7 @@ AS_HELP_STRING([], [valid for mipsbox: vuduo, vuduo2, gb800se, osnino, osninoplu
 				AC_MSG_ERROR([unknown model $withval for boxtype $BOXTYPE])
 			fi
 		;;
-		hd60|hd61|multibox|multiboxse|hd51|bre2ze4k|e4hdultra|h7|osmini4k|osmio4k|osmio4kplus|vusolo4k|vuduo4k|vuduo4kse|vuultimo4k|vuuno4k|vuuno4kse|vuzero4k)
+		hd60|hd61|multibox|multiboxse|hd51|bre2ze4k|h7|e4hdultra|protek4k|osmini4k|osmio4k|osmio4kplus|vusolo4k|vuduo4k|vuduo4kse|vuultimo4k|vuuno4k|vuuno4kse|vuzero4k)
 			if test "$BOXTYPE" = "armbox"; then
 				BOXMODEL="$withval"
 			else
@@ -137,8 +137,9 @@ AM_CONDITIONAL(BOXMODEL_MULTIBOXSE, test "$BOXMODEL" = "multiboxse")
 
 AM_CONDITIONAL(BOXMODEL_HD51, test "$BOXMODEL" = "hd51")
 AM_CONDITIONAL(BOXMODEL_BRE2ZE4K, test "$BOXMODEL" = "bre2ze4k")
-AM_CONDITIONAL(BOXMODEL_E4HDULTRA, test "$BOXMODEL" = "e4hdultra")
 AM_CONDITIONAL(BOXMODEL_H7, test "$BOXMODEL" = "h7")
+AM_CONDITIONAL(BOXMODEL_E4HDULTRA, test "$BOXMODEL" = "e4hdultra")
+AM_CONDITIONAL(BOXMODEL_PROTEK4K, test "$BOXMODEL" = "protek4k")
 
 AM_CONDITIONAL(BOXMODEL_OSMINI4K, test "$BOXMODEL" = "osmini4k")
 AM_CONDITIONAL(BOXMODEL_OSMIO4K, test "$BOXMODEL" = "osmio4k")
@@ -190,10 +191,12 @@ elif test "$BOXMODEL" = "hd51"; then
 	AC_DEFINE(BOXMODEL_HD51, 1, [hd51])
 elif test "$BOXMODEL" = "bre2ze4k"; then
 	AC_DEFINE(BOXMODEL_BRE2ZE4K, 1, [bre2ze4k])
-elif test "$BOXMODEL" = "e4hdultra"; then
-	AC_DEFINE(BOXMODEL_E4HDULTRA, 1, [e4hdultra])
 elif test "$BOXMODEL" = "h7"; then
 	AC_DEFINE(BOXMODEL_H7, 1, [h7])
+elif test "$BOXMODEL" = "e4hdultra"; then
+	AC_DEFINE(BOXMODEL_E4HDULTRA, 1, [e4hdultra])
+elif test "$BOXMODEL" = "protek4k"; then
+	AC_DEFINE(BOXMODEL_PROTEK4K, 1, [protek4k])
 
 elif test "$BOXMODEL" = "osmini4k"; then
 	AC_DEFINE(BOXMODEL_OSMINI4K, 1, [osmini4k])
