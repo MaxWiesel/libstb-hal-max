@@ -480,6 +480,7 @@ static int32_t PlaybackTerminate(Context_t *context)
 		}
 
 		ret = context->container->selectedContainer->Command(context, CONTAINER_STOP, NULL);
+
 		if (context && context->playback)
 		{
 			context->playback->isPaused     = 0;
@@ -489,6 +490,7 @@ static int32_t PlaybackTerminate(Context_t *context)
 			context->playback->SlowMotion   = 0;
 			context->playback->Speed        = 0;
 		}
+
 		if (context && context->output)
 			context->output->Command(context, OUTPUT_STOP, NULL);
 	}
@@ -1025,5 +1027,6 @@ PlaybackHandler_t PlaybackHandler =
 	0,          //noprobe
 	0,          //isLoopMode
 	0,          //isTSLiveMode
+	4000,       //httpTimeout
 	NULL        //stamp
 };
