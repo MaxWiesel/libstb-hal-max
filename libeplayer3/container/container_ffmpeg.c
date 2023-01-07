@@ -851,7 +851,14 @@ static void FFMPEGThread(Context_t *context)
 			LinuxDvbBuffSetStamp(stamp);
 		}
 
-		if (!isWaitingForFinish && (ffmpegStatus = av_read_frame(avContextTab[cAVIdx], &packet)) == 0)
+		if (!isWaitingForFinish)
+		{
+			releaseMutex(__FILE__, __FUNCTION__, __LINE__);
+			ffmpegStatus = av_read_frame(avContextTab[cAVIdx], &packet);
+			getMutex(__FILE__, __FUNCTION__, __LINE__);
+		}
+
+		if (!isWaitingForFinish && (ffmpegStatus == 0))
 		{
 			int64_t pts            = 0;
 			int64_t dts            = 0;
