@@ -17,18 +17,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include <config.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include <cstring>
 #include <cstdio>
 #include <string>
-#include <unistd.h>
 #include <sys/ioctl.h>
 #include "dmx_hal.h"
 #include "hal_debug.h"
@@ -147,6 +147,7 @@ void cDemux::Close(void)
 		hal_info("%s #%d: not open!\n", __FUNCTION__, num);
 		return;
 	}
+
 	pesfds.clear();
 	ioctl(fd, DMX_STOP);
 	close(fd);
@@ -264,11 +265,11 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		hal_info("%s #%d: len too long: %d, DMX_FILTER_SIZE %d\n", __func__, num, len, DMX_FILTER_SIZE);
 		len = DMX_FILTER_SIZE;
 	}
+	flt = filter[0];
 	s_flt.pid = pid;
 	s_flt.timeout = timeout;
-	flt = filter[0];
 	memcpy(s_flt.filter.filter, filter, len);
-	memcpy(s_flt.filter.mask,   mask,   len);
+	memcpy(s_flt.filter.mask, mask, len);
 	if (negmask != NULL)
 		memcpy(s_flt.filter.mode, negmask, len);
 
@@ -318,7 +319,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 		/* 0x60 - 0x6F: event_information_section - other_transport_stream, schedule */
 		case 0x70: /* time_date_section */
 			s_flt.flags &= ~DMX_CHECK_CRC; /* section has no CRC */
-			//s_flt.pid     = 0x0014;
+			//s_flt.pid = 0x0014;
 			to = 30000;
 			break;
 		case 0x71: /* running_status_section */
@@ -330,7 +331,7 @@ bool cDemux::sectionFilter(unsigned short _pid, const unsigned char *const filte
 			to = 0;
 			break;
 		case 0x73: /* time_offset_section */
-			//s_flt.pid     = 0x0014;
+			//s_flt.pid = 0x0014;
 			to = 30000;
 			break;
 		case 0x74: /* application_information_section */
