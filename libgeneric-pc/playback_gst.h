@@ -70,7 +70,7 @@ class cPlayback
 		bool SetSpeed(int speed);
 		bool SetSlow(int slow);
 		bool GetSpeed(int &speed) const;
-		bool GetPosition(int &position, int &duration);
+		bool GetPosition(int &position, int &duration, bool isWebChannel = false);
 		void GetPts(uint64_t &pts);
 		bool SetPosition(int position, bool absolute = false);
 		void FindAllPids(int *apids, unsigned int *ac3flags, unsigned int *numpida, std::string *language);
