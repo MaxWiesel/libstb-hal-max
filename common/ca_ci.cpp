@@ -1659,3 +1659,8 @@ void cCA::SetCIRelevantPidsRouting(int RPR, int slot)
 	}
 }
 #endif
+
+void cCA::SetCIOperator(int ciop, int slot)
+{
+	op[slot] = ciop;
+}
